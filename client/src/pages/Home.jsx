@@ -37,8 +37,8 @@ const Home = () => {
         <div className="hero-overlay"></div>
         <div className="hero-content">
             <img src="/logo2.png" alt="Logo BDSC" className="logo-img" />
-            <h1>Belgrano Day School Club (BDSC)</h1>
-          <h2>Hockey</h2>
+            <h1>Belgrano Day School Club</h1>
+          {/* <h2>Hockey</h2> */}
           <p>Tradición, excelencia y formación integral en hockey</p>
           <Link to="/entrenadores" className="btn-hero">
             Conocé a nuestros entrenadores
