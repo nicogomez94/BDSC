@@ -139,6 +139,26 @@
   box-shadow: 0 4px 12px rgba(26, 77, 42, 0.3);
 }
 
+.contact-status {
+  margin-top: -6px;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+
+.contact-status-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.contact-status-success {
+  background-color: #d1e7dd;
+  color: #0f5132;
+  border-color: #badbcc;
+}
+
 .contact-placeholder {
   margin-top: 10px;
   padding: 20px;

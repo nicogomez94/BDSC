@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Contact.css';
 
+const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
+
 const Contact = () => {
   const [formData, setFormData] = useState(
     DEBUG_MODE
@@ -12,6 +14,9 @@ const Contact = () => {
           message: ''
         }
   );
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState('');
 
   useEffect(() => {
     // Scroll reveal
@@ -37,14 +42,46 @@ const Contact = () => {
     };
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aquí se implementaría el envío del formulario
-    console.log('Formulario enviado:', formData);
-    alert('Gracias por tu mensaje. Te contactaremos pronto.');
-    setFormData(
-      DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', message: '' }
-    );
+    setSubmitError('');
+    setSubmitSuccess('');
+
+    if (!FORMSPREE_ENDPOINT) {
+      setSubmitError('Falta configurar VITE_FORMSPREE_ENDPOINT en el frontend.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          message: formData.message,
+          _subject: `Nuevo contacto de ${formData.name}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('No se pudo enviar el mensaje.');
+      }
+
+      setSubmitSuccess('Gracias por tu mensaje. Te contactaremos pronto.');
+      setFormData(
+        DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', message: '' }
+      );
+    } catch (error) {
+      setSubmitError(error.message || 'Ocurrió un error al enviar.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e) => {
@@ -132,9 +169,14 @@ const Contact = () => {
                 ></textarea>
               </div>
 
-              <button type="submit" className="btn-submit">
-                Enviar mensaje
+              <button type="submit" className="btn-submit" disabled={submitting}>
+                {submitting ? 'Enviando...' : 'Enviar mensaje'}
               </button>
+
+              {submitError && <div className="contact-status contact-status-error">{submitError}</div>}
+              {submitSuccess && (
+                <div className="contact-status contact-status-success">{submitSuccess}</div>
+              )}
 
               <div className="contact-placeholder">
                 <h3>Info adicional</h3>
