@@ -1,6 +1,30 @@
+import { useEffect } from 'react';
 import './Hockey.css';
 
 const Hockey = () => {
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    const sections = document.querySelectorAll('.scroll-reveal');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
+
   return (
     <div className="hockey-page">
       <div className="hockey-hero">
@@ -11,7 +35,7 @@ const Hockey = () => {
       </div>
 
       <div className="container">
-        <section className="hockey-section">
+        <section className="hockey-section scroll-reveal">
           <h2>Nuestra Historia</h2>
           <p>
             El hockey en Belgrano Day School Club comenzó hace más de dos décadas 
@@ -26,7 +50,7 @@ const Hockey = () => {
           </p>
         </section>
 
-        <section className="hockey-section categories-section">
+        <section className="hockey-section categories-section scroll-reveal">
           <h2>Categorías</h2>
           <div className="categories-list">
             <div className="category-item">
@@ -62,7 +86,7 @@ const Hockey = () => {
           </div>
         </section>
 
-        <section className="hockey-section">
+        <section className="hockey-section scroll-reveal">
           <h2>Instalaciones</h2>
           <div className="facilities-grid">
             <div className="facility-item">
@@ -84,7 +108,7 @@ const Hockey = () => {
           </div>
         </section>
 
-        <section className="hockey-section achievements">
+        <section className="hockey-section achievements scroll-reveal">
           <h2>Logros Destacados</h2>
           <div className="achievements-list">
             <div className="achievement-item">

@@ -160,3 +160,23 @@
     padding: 30px 20px;
   }
 }
+
+/* Scroll Reveal Animations */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.contact-info.scroll-reveal {
+  transition-delay: 0.1s;
+}
+
+.contact-form.scroll-reveal {
+  transition-delay: 0.3s;
+}

@@ -1,13 +1,43 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import './Home.css';
 
 const Home = () => {
+  useEffect(() => {
+    // Intersection Observer para animaciones al hacer scroll
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observar todas las secciones
+    const sections = document.querySelectorAll('.scroll-reveal');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
+
   return (
     <div className="home">
       <section className="hero">
+        <video className="hero-video" autoPlay loop muted playsInline>
+          <source src="/istockphoto-851568932-640_adpp_is.mp4" type="video/mp4" />
+        </video>
         <div className="hero-overlay"></div>
         <div className="hero-content">
-          <h1>Belgrano Day School Club (BDSC)</h1>
+            <img src="/logo2.png" alt="Logo BDSC" className="logo-img" />
+            <h1>Belgrano Day School Club (BDSC)</h1>
           <h2>Hockey</h2>
           <p>Tradición, excelencia y formación integral en hockey</p>
           <Link to="/entrenadores" className="btn-hero">
@@ -16,7 +46,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="about">
+      <section className="about scroll-reveal">
         <div className="container">
           <h2>Sobre el Hockey en BDSC</h2>
           <div className="about-content">
@@ -36,7 +66,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="trainers-preview">
+      <section className="trainers-preview scroll-reveal">
         <div className="container">
           <h2>Nuestros Entrenadores</h2>
           <p className="section-subtitle">
@@ -48,7 +78,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="info-section">
+      <section className="info-section scroll-reveal">
         <div className="container">
           <h2>Información y Categorías</h2>
           <div className="categories-grid">
@@ -72,7 +102,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="cta">
+      <section className="cta scroll-reveal">
         <div className="container">
           <h2>¿Querés ser parte de BDSC Hockey?</h2>
           <Link to="/contacto" className="btn-cta">

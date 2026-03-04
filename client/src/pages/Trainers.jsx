@@ -9,7 +9,29 @@ const Trainers = () => {
 
   useEffect(() => {
     loadTrainers();
-  }, []);
+    
+    // Scroll reveal
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    const cards = document.querySelectorAll('.trainer-card');
+    cards.forEach(card => observer.observe(card));
+
+    return () => {
+      cards.forEach(card => observer.unobserve(card));
+    };
+  }, [trainers]);
 
   const loadTrainers = async () => {
     try {

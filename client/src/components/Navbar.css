@@ -68,8 +68,8 @@
 
 .btn-login {
   background-color: var(--cream);
-  color: var(--primary-color);
-  padding: 8px 20px;
+  color: var(--primary-color) !important;
+  padding: 8px 20px !important;
   border-radius: 5px;
   text-decoration: none;
   font-weight: 600;

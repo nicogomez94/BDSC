@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './Contact.css';
 
 const Contact = () => {
@@ -7,6 +7,30 @@ const Contact = () => {
     email: '',
     message: ''
   });
+
+  useEffect(() => {
+    // Scroll reveal
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    const sections = document.querySelectorAll('.scroll-reveal');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -34,7 +58,7 @@ const Contact = () => {
 
       <div className="container">
         <div className="contact-content">
-          <div className="contact-info">
+          <div className="contact-info scroll-reveal">
             <h2>Información de Contacto</h2>
             
             <div className="info-item">
@@ -62,7 +86,7 @@ const Contact = () => {
             </div>
           </div>
 
-          <div className="contact-form">
+          <div className="contact-form scroll-reveal">
             <h2>Envianos un mensaje</h2>
             <form onSubmit={handleSubmit}>
               <div className="form-group">
