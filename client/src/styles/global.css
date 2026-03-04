@@ -184,6 +184,7 @@ html {
   border-radius: 5px;
   margin-bottom: 20px;
   border: 1px solid #f5c6cb;
+  margin-top: 20px;
 }
 
 .loading {
@@ -221,4 +222,25 @@ html {
   .container {
     padding: 0 15px;
   }
+}
+
+/* Botón flotante de WhatsApp */
+.whatsapp-float {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  background: #25d366;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  transition: box-shadow 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.whatsapp-float:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  background: #128c7e;
 }

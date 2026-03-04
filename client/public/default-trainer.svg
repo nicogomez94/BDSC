@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Entrenador por defecto">
+  <rect width="400" height="400" fill="#e5e7eb"/>
+  <circle cx="200" cy="150" r="70" fill="#9ca3af"/>
+  <path d="M90 340c0-61 49-110 110-110s110 49 110 110" fill="#9ca3af"/>
+</svg>

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import './Trainers.css';
 
+const DEFAULT_TRAINER_IMAGE = '/default-trainer.svg';
+
 const Trainers = () => {
   const [trainers, setTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -63,8 +65,11 @@ const Trainers = () => {
               <div key={trainer.id} className="trainer-card">
                 <div className="trainer-image">
                   <img 
-                    src={trainer.photoUrl || 'https://via.placeholder.com/400x400/1a4d2a/f5f0e8?text=Entrenador'} 
+                    src={trainer.photoUrl || DEFAULT_TRAINER_IMAGE}
                     alt={trainer.name} 
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_TRAINER_IMAGE;
+                    }}
                   />
                 </div>
                 <div className="trainer-info">

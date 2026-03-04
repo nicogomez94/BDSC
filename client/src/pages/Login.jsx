@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(DEBUG_MODE ? DEBUG_PREFILL.login.email : '');
+  const [password, setPassword] = useState(DEBUG_MODE ? DEBUG_PREFILL.login.password : '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   

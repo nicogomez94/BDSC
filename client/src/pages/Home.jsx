@@ -110,20 +110,6 @@ const Home = () => {
           </Link>
         </div>
       </section>
-        {/* Botón flotante de WhatsApp */}
-        <a
-          href="https://wa.me/549XXXXXXXXXX" // Reemplaza con el número real
-          className="whatsapp-float"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="WhatsApp"
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
-            alt="WhatsApp"
-            style={{ width: "50px", height: "50px" }}
-          />
-        </a>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
@@ -10,20 +11,28 @@ const AdminPanel = () => {
   const [error, setError] = useState(null);
 
   // Formulario de entrenador
-  const [trainerForm, setTrainerForm] = useState({
-    name: '',
-    bio: '',
-    specialty: '',
-    photoUrl: '',
-    email: '',
-    password: '',
-  });
+  const [trainerForm, setTrainerForm] = useState(
+    DEBUG_MODE
+      ? { ...DEBUG_PREFILL.trainerForm }
+      : {
+          name: '',
+          bio: '',
+          specialty: '',
+          photoUrl: '',
+          email: '',
+          password: '',
+        }
+  );
 
   // Formulario de sección
-  const [sectionForm, setSectionForm] = useState({
-    title: '',
-    content: '',
-  });
+  const [sectionForm, setSectionForm] = useState(
+    DEBUG_MODE
+      ? { ...DEBUG_PREFILL.sectionForm }
+      : {
+          title: '',
+          content: '',
+        }
+  );
 
   useEffect(() => {
     if (activeTab === 'trainers') {
@@ -58,14 +67,18 @@ const AdminPanel = () => {
 
     try {
       await api.admin.createTrainer(trainerForm);
-      setTrainerForm({
-        name: '',
-        bio: '',
-        specialty: '',
-        photoUrl: '',
-        email: '',
-        password: '',
-      });
+      setTrainerForm(
+        DEBUG_MODE
+          ? { ...DEBUG_PREFILL.trainerForm }
+          : {
+              name: '',
+              bio: '',
+              specialty: '',
+              photoUrl: '',
+              email: '',
+              password: '',
+            }
+      );
       loadTrainers();
       alert('Entrenador creado exitosamente');
     } catch (err) {
@@ -93,7 +106,7 @@ const AdminPanel = () => {
 
     try {
       await api.admin.createSection(sectionForm);
-      setSectionForm({ title: '', content: '' });
+      setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
       loadSections();
       alert('Sección creada exitosamente');
     } catch (err) {
@@ -138,8 +151,6 @@ const AdminPanel = () => {
     <div className="admin-panel">
       <div className="container">
         <h1>Panel de Coordinador</h1>
-
-        {error && <div className="error-message">{error}</div>}
 
         <div className="tabs">
           <button
@@ -232,6 +243,8 @@ const AdminPanel = () => {
               <button type="submit" className="btn-primary" disabled={loading}>
                 {loading ? 'Creando...' : 'Crear Entrenador'}
               </button>
+
+              {error && <div className="error-message">{error}</div>}
             </form>
 
             <h2>Lista de Entrenadores</h2>

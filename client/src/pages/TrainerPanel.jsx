@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
+import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './TrainerPanel.css';
 
 const TrainerPanel = () => {
@@ -9,21 +10,25 @@ const TrainerPanel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingProfile, setEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({
-    bio: '',
-    specialty: '',
-    photoUrl: '',
-    password: '',
-  });
+  const [profileForm, setProfileForm] = useState(
+    DEBUG_MODE
+      ? { ...DEBUG_PREFILL.profileForm }
+      : {
+          bio: '',
+          specialty: '',
+          photoUrl: '',
+          password: '',
+        }
+  );
 
   useEffect(() => {
     loadSections();
     if (user.trainer) {
       setProfileForm({
-        bio: user.trainer.bio || '',
-        specialty: user.trainer.specialty || '',
-        photoUrl: user.trainer.photoUrl || '',
-        password: '',
+        bio: user.trainer.bio || (DEBUG_MODE ? DEBUG_PREFILL.profileForm.bio : ''),
+        specialty: user.trainer.specialty || (DEBUG_MODE ? DEBUG_PREFILL.profileForm.specialty : ''),
+        photoUrl: user.trainer.photoUrl || (DEBUG_MODE ? DEBUG_PREFILL.profileForm.photoUrl : ''),
+        password: DEBUG_MODE ? DEBUG_PREFILL.profileForm.password : '',
       });
     }
   }, [user]);

@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react';
+import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Contact.css';
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  });
+  const [formData, setFormData] = useState(
+    DEBUG_MODE
+      ? { ...DEBUG_PREFILL.contact }
+      : {
+          name: '',
+          email: '',
+          message: ''
+        }
+  );
 
   useEffect(() => {
     // Scroll reveal
@@ -37,7 +42,9 @@ const Contact = () => {
     // Aquí se implementaría el envío del formulario
     console.log('Formulario enviado:', formData);
     alert('Gracias por tu mensaje. Te contactaremos pronto.');
-    setFormData({ name: '', email: '', message: '' });
+    setFormData(
+      DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', message: '' }
+    );
   };
 
   const handleChange = (e) => {
