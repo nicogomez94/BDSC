@@ -29,7 +29,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="home">
+     <div className="home">
       <section className="hero">
         <video className="hero-video" autoPlay loop muted playsInline>
           <source src="/istockphoto-851568932-640_adpp_is.mp4" type="video/mp4" />
@@ -110,6 +110,20 @@ const Home = () => {
           </Link>
         </div>
       </section>
+        {/* Botón flotante de WhatsApp */}
+        <a
+          href="https://wa.me/549XXXXXXXXXX" // Reemplaza con el número real
+          className="whatsapp-float"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="WhatsApp"
+        >
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+            alt="WhatsApp"
+            style={{ width: "50px", height: "50px" }}
+          />
+        </a>
     </div>
   );
 };
