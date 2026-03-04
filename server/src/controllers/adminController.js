@@ -7,32 +7,13 @@ export const createTrainer = async (req, res, next) => {
   try {
     const { name, bio, specialty, photoUrl, email, password } = req.body;
 
+    // Validar campos requeridos
     const errors = validateRequired(['name'], { name });
     if (errors.length > 0) {
       return res.status(400).json({ error: errors.join(', ') });
     }
 
-    const slug = generateSlug(name);
-
-    const existingTrainer = await prisma.trainer.findUnique({
-      where: { slug },
-    });
-
-    if (existingTrainer) {
-      return res.status(409).json({ error: 'Ya existe un entrenador con ese nombre' });
-    }
-
-    const trainer = await prisma.trainer.create({
-      data: {
-        name,
-        slug,
-        bio,
-        specialty,
-        photoUrl,
-      },
-    });
-
-    // Si se proporciona email y password, crear usuario
+    // Validar email y password ANTES de crear el entrenador
     if (email && password) {
       if (!validateEmail(email)) {
         return res.status(400).json({ error: 'Email inválido' });
@@ -49,7 +30,31 @@ export const createTrainer = async (req, res, next) => {
       if (existingUser) {
         return res.status(409).json({ error: 'El email ya está en uso' });
       }
+    }
 
+    const slug = generateSlug(name);
+
+    const existingTrainer = await prisma.trainer.findUnique({
+      where: { slug },
+    });
+
+    if (existingTrainer) {
+      return res.status(409).json({ error: 'Ya existe un entrenador con ese nombre' });
+    }
+
+    // Crear el entrenador solo después de todas las validaciones
+    const trainer = await prisma.trainer.create({
+      data: {
+        name,
+        slug,
+        bio,
+        specialty,
+        photoUrl,
+      },
+    });
+
+    // Crear usuario si se proporcionaron credenciales
+    if (email && password) {
       const passwordHash = await bcrypt.hash(password, 10);
 
       await prisma.user.create({
