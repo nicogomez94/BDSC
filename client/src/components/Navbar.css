@@ -1,7 +1,10 @@
 .navbar {
   background-color: var(--primary-color);
-  padding: 1rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.2rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .navbar-container {
@@ -14,40 +17,118 @@
 }
 
 .navbar-logo {
-  color: var(--white);
-  font-size: 24px;
-  font-weight: bold;
+  color: var(--cream);
+  font-size: 26px;
+  font-weight: 700;
   text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: color 0.3s ease;
+}
+
+.navbar-logo:hover {
+  color: var(--white);
 }
 
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 30px;
+  gap: 35px;
   align-items: center;
 }
 
-.navbar-menu li a,
-.navbar-menu li button {
-  color: var(--white);
+.navbar-menu li a {
+  color: var(--cream);
   text-decoration: none;
   font-weight: 500;
-  transition: opacity 0.3s;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 5px;
 }
 
 .navbar-menu li a:hover {
-  opacity: 0.8;
+  color: var(--white);
 }
 
+.navbar-menu li a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--cream);
+  transition: width 0.3s ease;
+}
+
+.navbar-menu li a:hover::after {
+  width: 100%;
+}
+
+.btn-login {
+  background-color: var(--cream);
+  color: var(--primary-color);
+  padding: 8px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+  background-color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-logout {
+  background-color: transparent;
+  color: var(--cream);
+  border: 2px solid var(--cream);
+  padding: 6px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: var(--cream);
+  color: var(--primary-color);
+}
+
+.btn-logout:hover {
+  background-color: var(--cream);
+  color: var(--primary-color);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 0;
+  }
+
   .navbar-container {
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+  }
+
+  .navbar-logo {
+    font-size: 22px;
   }
 
   .navbar-menu {
     flex-wrap: wrap;
     justify-content: center;
-    gap: 15px;
+    gap: 20px;
+  }
+
+  .navbar-menu li a {
+    font-size: 14px;
+  }
+
+  .navbar-menu li a::after {
+    display: none;
   }
 }

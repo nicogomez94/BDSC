@@ -1,25 +1,36 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-container">
-        <div className="footer-section">
+        <div className="footer-section footer-brand">
           <h3>BDSC Hockey</h3>
-          <p>Belgrano Day School Club</p>
+          <p className="footer-tagline">Belgrano Day School Club</p>
+          <p className="footer-description">
+            Tradición, excelencia y formación integral en hockey desde 2000
+          </p>
+        </div>
+        
+        <div className="footer-section">
+          <h4>Navegación</h4>
+          <ul className="footer-links">
+            <li><Link to="/">Inicio</Link></li>
+            <li><Link to="/hockey">Hockey BDSC</Link></li>
+            <li><Link to="/entrenadores">Entrenadores</Link></li>
+            <li><Link to="/contacto">Contacto</Link></li>
+          </ul>
         </div>
         
         <div className="footer-section">
           <h4>Contacto</h4>
-          <p>Email: hockey@bdsc.com</p>
-          <p>Tel: (011) 4567-8900</p>
-        </div>
-        
-        <div className="footer-section">
-          <h4>Enlaces</h4>
-          <p><a href="/">Inicio</a></p>
-          <p><a href="/hockey">Hockey BDSC</a></p>
-          <p><a href="/entrenadores">Entrenadores</a></p>
+          <ul className="footer-contact">
+            <li>📧 hockey@bdsc.com</li>
+            <li>📞 (011) 4567-8900</li>
+            <li>📍 Av. Belgrano 1234, Buenos Aires</li>
+            <li>🕐 Lun-Vie: 9:00-18:00</li>
+          </ul>
         </div>
       </div>
       

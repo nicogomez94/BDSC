@@ -1,23 +1,41 @@
 .hockey-page {
-  padding: 60px 20px;
-  min-height: 70vh;
+  width: 100%;
 }
 
-.hockey-page h1 {
-  font-size: 36px;
-  color: var(--primary-color);
-  margin-bottom: 40px;
+.hockey-hero {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: var(--white);
+  padding: 80px 20px;
   text-align: center;
 }
 
+.hockey-hero h1 {
+  font-size: 48px;
+  margin-bottom: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hockey-intro {
+  font-size: 20px;
+  color: var(--cream);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .hockey-section {
-  margin-bottom: 40px;
+  margin-bottom: 60px;
+  padding: 40px 0;
 }
 
 .hockey-section h2 {
-  font-size: 28px;
-  color: var(--secondary-color);
-  margin-bottom: 20px;
+  font-size: 36px;
+  color: var(--primary-color);
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .hockey-section p {
@@ -25,33 +43,165 @@
   line-height: 1.8;
   color: var(--text-dark);
   margin-bottom: 15px;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.hockey-section ul {
-  margin-left: 20px;
+/* Categories Section */
+.categories-section {
+  background-color: var(--cream);
+  padding: 60px 20px;
+  margin: 0 -20px;
 }
 
-.hockey-section li {
-  font-size: 18px;
-  margin-bottom: 10px;
-  line-height: 1.6;
+.categories-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.hockey-section strong {
+.category-item {
+  background-color: var(--white);
+  padding: 30px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.category-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(26, 77, 42, 0.15);
+}
+
+.category-item h3 {
+  font-size: 24px;
   color: var(--primary-color);
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
+.category-item .age {
+  font-size: 16px;
+  color: var(--secondary-color);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.category-item p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Facilities Grid */
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.facility-item {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: var(--bg-light);
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.facility-item:hover {
+  transform: translateY(-5px);
+}
+
+.facility-item h3 {
+  font-size: 20px;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.facility-item p {
+  font-size: 16px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* Achievements Section */
+.achievements {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 60px 20px;
+  margin: 0 -20px;
+}
+
+.achievements h2 {
+  color: var(--cream);
+}
+
+.achievements-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.achievement-item {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.achievement-item:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.achievement-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.achievement-item p {
+  font-size: 16px;
+  color: var(--cream);
+  margin: 0;
+}
+
+.achievement-item p {
+  font-size: 16px;
+  color: var(--cream);
+  margin: 0;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .hockey-page h1 {
-    font-size: 28px;
+  .hockey-hero h1 {
+    font-size: 36px;
+  }
+
+  .hockey-intro {
+    font-size: 18px;
   }
 
   .hockey-section h2 {
-    font-size: 24px;
+    font-size: 28px;
   }
 
-  .hockey-section p,
-  .hockey-section li {
-    font-size: 16px;
+  .categories-list,
+  .facilities-grid,
+  .achievements-list {
+    grid-template-columns: 1fr;
+  }
+
+  .categories-section,
+  .achievements {
+    margin: 0;
   }
 }
