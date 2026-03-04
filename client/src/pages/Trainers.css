@@ -1,0 +1,84 @@
+.trainers-page {
+  padding: 60px 20px;
+  min-height: 70vh;
+}
+
+.trainers-page h1 {
+  font-size: 36px;
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--primary-color);
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-light);
+  margin-bottom: 50px;
+}
+
+.trainers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.trainer-card {
+  background-color: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.trainer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.trainer-image {
+  width: 100%;
+  height: 300px;
+  overflow: hidden;
+}
+
+.trainer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trainer-info {
+  padding: 20px;
+}
+
+.trainer-info h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+.specialty {
+  color: var(--accent-color);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.bio {
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+.no-trainers {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 18px;
+  padding: 40px;
+}
+
+@media (max-width: 768px) {
+  .trainers-grid {
+    grid-template-columns: 1fr;
+  }
+}

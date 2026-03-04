@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  COORDINADOR
+  ENTRENADOR
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  trainerId    Int?     @unique
+  trainer      Trainer? @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Trainer {
+  id            Int             @id @default(autoincrement())
+  name          String
+  slug          String          @unique
+  bio           String?
+  specialty     String?
+  photoUrl      String?
+  user          User?
+  sectionAccess SectionAccess[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("trainers")
+}
+
+model Section {
+  id            Int             @id @default(autoincrement())
+  title         String
+  content       String
+  sectionAccess SectionAccess[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@map("sections")
+}
+
+model SectionAccess {
+  id        Int      @id @default(autoincrement())
+  sectionId Int
+  trainerId Int
+  section   Section  @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  trainer   Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([sectionId, trainerId])
+  @@map("section_access")
+}
