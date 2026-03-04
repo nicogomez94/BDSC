@@ -139,6 +139,30 @@
   box-shadow: 0 4px 12px rgba(26, 77, 42, 0.3);
 }
 
+.contact-placeholder {
+  margin-top: 10px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: #f7f7f7;
+}
+
+.contact-placeholder h3 {
+  margin: 0 0 10px;
+  color: var(--primary-color);
+  font-size: 18px;
+}
+
+.contact-placeholder p {
+  margin: 0 0 8px;
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.contact-placeholder p:last-child {
+  margin-bottom: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .contact-page h1 {

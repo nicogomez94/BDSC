@@ -128,6 +128,20 @@ const Contact = () => {
               <button type="submit" className="btn-submit">
                 Enviar mensaje
               </button>
+
+              <div className="contact-placeholder">
+                <h3>Info adicional</h3>
+                <p>
+                  Respondemos consultas en menos de 24 horas hábiles.
+                </p>
+                <p>
+                  Si tu consulta es urgente, comunicate por teléfono al
+                  (011) 4567-8900.
+                </p>
+                <p>
+                  También podés visitarnos de lunes a viernes de 9:00 a 18:00.
+                </p>
+              </div>
             </form>
           </div>
         </div>
