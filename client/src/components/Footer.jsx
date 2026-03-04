@@ -18,7 +18,7 @@ const Footer = () => {
           <ul className="footer-links">
             <li><Link to="/">Inicio</Link></li>
             <li><Link to="/hockey">Hockey BDSC</Link></li>
-            <li><Link to="/entrenadores">Entrenadores</Link></li>
+            <li><a href="#" onClick={e => {e.preventDefault(); alert('Sitio en construcción');}}>Entrenadores</a></li>
             <li><Link to="/contacto">Contacto</Link></li>
           </ul>
         </div>

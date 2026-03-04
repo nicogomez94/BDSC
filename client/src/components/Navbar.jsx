@@ -16,7 +16,7 @@ const Navbar = () => {
         <ul className="navbar-menu">
           <li><Link to="/">Inicio</Link></li>
           <li><Link to="/hockey">Hockey BDSC</Link></li>
-          <li><Link to="/entrenadores">Entrenadores</Link></li>
+          <li><a href="#" onClick={e => {e.preventDefault(); alert('Sitio en construcción');}}>Entrenadores</a></li>
           <li><Link to="/contacto">Contacto</Link></li>
           
           {isAuthenticated ? (
@@ -33,7 +33,7 @@ const Navbar = () => {
               </li>
             </>
           ) : (
-            <li><Link to="/login" className="btn-login">Acceso entrenadores</Link></li>
+            <li><a href="#" className="btn-login" onClick={e => {e.preventDefault(); alert('Sitio en construcción');}}>Acceso entrenadores</a></li>
           )}
         </ul>
       </div>

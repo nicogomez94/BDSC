@@ -40,9 +40,9 @@ const Home = () => {
             <h1>Belgrano Day School Club</h1>
           {/* <h2>Hockey</h2> */}
           <p>Tradición, excelencia y formación integral en hockey</p>
-          <Link to="/entrenadores" className="btn-hero">
+          <a href="#" className="btn-hero" onClick={e => {e.preventDefault(); alert('Sitio en construcción');}}>
             Conocé a nuestros entrenadores
-          </Link>
+          </a>
         </div>
       </section>
 
@@ -72,9 +72,9 @@ const Home = () => {
           <p className="section-subtitle">
             Conocé al equipo de profesionales que lidera el hockey en BDSC
           </p>
-          <Link to="/entrenadores" className="btn-secondary">
+          <a href="#" className="btn-secondary" onClick={e => {e.preventDefault(); alert('Sitio en construcción');}}>
             Ver todos los entrenadores
-          </Link>
+          </a>
         </div>
       </section>
 
