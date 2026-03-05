@@ -1,4 +1,25 @@
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+const resolveApiUrl = (value) => {
+  const fallback = '/api';
+  const raw = (value || fallback).trim();
+
+  if (!raw) return fallback;
+
+  // Relative paths are used as-is (e.g. "/api").
+  if (raw.startsWith('/')) {
+    return raw.replace(/\/+$/, '') || fallback;
+  }
+
+  // If env is a full origin (e.g. https://bdsc.onrender.com), default to /api.
+  try {
+    const parsed = new URL(raw);
+    parsed.pathname = parsed.pathname === '/' ? '/api' : parsed.pathname.replace(/\/+$/, '');
+    return parsed.toString().replace(/\/+$/, '');
+  } catch {
+    return raw.replace(/\/+$/, '');
+  }
+};
+
+const API_URL = resolveApiUrl(import.meta.env.VITE_API_URL);
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
