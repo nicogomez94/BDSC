@@ -13,12 +13,36 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? process.env.FRONTEND_URL
-    : 'http://localhost:5173',
+const normalizeOrigin = (origin) => origin?.replace(/\/+$/, '');
+
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? (process.env.FRONTEND_URL || '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+      .map(normalizeOrigin)
+  : ['http://localhost:5173'];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow server-to-server or same-origin requests without Origin header.
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    console.warn('[cors] blocked origin', { origin });
+    return callback(new Error('CORS origin no permitido'));
+  },
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
