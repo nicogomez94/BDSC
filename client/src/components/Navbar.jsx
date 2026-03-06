@@ -28,7 +28,7 @@ const Navbar = () => {
 
   const handleDropdownClick = (e, dropdownName) => {
     // En mobile, prevenir navegación y toggle el dropdown
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= 982) {
       e.preventDefault();
       setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
     }
