@@ -41,7 +41,7 @@ const sectionGroups = [
     description: 'Recursos humanos, soporte interno y documentación operativa.',
     items: [
       {
-        name: 'Coordinadores',
+        name: 'Entrenadores',
         path: '/coordinacion/gestion-interna/coordinadores',
       },
       { name: 'Árbitros' },

@@ -1,80 +1,113 @@
 import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import './Home.css';
 
 const Home = () => {
+  useEffect(() => {
+    // Intersection Observer para animaciones al hacer scroll
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observar todas las secciones
+    const sections = document.querySelectorAll('.scroll-reveal');
+    sections.forEach(section => observer.observe(section));
+
+    return () => {
+      sections.forEach(section => observer.unobserve(section));
+    };
+  }, []);
+
   return (
-    <div className="home">
-      <section className="home-header">
+     <div className="home">
+      <section className="hero">
+        <video className="hero-video" autoPlay loop muted playsInline>
+          <source src="/istockphoto-851568932-640_adpp_is.mp4" type="video/mp4" />
+        </video>
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+            <img src="/logo2.png" alt="Logo BDSC" className="logo-img" />
+            <h1>Belgrano Day School Club</h1>
+          {/* <h2>Hockey</h2> */}
+          <p>Tradición, excelencia y formación integral en hockey</p>
+          <Link to="/entrenadores" className="btn-hero">
+            Conocé a nuestros entrenadores
+          </Link>
+        </div>
+      </section>
+
+      <section className="about scroll-reveal">
         <div className="container">
-          <h1>Inicio</h1>
-          <p>
-            Portal central de coordinación de hockey. Accedé rápido a operación,
-            planificación y seguimiento interno.
+          <h2>Sobre el Hockey en BDSC</h2>
+          <div className="about-content">
+            <p className="lead">
+              El hockey en Belgrano Day School Club es una tradición de excelencia, 
+              compromiso y formación integral. Nuestro programa está diseñado para 
+              desarrollar no solo las habilidades deportivas, sino también los valores 
+              de trabajo en equipo, disciplina y respeto.
+            </p>
+            <p>
+              Con más de 20 años de trayectoria, hemos formado jugadores que han 
+              representado al club a nivel nacional e internacional. Nuestro equipo 
+              de entrenadores especializados trabaja día a día para brindar la mejor 
+              experiencia deportiva a cada uno de nuestros jugadores.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="trainers-preview scroll-reveal">
+        <div className="container">
+          <h2>Nuestros Entrenadores</h2>
+          <p className="section-subtitle">
+            Conocé al equipo de profesionales que lidera el hockey en BDSC
           </p>
+          <Link to="/entrenadores" className="btn-secondary">
+            Ver todos los entrenadores
+          </Link>
         </div>
       </section>
 
-      <section className="home-section">
+      <section className="info-section scroll-reveal">
         <div className="container">
-          <h2>Accesos rápidos</h2>
-          <div className="home-grid home-grid-links">
-            <Link to="/coordinacion" className="home-card home-card-link">
-              <h3>Coordinación</h3>
-              <p>Operación, competencia, temporada 2026 y gestión interna.</p>
-            </Link>
-            <Link to="/recursos" className="home-card home-card-link">
-              <h3>Recursos</h3>
-              <p>Planificación deportiva y herramientas de entrenamiento.</p>
-            </Link>
-            <Link to="/contacto" className="home-card home-card-link">
-              <h3>Contacto</h3>
-              <p>Canales de consulta y comunicación interna.</p>
-            </Link>
-            <Link to="/panel" className="home-card home-card-link">
-              <h3>Panel</h3>
-              <p>Acceso al espacio privado por rol de usuario.</p>
-            </Link>
+          <h2>Información y Categorías</h2>
+          <div className="categories-grid">
+            <div className="category-card">
+              <h3>Mini Hockey</h3>
+              <p>4-6 años</p>
+            </div>
+            <div className="category-card">
+              <h3>Infantiles</h3>
+              <p>7-12 años</p>
+            </div>
+            <div className="category-card">
+              <h3>Juveniles</h3>
+              <p>13-18 años</p>
+            </div>
+            <div className="category-card">
+              <h3>Primera</h3>
+              <p>Mayores</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="home-section home-section-soft">
+      <section className="cta scroll-reveal">
         <div className="container">
-          <h2>Resumen</h2>
-          <div className="home-grid">
-            <article className="home-card">
-              <h3>Operación diaria</h3>
-              <p>Control de planteles, asistencia y distribución de espacios.</p>
-            </article>
-            <article className="home-card">
-              <h3>Competencia</h3>
-              <p>Seguimiento por categorías, fixture y análisis en video.</p>
-            </article>
-            <article className="home-card">
-              <h3>Temporada 2026</h3>
-              <p>Estado de pretemporada y cronograma de inicio de actividades.</p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-section">
-        <div className="container">
-          <h2>Novedades</h2>
-          <div className="home-updates">
-            <article className="home-update">
-              <h3>Distribución de espacios</h3>
-              <p>Publicar asignación semanal de canchas y horarios de entrenamiento.</p>
-            </article>
-            <article className="home-update">
-              <h3>Reunión de padres</h3>
-              <p>Definir fecha por categorías para primera reunión del ciclo.</p>
-            </article>
-            <article className="home-update">
-              <h3>Pretemporada febrero</h3>
-              <p>Completar carga de objetivos y seguimiento por grupo.</p>
-            </article>
-          </div>
+          <h2>¿Querés ser parte de BDSC Hockey?</h2>
+          <Link to="/contacto" className="btn-cta">
+            Contactanos
+          </Link>
         </div>
       </section>
     </div>
