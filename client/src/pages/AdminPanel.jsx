@@ -16,6 +16,14 @@ const MONTHS = [
   { value: 10, label: 'Octubre' },
   { value: 11, label: 'Noviembre' },
 ];
+const CREATE_TABS = ['trainers', 'sections', 'divisions', 'players', 'sessions'];
+const CREATE_MODAL_COPY = {
+  trainers: { title: 'Crear entrenador', button: 'Nuevo entrenador' },
+  sections: { title: 'Crear sección', button: 'Nueva sección' },
+  divisions: { title: 'Crear división', button: 'Nueva división' },
+  players: { title: 'Crear jugadora', button: 'Nueva jugadora' },
+  sessions: { title: 'Crear fecha', button: 'Nueva fecha' },
+};
 
 const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
@@ -33,6 +41,7 @@ const AdminPanel = () => {
   const [changes, setChanges] = useState({});
   const [report, setReport] = useState(null);
   const [filters, setFilters] = useState({ divisionId: '', month: '' });
+  const [createModalTab, setCreateModalTab] = useState(null);
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
@@ -101,11 +110,16 @@ const AdminPanel = () => {
     });
   }, [tab]);
 
+  useEffect(() => {
+    setCreateModalTab(null);
+  }, [tab]);
+
   const handleCreateTrainer = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
       await api.admin.createTrainer(trainerForm);
       setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : { name: '', bio: '', specialty: '', photoUrl: '', email: '', password: '' });
+      setCreateModalTab(null);
       await loadTrainers();
     });
   };
@@ -123,6 +137,7 @@ const AdminPanel = () => {
     await withLoad(async () => {
       await api.admin.createSection(sectionForm);
       setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
+      setCreateModalTab(null);
       await loadSections();
     });
   };
@@ -140,6 +155,7 @@ const AdminPanel = () => {
     await withLoad(async () => {
       await api.admin.createDivision({ name: divisionForm.name, seasonYear: Number(divisionForm.seasonYear) });
       setDivisionForm({ name: '', seasonYear: new Date().getFullYear() });
+      setCreateModalTab(null);
       await loadDivisions();
     });
   };
@@ -154,6 +170,7 @@ const AdminPanel = () => {
         active: playerForm.active,
       });
       setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true });
+      setCreateModalTab(null);
       await loadPlayers(filters.divisionId);
     });
   };
@@ -167,6 +184,7 @@ const AdminPanel = () => {
         notes: sessionForm.notes,
       });
       setSessionForm({ divisionId: '', date: '', notes: '' });
+      setCreateModalTab(null);
       await loadSessions(filters.divisionId, filters.month);
     });
   };
@@ -211,6 +229,141 @@ const AdminPanel = () => {
       document.body.removeChild(anchor);
       URL.revokeObjectURL(url);
     });
+  };
+  const openCreateModal = () => setCreateModalTab(tab);
+  const closeCreateModal = () => setCreateModalTab(null);
+  const canCreateInTab = CREATE_TABS.includes(tab);
+
+  const renderCreateModalForm = () => {
+    if (createModalTab === 'trainers') {
+      return (
+        <form onSubmit={handleCreateTrainer} className="admin-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nombre</label>
+              <input value={trainerForm.name} onChange={(e) => setTrainerForm({ ...trainerForm, name: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Especialidad</label>
+              <input value={trainerForm.specialty} onChange={(e) => setTrainerForm({ ...trainerForm, specialty: e.target.value })} />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Biografía</label>
+            <textarea value={trainerForm.bio} onChange={(e) => setTrainerForm({ ...trainerForm, bio: e.target.value })} rows="3" />
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Email</label>
+              <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label>Contraseña</label>
+              <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
+            </div>
+          </div>
+          <button type="submit" className="btn-primary">Crear entrenador</button>
+        </form>
+      );
+    }
+
+    if (createModalTab === 'sections') {
+      return (
+        <form onSubmit={handleCreateSection} className="admin-form">
+          <div className="form-group">
+            <label>Título</label>
+            <input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} required />
+          </div>
+          <div className="form-group">
+            <label>Contenido</label>
+            <textarea value={sectionForm.content} onChange={(e) => setSectionForm({ ...sectionForm, content: e.target.value })} rows="4" required />
+          </div>
+          <button type="submit" className="btn-primary">Crear sección</button>
+        </form>
+      );
+    }
+
+    if (createModalTab === 'divisions') {
+      return (
+        <form onSubmit={handleCreateDivision} className="admin-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nombre</label>
+              <input value={divisionForm.name} onChange={(e) => setDivisionForm({ ...divisionForm, name: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Temporada</label>
+              <input type="number" value={divisionForm.seasonYear} onChange={(e) => setDivisionForm({ ...divisionForm, seasonYear: e.target.value })} required />
+            </div>
+          </div>
+          <button type="submit" className="btn-primary">Crear división</button>
+        </form>
+      );
+    }
+
+    if (createModalTab === 'players') {
+      return (
+        <form onSubmit={handleCreatePlayer} className="admin-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nombre completo</label>
+              <input value={playerForm.fullName} onChange={(e) => setPlayerForm({ ...playerForm, fullName: e.target.value })} required />
+            </div>
+            <div className="form-group">
+              <label>Año nacimiento</label>
+              <input type="number" value={playerForm.birthYear} onChange={(e) => setPlayerForm({ ...playerForm, birthYear: e.target.value })} required />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>División</label>
+              <select value={playerForm.divisionId} onChange={(e) => setPlayerForm({ ...playerForm, divisionId: e.target.value })} required>
+                <option value="">Seleccionar</option>
+                {divisions.map((division) => (
+                  <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group checkbox-group">
+              <label>
+                <input type="checkbox" checked={playerForm.active} onChange={(e) => setPlayerForm({ ...playerForm, active: e.target.checked })} />
+                Activa
+              </label>
+            </div>
+          </div>
+          <button type="submit" className="btn-primary">Crear jugadora</button>
+        </form>
+      );
+    }
+
+    if (createModalTab === 'sessions') {
+      return (
+        <form onSubmit={handleCreateSession} className="admin-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label>División</label>
+              <select value={sessionForm.divisionId} onChange={(e) => setSessionForm({ ...sessionForm, divisionId: e.target.value })} required>
+                <option value="">Seleccionar</option>
+                {divisions.map((division) => (
+                  <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Fecha</label>
+              <input type="date" value={sessionForm.date} onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })} required />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Notas</label>
+            <input value={sessionForm.notes} onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })} />
+          </div>
+          <button type="submit" className="btn-primary">Crear fecha</button>
+        </form>
+      );
+    }
+
+    return null;
   };
 
   const filterRow = (
@@ -257,37 +410,17 @@ const AdminPanel = () => {
 
         {loading && <div className="loading">Cargando...</div>}
         {error && <div className="error-message">{error}</div>}
+        {canCreateInTab && (
+          <div className="tab-actions">
+            <button type="button" className="btn-primary" onClick={openCreateModal}>
+              {CREATE_MODAL_COPY[tab].button}
+            </button>
+          </div>
+        )}
 
         {tab === 'trainers' && (
           <div className="tab-content">
-            <h2>Crear entrenador</h2>
-            <form onSubmit={handleCreateTrainer} className="admin-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre</label>
-                  <input value={trainerForm.name} onChange={(e) => setTrainerForm({ ...trainerForm, name: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Especialidad</label>
-                  <input value={trainerForm.specialty} onChange={(e) => setTrainerForm({ ...trainerForm, specialty: e.target.value })} />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Biografía</label>
-                <textarea value={trainerForm.bio} onChange={(e) => setTrainerForm({ ...trainerForm, bio: e.target.value })} rows="3" />
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Email</label>
-                  <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
-                </div>
-                <div className="form-group">
-                  <label>Contraseña</label>
-                  <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
-                </div>
-              </div>
-              <button type="submit" className="btn-primary">Crear entrenador</button>
-            </form>
+            <h2>Entrenadores</h2>
             <div className="data-table">
               {trainers.map((trainer) => (
                 <div className="data-row" key={trainer.id}>
@@ -304,18 +437,7 @@ const AdminPanel = () => {
 
         {tab === 'sections' && (
           <div className="tab-content">
-            <h2>Crear sección</h2>
-            <form onSubmit={handleCreateSection} className="admin-form">
-              <div className="form-group">
-                <label>Título</label>
-                <input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} required />
-              </div>
-              <div className="form-group">
-                <label>Contenido</label>
-                <textarea value={sectionForm.content} onChange={(e) => setSectionForm({ ...sectionForm, content: e.target.value })} rows="4" required />
-              </div>
-              <button type="submit" className="btn-primary">Crear sección</button>
-            </form>
+            <h2>Secciones</h2>
             <div className="sections-list">
               {sections.map((section) => (
                 <div className="section-card" key={section.id}>
@@ -367,19 +489,6 @@ const AdminPanel = () => {
         {tab === 'divisions' && (
           <div className="tab-content">
             <h2>Gestión de divisiones</h2>
-            <form onSubmit={handleCreateDivision} className="admin-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre</label>
-                  <input value={divisionForm.name} onChange={(e) => setDivisionForm({ ...divisionForm, name: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Temporada</label>
-                  <input type="number" value={divisionForm.seasonYear} onChange={(e) => setDivisionForm({ ...divisionForm, seasonYear: e.target.value })} required />
-                </div>
-              </div>
-              <button type="submit" className="btn-primary">Crear división</button>
-            </form>
 
             <div className="data-table">
               {divisions.map((division) => (
@@ -480,37 +589,6 @@ const AdminPanel = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreatePlayer} className="admin-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Nombre completo</label>
-                  <input value={playerForm.fullName} onChange={(e) => setPlayerForm({ ...playerForm, fullName: e.target.value })} required />
-                </div>
-                <div className="form-group">
-                  <label>Año nacimiento</label>
-                  <input type="number" value={playerForm.birthYear} onChange={(e) => setPlayerForm({ ...playerForm, birthYear: e.target.value })} required />
-                </div>
-              </div>
-              <div className="form-row">
-                <div className="form-group">
-                  <label>División</label>
-                  <select value={playerForm.divisionId} onChange={(e) => setPlayerForm({ ...playerForm, divisionId: e.target.value })} required>
-                    <option value="">Seleccionar</option>
-                    {divisions.map((division) => (
-                      <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group checkbox-group">
-                  <label>
-                    <input type="checkbox" checked={playerForm.active} onChange={(e) => setPlayerForm({ ...playerForm, active: e.target.checked })} />
-                    Activa
-                  </label>
-                </div>
-              </div>
-              <button type="submit" className="btn-primary">Crear jugadora</button>
-            </form>
-
             <div className="data-table">
               {players.map((player) => (
                 <div className="data-row" key={player.id}>
@@ -568,29 +646,6 @@ const AdminPanel = () => {
                 Aplicar filtros
               </button>
             </div>
-
-            <form onSubmit={handleCreateSession} className="admin-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>División</label>
-                  <select value={sessionForm.divisionId} onChange={(e) => setSessionForm({ ...sessionForm, divisionId: e.target.value })} required>
-                    <option value="">Seleccionar</option>
-                    {divisions.map((division) => (
-                      <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Fecha</label>
-                  <input type="date" value={sessionForm.date} onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })} required />
-                </div>
-              </div>
-              <div className="form-group">
-                <label>Notas</label>
-                <input value={sessionForm.notes} onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })} />
-              </div>
-              <button type="submit" className="btn-primary">Crear fecha</button>
-            </form>
 
             <div className="data-table">
               {sessions.map((session) => (
@@ -751,6 +806,23 @@ const AdminPanel = () => {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {createModalTab && (
+          <div className="modal-overlay" onClick={closeCreateModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-header-copy">
+                  <h3>{CREATE_MODAL_COPY[createModalTab].title}</h3>
+                  <p>Completá los datos para crear un nuevo registro.</p>
+                </div>
+                <button type="button" className="modal-close" onClick={closeCreateModal} aria-label="Cerrar modal">
+                  x
+                </button>
+              </div>
+              <div className="modal-body">{renderCreateModalForm()}</div>
+            </div>
           </div>
         )}
       </div>

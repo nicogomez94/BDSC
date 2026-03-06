@@ -41,6 +41,12 @@
   flex-wrap: wrap;
 }
 
+.tab-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
 .tab-content h2 {
   font-size: 24px;
   color: var(--secondary-color);
@@ -297,6 +303,87 @@
   padding-left: 22px;
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 20, 25, 0.48);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  z-index: 1000;
+}
+
+.modal-content {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 24px 65px rgba(0, 0, 0, 0.28);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid #ece8e1;
+  background: linear-gradient(180deg, #f7f4ed 0%, #fdfcf9 100%);
+}
+
+.modal-header-copy p {
+  margin-top: 6px;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.modal-header h3 {
+  font-size: 28px;
+  line-height: 1.1;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.modal-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1px solid #d8d2c7;
+  background: #fff;
+  color: #6f6a61;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+.modal-content .admin-form {
+  background: linear-gradient(180deg, #f2eee8 0%, #f8f5ef 100%);
+  border: 1px solid #e3ded3;
+  margin-bottom: 0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.modal-content .checkbox-group label {
+  margin-top: 28px;
+}
+
 @media (max-width: 768px) {
   .data-row {
     flex-direction: column;
@@ -316,5 +403,34 @@
 
   .filters-actions {
     flex-wrap: wrap;
+  }
+
+  .tab-actions {
+    justify-content: flex-start;
+  }
+
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-content {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .modal-header {
+    padding: 16px 16px 12px;
+  }
+
+  .modal-header h3 {
+    font-size: 22px;
+  }
+
+  .modal-body {
+    padding: 10px;
+  }
+
+  .modal-content .admin-form {
+    padding: 16px;
   }
 }
