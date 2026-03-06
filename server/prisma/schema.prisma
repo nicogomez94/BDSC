@@ -12,30 +12,39 @@ enum Role {
   ENTRENADOR
 }
 
+enum AttendanceStatus {
+  PRESENTE
+  AUSENTE
+  JUSTIFICADA
+  TARDE
+}
+
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
-  passwordHash String
-  role         Role
-  trainerId    Int?     @unique
-  trainer      Trainer? @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                 Int          @id @default(autoincrement())
+  email              String       @unique
+  passwordHash       String
+  role               Role
+  trainerId          Int?         @unique
+  trainer            Trainer?     @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  attendancesCreated Attendance[]
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@map("users")
 }
 
 model Trainer {
-  id            Int             @id @default(autoincrement())
-  name          String
-  slug          String          @unique
-  bio           String?
-  specialty     String?
-  photoUrl      String?
-  user          User?
-  sectionAccess SectionAccess[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id                    Int                    @id @default(autoincrement())
+  name                  String
+  slug                  String                 @unique
+  bio                   String?
+  specialty             String?
+  photoUrl              String?
+  user                  User?
+  sectionAccess         SectionAccess[]
+  divisionAccess        TrainerDivisionAccess[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 
   @@map("trainers")
 }
@@ -61,4 +70,80 @@ model SectionAccess {
 
   @@unique([sectionId, trainerId])
   @@map("section_access")
+}
+
+model Division {
+  id                Int                    @id @default(autoincrement())
+  name              String
+  seasonYear        Int
+  players           Player[]
+  trainingSessions  TrainingSession[]
+  trainerAccess     TrainerDivisionAccess[]
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+
+  @@unique([name, seasonYear])
+  @@map("divisions")
+}
+
+model Player {
+  id          Int          @id @default(autoincrement())
+  fullName    String
+  birthYear   Int
+  active      Boolean      @default(true)
+  divisionId  Int
+  division    Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  attendance  Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([divisionId])
+  @@map("players")
+}
+
+model TrainingSession {
+  id          Int          @id @default(autoincrement())
+  divisionId  Int
+  division    Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  date        DateTime
+  month       Int
+  notes       String?
+  attendance  Attendance[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([divisionId, date])
+  @@index([divisionId, month])
+  @@map("training_sessions")
+}
+
+model Attendance {
+  id                Int              @id @default(autoincrement())
+  playerId          Int
+  trainingSessionId Int
+  status            AttendanceStatus
+  observation       String?
+  createdByUserId   Int
+  player            Player           @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  trainingSession   TrainingSession  @relation(fields: [trainingSessionId], references: [id], onDelete: Cascade)
+  createdByUser     User             @relation(fields: [createdByUserId], references: [id], onDelete: Restrict)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@unique([playerId, trainingSessionId])
+  @@index([trainingSessionId])
+  @@index([playerId])
+  @@map("attendance")
+}
+
+model TrainerDivisionAccess {
+  id         Int       @id @default(autoincrement())
+  trainerId  Int
+  divisionId Int
+  trainer    Trainer   @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  division   Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+
+  @@unique([trainerId, divisionId])
+  @@map("trainer_division_access")
 }

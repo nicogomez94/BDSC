@@ -9,6 +9,37 @@
   margin-bottom: 30px;
 }
 
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tabs-wrap {
+  flex-wrap: wrap;
+}
+
+.tabs button {
+  padding: 12px 24px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-light);
+}
+
+.tabs button.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.tab-content {
+  margin-bottom: 30px;
+}
+
 .profile-section,
 .sections-section {
   margin-bottom: 50px;
@@ -48,6 +79,48 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 25px;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.filters-actions {
+  margin: 8px 0 18px;
+}
+
+.attendance-grid-wrapper {
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.attendance-grid {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.attendance-grid th,
+.attendance-grid td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: center;
+}
+
+.attendance-grid th:first-child,
+.attendance-grid td:first-child {
+  min-width: 220px;
+  text-align: left;
+}
+
+.attendance-grid select {
+  min-width: 122px;
+  padding: 6px;
+  font-size: 12px;
 }
 
 .section-card {
