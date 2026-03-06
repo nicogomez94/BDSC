@@ -1,4 +1,12 @@
 import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faLocationDot,
+  faPhone,
+  faEnvelope,
+  faClock,
+  faPaperPlane
+} from '@fortawesome/free-solid-svg-icons';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Contact.css';
 
@@ -106,25 +114,25 @@ const Contact = () => {
             <h2>Información de Contacto</h2>
             
             <div className="info-item">
-              <div className="info-icon">📍</div>
+              <div className="info-icon"><FontAwesomeIcon icon={faLocationDot} /></div>
               <h3>Dirección</h3>
               <p>Av. Belgrano 1234<br/>Buenos Aires, Argentina</p>
             </div>
 
             <div className="info-item">
-              <div className="info-icon">📞</div>
+              <div className="info-icon"><FontAwesomeIcon icon={faPhone} /></div>
               <h3>Teléfono</h3>
               <p>(011) 4567-8900</p>
             </div>
 
             <div className="info-item">
-              <div className="info-icon">✉️</div>
+              <div className="info-icon"><FontAwesomeIcon icon={faEnvelope} /></div>
               <h3>Email</h3>
               <p>hockey@bdsc.com</p>
             </div>
 
             <div className="info-item">
-              <div className="info-icon">🕐</div>
+              <div className="info-icon"><FontAwesomeIcon icon={faClock} /></div>
               <h3>Horarios de atención</h3>
               <p>Lunes a Viernes: 9:00 - 18:00<br/>Sábados: 9:00 - 13:00</p>
             </div>
@@ -170,6 +178,7 @@ const Contact = () => {
               </div>
 
               <button type="submit" className="btn-submit" disabled={submitting}>
+                <FontAwesomeIcon icon={faPaperPlane} />
                 {submitting ? 'Enviando...' : 'Enviar mensaje'}
               </button>
 

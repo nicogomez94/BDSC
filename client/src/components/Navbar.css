@@ -56,6 +56,9 @@
   position: relative;
   padding-bottom: 5px;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
 .navbar-menu li a:hover {
@@ -196,6 +199,9 @@
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-login:hover {
@@ -213,6 +219,9 @@
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .btn-logout:hover {

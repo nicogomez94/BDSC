@@ -1,5 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faArrowRight,
+  faUsers,
+  faPersonRunning,
+  faChildReaching,
+  faUserGroup,
+  faTrophy,
+  faPhone
+} from '@fortawesome/free-solid-svg-icons';
 import './Home.css';
 
 const Home = () => {
@@ -41,6 +51,7 @@ const Home = () => {
           {/* <h2>Hockey</h2> */}
           <p>Tradición, excelencia y formación integral en hockey</p>
           <Link to="/entrenadores" className="btn-hero">
+            <FontAwesomeIcon icon={faUsers} />
             Conocé a nuestros entrenadores
           </Link>
         </div>
@@ -73,6 +84,7 @@ const Home = () => {
             Conocé al equipo de profesionales que lidera el hockey en BDSC
           </p>
           <Link to="/entrenadores" className="btn-secondary">
+            <FontAwesomeIcon icon={faArrowRight} />
             Ver todos los entrenadores
           </Link>
         </div>
@@ -83,22 +95,27 @@ const Home = () => {
           <h2>Información y Categorías</h2>
           <div className="categories-grid">
             <div className="category-card">
+              <FontAwesomeIcon className="category-icon" icon={faChildReaching} />
               <h3>Iniciación</h3>
               <p>Décima</p>
             </div>
             <div className="category-card">
+              <FontAwesomeIcon className="category-icon" icon={faPersonRunning} />
               <h3>Infantiles</h3>
               <p>Novena y octava</p>
             </div>
             <div className="category-card">
+              <FontAwesomeIcon className="category-icon" icon={faUserGroup} />
               <h3>Juveniles</h3>
               <p>Séptima, sexta y quinta</p>
             </div>
             <div className="category-card">
+              <FontAwesomeIcon className="category-icon" icon={faTrophy} />
               <h3>Plantel superior</h3>
               <p>Intermedia y primera</p>
             </div>
             <div className="category-card">
+              <FontAwesomeIcon className="category-icon" icon={faUsers} />
               <h3>Cuarta</h3>
               <p>Más de 35 años</p>
             </div>
@@ -110,6 +127,7 @@ const Home = () => {
         <div className="container">
           <h2>¿Querés ser parte de BDSC Hockey?</h2>
           <Link to="/contacto" className="btn-cta">
+            <FontAwesomeIcon icon={faPhone} />
             Contactanos
           </Link>
         </div>

@@ -91,6 +91,9 @@
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-hero:hover {
@@ -154,6 +157,12 @@
   color: var(--cream);
 }
 
+.trainers-preview .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 /* Info Section */
 .info-section {
   padding: 80px 20px;
@@ -198,6 +207,12 @@
   font-weight: 700;
 }
 
+.category-icon {
+  font-size: 26px;
+  color: var(--secondary-color);
+  margin-bottom: 14px;
+}
+
 .category-card p {
   font-size: 16px;
   color: var(--text-light);
@@ -229,6 +244,9 @@
   display: inline-block;
   transition: all 0.3s ease;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .btn-cta:hover {

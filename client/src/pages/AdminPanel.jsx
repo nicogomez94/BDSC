@@ -1,4 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUserTie,
+  faFolderTree,
+  faLayerGroup,
+  faPersonDress,
+  faCalendarDay,
+  faClipboardCheck,
+  faChartColumn,
+  faUserGear
+} from '@fortawesome/free-solid-svg-icons';
 import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './AdminPanel.css';
@@ -24,6 +35,15 @@ const CREATE_MODAL_COPY = {
   players: { title: 'Crear jugadora', button: 'Nueva jugadora' },
   sessions: { title: 'Crear fecha', button: 'Nueva fecha' },
 };
+const PANEL_TABS = [
+  { key: 'trainers', label: 'Entrenadores', icon: faUserTie },
+  { key: 'sections', label: 'Secciones', icon: faFolderTree },
+  { key: 'divisions', label: 'Divisiones', icon: faLayerGroup },
+  { key: 'players', label: 'Jugadoras', icon: faPersonDress },
+  { key: 'sessions', label: 'Fechas', icon: faCalendarDay },
+  { key: 'attendance', label: 'Asistencia', icon: faClipboardCheck },
+  { key: 'reports', label: 'Reportes', icon: faChartColumn },
+];
 
 const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
@@ -396,16 +416,18 @@ const AdminPanel = () => {
   return (
     <div className="admin-panel">
       <div className="container">
-        <h1>Panel de Coordinador</h1>
+        <h1 className="panel-title">
+          <FontAwesomeIcon icon={faUserGear} />
+          Panel de Coordinador
+        </h1>
 
         <div className="tabs tabs-wrap">
-          <button className={tab === 'trainers' ? 'active' : ''} onClick={() => setTab('trainers')}>Entrenadores</button>
-          <button className={tab === 'sections' ? 'active' : ''} onClick={() => setTab('sections')}>Secciones</button>
-          <button className={tab === 'divisions' ? 'active' : ''} onClick={() => setTab('divisions')}>Divisiones</button>
-          <button className={tab === 'players' ? 'active' : ''} onClick={() => setTab('players')}>Jugadoras</button>
-          <button className={tab === 'sessions' ? 'active' : ''} onClick={() => setTab('sessions')}>Fechas</button>
-          <button className={tab === 'attendance' ? 'active' : ''} onClick={() => setTab('attendance')}>Asistencia</button>
-          <button className={tab === 'reports' ? 'active' : ''} onClick={() => setTab('reports')}>Reportes</button>
+          {PANEL_TABS.map((item) => (
+            <button key={item.key} className={tab === item.key ? 'active' : ''} onClick={() => setTab(item.key)}>
+              <FontAwesomeIcon icon={item.icon} />
+              {item.label}
+            </button>
+          ))}
         </div>
 
         {loading && <div className="loading">Cargando...</div>}

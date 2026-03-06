@@ -9,6 +9,12 @@
   margin-bottom: 30px;
 }
 
+.panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .tabs {
   display: flex;
   gap: 10px;
@@ -26,6 +32,9 @@
   font-weight: 500;
   color: var(--text-light);
   transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tabs button.active {

@@ -61,7 +61,9 @@
   color: var(--cream);
   text-decoration: none;
   transition: all 0.3s ease;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .footer-links a:hover {
@@ -73,6 +75,9 @@
   color: var(--cream);
   font-size: 14px;
   line-height: 1.8;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .footer-bottom {

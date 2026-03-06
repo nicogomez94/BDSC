@@ -1,4 +1,12 @@
 import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faEnvelope,
+  faPhone,
+  faLocationDot,
+  faClock,
+  faChevronRight
+} from '@fortawesome/free-solid-svg-icons';
 import './Footer.css';
 
 const Footer = () => {
@@ -16,21 +24,21 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Navegación</h4>
           <ul className="footer-links">
-            <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/coordinacion">Coordinación</Link></li>
-            <li><Link to="/recursos">Recursos</Link></li>
-            <li><Link to="/contacto">Contacto</Link></li>
-            <li><Link to="/panel">Panel</Link></li>
+            <li><Link to="/"><FontAwesomeIcon icon={faChevronRight} />Inicio</Link></li>
+            <li><Link to="/coordinacion"><FontAwesomeIcon icon={faChevronRight} />Coordinación</Link></li>
+            <li><Link to="/recursos"><FontAwesomeIcon icon={faChevronRight} />Recursos</Link></li>
+            <li><Link to="/contacto"><FontAwesomeIcon icon={faChevronRight} />Contacto</Link></li>
+            <li><Link to="/panel"><FontAwesomeIcon icon={faChevronRight} />Panel</Link></li>
           </ul>
         </div>
         
         <div className="footer-section">
           <h4>Contacto</h4>
           <ul className="footer-contact">
-            <li>📧 hockey@bdsc.com</li>
-            <li>📞 (011) 4567-8900</li>
-            <li>📍 Av. Belgrano 1234, Buenos Aires</li>
-            <li>🕐 Lun-Vie: 9:00-18:00</li>
+            <li><FontAwesomeIcon icon={faEnvelope} />hockey@bdsc.com</li>
+            <li><FontAwesomeIcon icon={faPhone} />(011) 4567-8900</li>
+            <li><FontAwesomeIcon icon={faLocationDot} />Av. Belgrano 1234, Buenos Aires</li>
+            <li><FontAwesomeIcon icon={faClock} />Lun-Vie: 9:00-18:00</li>
           </ul>
         </div>
       </div>

@@ -1,5 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faSignOutAlt,
+  faRightToBracket
+} from '@fortawesome/free-solid-svg-icons';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -74,10 +79,11 @@ const Navbar = () => {
         <div className="navbar-actions">
           {isAuthenticated ? (
             <button onClick={logout} className="btn-logout">
+              <FontAwesomeIcon icon={faSignOutAlt} />
               Cerrar sesión
             </button>
           ) : (
-            <Link to="/login" className="btn-login">Acceso entrenadores</Link>
+            <Link to="/login" className="btn-login"><FontAwesomeIcon icon={faRightToBracket} />Acceso entrenadores</Link>
           )}
         </div>
       </div>
