@@ -4,6 +4,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const panelPath = isAuthenticated && user?.role === 'COORDINADOR' ? '/admin' : '/panel';
 
   return (
     <nav className="navbar">
@@ -15,27 +16,21 @@ const Navbar = () => {
         
         <ul className="navbar-menu">
           <li><Link to="/">Inicio</Link></li>
-          <li><Link to="/hockey">Hockey BDSC</Link></li>
-          <li><Link to="/entrenadores">Entrenadores</Link></li>
+          <li><Link to="/coordinacion">Coordinación</Link></li>
+          <li><Link to="/recursos">Recursos</Link></li>
           <li><Link to="/contacto">Contacto</Link></li>
-          
-          {isAuthenticated ? (
-            <>
-              <li>
-                <Link to={user.role === 'COORDINADOR' ? '/admin' : '/panel'}>
-                  Panel
-                </Link>
-              </li>
-              <li>
-                <button onClick={logout} className="btn-logout">
-                  Cerrar Sesión
-                </button>
-              </li>
-            </>
-          ) : (
-            <li><Link to="/login" className="btn-login">Acceso entrenadores</Link></li>
-          )}
+          <li><Link to={panelPath}>Panel</Link></li>
         </ul>
+
+        <div className="navbar-actions">
+          {isAuthenticated ? (
+            <button onClick={logout} className="btn-logout">
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link to="/login" className="btn-login">Acceso entrenadores</Link>
+          )}
+        </div>
       </div>
     </nav>
   );

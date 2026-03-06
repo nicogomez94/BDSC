@@ -17,9 +17,10 @@ const Footer = () => {
           <h4>Navegación</h4>
           <ul className="footer-links">
             <li><Link to="/">Inicio</Link></li>
-            <li><Link to="/hockey">Hockey BDSC</Link></li>
-            <li><Link to="/entrenadores">Entrenadores</Link></li>
+            <li><Link to="/coordinacion">Coordinación</Link></li>
+            <li><Link to="/recursos">Recursos</Link></li>
             <li><Link to="/contacto">Contacto</Link></li>
+            <li><Link to="/panel">Panel</Link></li>
           </ul>
         </div>
         

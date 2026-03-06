@@ -5,8 +5,9 @@ import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
-import Hockey from './pages/Hockey';
 import Trainers from './pages/Trainers';
+import Coordinacion from './pages/Coordinacion';
+import Recursos from './pages/Recursos';
 import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -32,8 +33,9 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/hockey" element={<Hockey />} />
-              <Route path="/entrenadores" element={<Trainers />} />
+              <Route path="/coordinacion" element={<Coordinacion />} />
+              <Route path="/coordinacion/gestion-interna/coordinadores" element={<Trainers />} />
+              <Route path="/recursos" element={<Recursos />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               
@@ -53,6 +55,12 @@ function App() {
                     <AdminPanel />
                   </ProtectedRoute>
                 }
+              />
+
+              <Route path="/hockey" element={<Navigate to="/coordinacion" replace />} />
+              <Route
+                path="/entrenadores"
+                element={<Navigate to="/coordinacion/gestion-interna/coordinadores" replace />}
               />
               
               <Route path="*" element={<Navigate to="/" />} />

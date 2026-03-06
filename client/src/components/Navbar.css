@@ -8,22 +8,25 @@
 }
 
 .navbar-container {
-  max-width: 1200px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
 }
 
 .navbar-logo {
   color: var(--cream);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   text-decoration: none;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.7px;
   transition: color 0.3s ease;
+  white-space: nowrap;
 }
 
 .navbar-logo:hover {
@@ -33,8 +36,11 @@
 .navbar-menu {
   display: flex;
   list-style: none;
-  gap: 35px;
+  gap: 24px;
   align-items: center;
+  flex: 1;
+  justify-content: center;
+  min-width: 0;
 }
 
 .navbar-menu li a {
@@ -45,6 +51,7 @@
   transition: all 0.3s ease;
   position: relative;
   padding-bottom: 5px;
+  white-space: nowrap;
 }
 
 .navbar-menu li a:hover {
@@ -64,6 +71,12 @@
 
 .navbar-menu li a:hover::after {
   width: 100%;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .btn-login {
@@ -98,11 +111,6 @@
   color: var(--primary-color);
 }
 
-.btn-logout:hover {
-  background-color: var(--cream);
-  color: var(--primary-color);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .navbar {
@@ -111,17 +119,18 @@
 
   .navbar-container {
     flex-direction: column;
-    gap: 20px;
+    gap: 14px;
   }
 
   .navbar-logo {
-    font-size: 22px;
+    font-size: 21px;
   }
 
   .navbar-menu {
+    width: 100%;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 14px 20px;
   }
 
   .navbar-menu li a {
@@ -130,5 +139,10 @@
 
   .navbar-menu li a::after {
     display: none;
+  }
+
+  .navbar-actions {
+    width: 100%;
+    justify-content: center;
   }
 }
