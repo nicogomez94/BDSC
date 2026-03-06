@@ -760,7 +760,7 @@ const AdminPanel = () => {
         )}
 
         {tab === 'reports' && (
-          <div className="tab-content">
+          <div className="tab-content reports-tab">
             <h2>Reportes</h2>
             {filterRow}
             <div className="filters-actions">
@@ -769,7 +769,7 @@ const AdminPanel = () => {
             </div>
 
             {report && (
-              <>
+              <div className="report-content">
                 <div className="summary-grid">
                   <div className="summary-card"><h3>Divisiones</h3><p>{report.summary.totalDivisions}</p></div>
                   <div className="summary-card"><h3>Jugadoras</h3><p>{report.summary.totalPlayers}</p></div>
@@ -777,56 +777,62 @@ const AdminPanel = () => {
                   <div className="summary-card"><h3>Registros</h3><p>{report.summary.totalRecords}</p></div>
                 </div>
 
-                <h3>Por jugadora</h3>
-                <div className="table-scroll">
-                  <table className="report-table">
-                    <thead>
-                      <tr>
-                        <th>Jugadora</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>% Asistencia</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {report.byPlayer.map((player) => (
-                        <tr key={player.playerId}>
-                          <td>{player.fullName}</td><td>{player.divisionName}</td><td>{player.PRESENTE}</td><td>{player.TARDE}</td><td>{player.JUSTIFICADA}</td><td>{player.AUSENTE}</td><td>{player.attendancePercentage}%</td>
+                <section className="report-block">
+                  <h3>Por jugadora</h3>
+                  <div className="table-scroll">
+                    <table className="report-table">
+                      <thead>
+                        <tr>
+                          <th>Jugadora</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>% Asistencia</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <h3>Totales por fecha</h3>
-                <div className="table-scroll">
-                  <table className="report-table">
-                    <thead>
-                      <tr>
-                        <th>Fecha</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>Total</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {report.totalsByDate.map((item) => (
-                        <tr key={item.trainingSessionId}>
-                          <td>{dateLabel(item.date)}</td><td>{item.divisionName}</td><td>{item.totals.PRESENTE}</td><td>{item.totals.TARDE}</td><td>{item.totals.JUSTIFICADA}</td><td>{item.totals.AUSENTE}</td><td>{item.totalRecords}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <h3>Ranking por división</h3>
-                <div className="ranking-grid">
-                  {report.ranking.map((rank) => (
-                    <div key={rank.divisionId} className="ranking-card">
-                      <h4>{rank.divisionName} - {rank.seasonYear}</h4>
-                      <ol>
-                        {rank.players.slice(0, 10).map((player) => (
-                          <li key={player.playerId}>{player.fullName} ({player.attendancePercentage}%)</li>
+                      </thead>
+                      <tbody>
+                        {report.byPlayer.map((player) => (
+                          <tr key={player.playerId}>
+                            <td>{player.fullName}</td><td>{player.divisionName}</td><td>{player.PRESENTE}</td><td>{player.TARDE}</td><td>{player.JUSTIFICADA}</td><td>{player.AUSENTE}</td><td>{player.attendancePercentage}%</td>
+                          </tr>
                         ))}
-                      </ol>
-                    </div>
-                  ))}
-                </div>
-              </>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section className="report-block">
+                  <h3>Totales por fecha</h3>
+                  <div className="table-scroll">
+                    <table className="report-table">
+                      <thead>
+                        <tr>
+                          <th>Fecha</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {report.totalsByDate.map((item) => (
+                          <tr key={item.trainingSessionId}>
+                            <td>{dateLabel(item.date)}</td><td>{item.divisionName}</td><td>{item.totals.PRESENTE}</td><td>{item.totals.TARDE}</td><td>{item.totals.JUSTIFICADA}</td><td>{item.totals.AUSENTE}</td><td>{item.totalRecords}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                <section className="report-block">
+                  <h3>Ranking por división</h3>
+                  <div className="ranking-grid">
+                    {report.ranking.map((rank) => (
+                      <div key={rank.divisionId} className="ranking-card">
+                        <h4>{rank.divisionName} - {rank.seasonYear}</h4>
+                        <ol>
+                          {rank.players.slice(0, 10).map((player) => (
+                            <li key={player.playerId}>{player.fullName} ({player.attendancePercentage}%)</li>
+                          ))}
+                        </ol>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </div>
             )}
           </div>
         )}
