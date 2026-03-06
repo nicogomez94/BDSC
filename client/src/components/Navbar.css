@@ -445,7 +445,7 @@
     border-radius: 0;
   }
 
-  .dropdown:hover .dropdown-menu {
+  .dropdown.active .dropdown-menu {
     max-height: 700px;
     transition: max-height 0.6s ease-in;
   }

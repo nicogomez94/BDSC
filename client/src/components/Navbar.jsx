@@ -14,13 +14,24 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const panelPath = isAuthenticated && user?.role === 'COORDINADOR' ? '/admin' : '/panel';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    setOpenDropdown(null); // Reset dropdowns when closing menu
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
+    setOpenDropdown(null);
+  };
+
+  const handleDropdownClick = (e, dropdownName) => {
+    // En mobile, prevenir navegación y toggle el dropdown
+    if (window.innerWidth <= 768) {
+      e.preventDefault();
+      setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
+    }
   };
 
   return (
@@ -51,8 +62,8 @@ const Navbar = () => {
           <ul className="navbar-menu">
             <li><Link to="/" onClick={closeMenu}>Inicio</Link></li>
             
-            <li className="dropdown">
-              <Link to="/coordinacion" onClick={closeMenu}>Coordinación</Link>
+            <li className={`dropdown ${openDropdown === 'coordinacion' ? 'active' : ''}`}>
+              <Link to="/coordinacion" onClick={(e) => handleDropdownClick(e, 'coordinacion')}>Coordinación</Link>
               <ul className="dropdown-menu">
                 <li className="dropdown-group-title">Operación</li>
                 <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Planteles</Link></li>
@@ -83,8 +94,8 @@ const Navbar = () => {
               </ul>
             </li>
             
-            <li className="dropdown">
-              <Link to="/recursos" onClick={closeMenu}>Recursos</Link>
+            <li className={`dropdown ${openDropdown === 'recursos' ? 'active' : ''}`}>
+              <Link to="/recursos" onClick={(e) => handleDropdownClick(e, 'recursos')}>Recursos</Link>
               <ul className="dropdown-menu">
                 <li className="dropdown-group-title">Planificación deportiva</li>
                 <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Modelo de juego</Link></li>
