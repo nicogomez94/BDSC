@@ -83,20 +83,24 @@ const Home = () => {
           <h2>Información y Categorías</h2>
           <div className="categories-grid">
             <div className="category-card">
-              <h3>Mini Hockey</h3>
-              <p>4-6 años</p>
+              <h3>Iniciación</h3>
+              <p>Décima</p>
             </div>
             <div className="category-card">
               <h3>Infantiles</h3>
-              <p>7-12 años</p>
+              <p>Novena y octava</p>
             </div>
             <div className="category-card">
               <h3>Juveniles</h3>
-              <p>13-18 años</p>
+              <p>Séptima, sexta y quinta</p>
             </div>
             <div className="category-card">
-              <h3>Primera</h3>
-              <p>Mayores</p>
+              <h3>Plantel superior</h3>
+              <p>Intermedia y primera</p>
+            </div>
+            <div className="category-card">
+              <h3>Cuarta</h3>
+              <p>Más de 35 años</p>
             </div>
           </div>
         </div>
