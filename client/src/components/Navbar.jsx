@@ -33,17 +33,6 @@ const Navbar = () => {
           BDSC Hockey
         </Link>
 
-        <div className="navbar-actions navbar-actions-desktop">
-          {isAuthenticated ? (
-            <button onClick={logout} className="btn-logout">
-              <FontAwesomeIcon icon={faSignOutAlt} />
-              Cerrar sesión
-            </button>
-          ) : (
-            <Link to="/login" className="btn-login"><FontAwesomeIcon icon={faRightToBracket} />Acceso entrenadores</Link>
-          )}
-        </div>
-
         <button className="navbar-toggle" onClick={toggleMenu} aria-label="Toggle menu">
           <FontAwesomeIcon icon={faBars} />
         </button>
@@ -116,19 +105,30 @@ const Navbar = () => {
             <li><Link to={panelPath} onClick={closeMenu}>Panel</Link></li>
           </ul>
 
-          <div className="navbar-actions navbar-actions-mobile">
+          <div className="navbar-actions-mobile">
             {isAuthenticated ? (
               <button onClick={() => { logout(); closeMenu(); }} className="btn-logout">
                 <FontAwesomeIcon icon={faSignOutAlt} />
-                Cerrar sesión
+                &nbsp;Cerrar sesión
               </button>
             ) : (
               <Link to="/login" className="btn-login" onClick={closeMenu}>
                 <FontAwesomeIcon icon={faRightToBracket} />
-                Acceso entrenadores
+                &nbsp;Acceso entrenadores
               </Link>
             )}
           </div>
+        </div>
+
+        <div className="navbar-actions-desktop">
+          {isAuthenticated ? (
+            <button onClick={logout} className="btn-logout">
+              <FontAwesomeIcon icon={faSignOutAlt} />
+              Cerrar sesión
+            </button>
+          ) : (
+            <Link to="/login" className="btn-login"><FontAwesomeIcon icon={faRightToBracket} />Acceso entrenadores</Link>
+          )}
         </div>
       </div>
     </nav>

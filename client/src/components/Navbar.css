@@ -15,7 +15,6 @@
   justify-content: space-between;
   align-items: center;
   gap: 24px;
-  flex-wrap: wrap;
 }
 
 .navbar-logo {
@@ -27,6 +26,7 @@
   letter-spacing: 0.7px;
   transition: color 0.3s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .navbar-logo:hover {
@@ -79,6 +79,9 @@
 
 .navbar-actions-desktop {
   display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .navbar-menu {
@@ -478,7 +481,7 @@
 
   /* Mobile actions at bottom */
   .navbar-actions-mobile {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     padding: 24px;
     border-top: 2px solid rgba(255, 255, 255, 0.15);
