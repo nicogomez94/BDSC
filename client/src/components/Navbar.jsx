@@ -125,7 +125,7 @@ const Navbar = () => {
             ) : (
               <Link to="/login" className="btn-login" onClick={closeMenu}>
                 <FontAwesomeIcon icon={faRightToBracket} />
-                &nbsp;Acceso entrenadores
+                &nbsp;Acceso cuerpo técnico
               </Link>
             )}
           </div>
@@ -138,7 +138,7 @@ const Navbar = () => {
               Cerrar sesión
             </button>
           ) : (
-            <Link to="/login" className="btn-login"><FontAwesomeIcon icon={faRightToBracket} />Acceso entrenadores</Link>
+            <Link to="/login" className="btn-login"><FontAwesomeIcon icon={faRightToBracket} />Acceso cuerpo técnico</Link>
           )}
         </div>
       </div>

@@ -54,6 +54,7 @@ async function main() {
     where: { slug: 'juan-perez' },
     update: {
       name: 'Juan Pérez',
+      type: 'ENTRENADOR',
       bio: 'Entrenador de hockey con 10 años de experiencia',
       specialty: 'Defensa',
       photoUrl: 'https://via.placeholder.com/300',
@@ -61,6 +62,7 @@ async function main() {
     create: {
       name: 'Juan Pérez',
       slug: 'juan-perez',
+      type: 'ENTRENADOR',
       bio: 'Entrenador de hockey con 10 años de experiencia',
       specialty: 'Defensa',
       photoUrl: 'https://via.placeholder.com/300',
@@ -71,6 +73,7 @@ async function main() {
     where: { slug: 'maria-gonzalez' },
     update: {
       name: 'María González',
+      type: 'ENTRENADOR',
       bio: 'Especialista en técnicas de ataque',
       specialty: 'Ataque',
       photoUrl: 'https://via.placeholder.com/300',
@@ -78,8 +81,28 @@ async function main() {
     create: {
       name: 'María González',
       slug: 'maria-gonzalez',
+      type: 'ENTRENADOR',
       bio: 'Especialista en técnicas de ataque',
       specialty: 'Ataque',
+      photoUrl: 'https://via.placeholder.com/300',
+    },
+  });
+
+  const trainer3 = await prisma.trainer.upsert({
+    where: { slug: 'lucas-romero' },
+    update: {
+      name: 'Lucas Romero',
+      type: 'PREPARADOR_FISICO',
+      bio: 'Preparador físico orientado a trabajo preventivo y potencia.',
+      specialty: 'Preparación física',
+      photoUrl: 'https://via.placeholder.com/300',
+    },
+    create: {
+      name: 'Lucas Romero',
+      slug: 'lucas-romero',
+      type: 'PREPARADOR_FISICO',
+      bio: 'Preparador físico orientado a trabajo preventivo y potencia.',
+      specialty: 'Preparación física',
       photoUrl: 'https://via.placeholder.com/300',
     },
   });
@@ -96,6 +119,21 @@ async function main() {
       passwordHash: hashedTrainerPassword,
       role: 'ENTRENADOR',
       trainerId: trainer1.id,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'lucas.romero@bdsc.com' },
+    update: {
+      passwordHash: hashedTrainerPassword,
+      role: 'PREPARADOR_FISICO',
+      trainerId: trainer3.id,
+    },
+    create: {
+      email: 'lucas.romero@bdsc.com',
+      passwordHash: hashedTrainerPassword,
+      role: 'PREPARADOR_FISICO',
+      trainerId: trainer3.id,
     },
   });
 
@@ -142,6 +180,12 @@ async function main() {
     create: { sectionId: section2.id, trainerId: trainer1.id },
   });
 
+  await prisma.sectionAccess.upsert({
+    where: { sectionId_trainerId: { sectionId: section1.id, trainerId: trainer3.id } },
+    update: {},
+    create: { sectionId: section1.id, trainerId: trainer3.id },
+  });
+
   const division9na = await prisma.division.upsert({
     where: { name_seasonYear: { name: '9na', seasonYear: 2026 } },
     update: {},
@@ -176,6 +220,12 @@ async function main() {
     where: { trainerId_divisionId: { trainerId: trainer1.id, divisionId: division8va.id } },
     update: {},
     create: { trainerId: trainer1.id, divisionId: division8va.id },
+  });
+
+  await prisma.trainerDivisionAccess.upsert({
+    where: { trainerId_divisionId: { trainerId: trainer3.id, divisionId: division8va.id } },
+    update: {},
+    create: { trainerId: trainer3.id, divisionId: division8va.id },
   });
 
   const players9na = await Promise.all([
@@ -298,6 +348,7 @@ async function main() {
   console.log('Coordinador: coordinador@bdsc.com / admin123');
   console.log('Entrenador 1: juan.perez@bdsc.com / trainer123');
   console.log('Entrenador 2: maria.gonzalez@bdsc.com / trainer123');
+  console.log('Preparador físico: lucas.romero@bdsc.com / trainer123');
 }
 
 main()

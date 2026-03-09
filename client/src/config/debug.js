@@ -12,6 +12,7 @@ export const DEBUG_PREFILL = {
   },
   trainerForm: {
     name: 'Entrenador Debug',
+    type: 'ENTRENADOR',
     bio: 'Perfil de prueba generado para modo debug.',
     specialty: 'Hockey Juvenil',
     photoUrl: 'https://via.placeholder.com/400x400/1a4d2a/f5f0e8?text=Entrenador',

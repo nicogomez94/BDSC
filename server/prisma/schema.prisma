@@ -10,6 +10,12 @@ datasource db {
 enum Role {
   COORDINADOR
   ENTRENADOR
+  PREPARADOR_FISICO
+}
+
+enum TrainerType {
+  ENTRENADOR
+  PREPARADOR_FISICO
 }
 
 enum AttendanceStatus {
@@ -37,6 +43,7 @@ model Trainer {
   id             Int                     @id @default(autoincrement())
   name           String
   slug           String                  @unique
+  type           TrainerType             @default(ENTRENADOR)
   bio            String?
   specialty      String?
   photoUrl       String?

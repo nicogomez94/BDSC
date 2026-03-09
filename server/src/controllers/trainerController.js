@@ -4,6 +4,13 @@ export const getAllTrainers = async (req, res, next) => {
   try {
     console.log(`[trainers] ${req.method} ${req.originalUrl} - start`);
     const trainers = await prisma.trainer.findMany({
+      include: {
+        user: {
+          select: {
+            role: true,
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
     console.log(`[trainers] ${req.method} ${req.originalUrl} - ok (${trainers.length} results)`);
@@ -26,6 +33,13 @@ export const getTrainerBySlug = async (req, res, next) => {
 
     const trainer = await prisma.trainer.findUnique({
       where: { slug },
+      include: {
+        user: {
+          select: {
+            role: true,
+          },
+        },
+      },
     });
 
     if (!trainer) {

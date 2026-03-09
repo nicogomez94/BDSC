@@ -13,7 +13,7 @@ const router = express.Router();
 
 // Proteger todas las rutas de entrenador
 router.use(authenticate);
-router.use(requireRole('ENTRENADOR'));
+router.use(requireRole('ENTRENADOR', 'PREPARADOR_FISICO'));
 
 router.get('/sections', getTrainerSections);
 router.put('/profile', updateTrainerProfile);

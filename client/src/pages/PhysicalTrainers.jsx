@@ -4,17 +4,16 @@ import './Trainers.css';
 
 const DEFAULT_TRAINER_IMAGE = '/default-trainer.svg';
 
-const Trainers = () => {
-  const [trainers, setTrainers] = useState([]);
+const PhysicalTrainers = () => {
+  const [physicalTrainers, setPhysicalTrainers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    loadTrainers();
+    loadPhysicalTrainers();
   }, []);
 
   useEffect(() => {
-    // Scroll reveal
     const observerOptions = {
       root: null,
       rootMargin: '0px',
@@ -35,12 +34,12 @@ const Trainers = () => {
     return () => {
       cards.forEach((card) => observer.unobserve(card));
     };
-  }, [trainers]);
+  }, [physicalTrainers]);
 
-  const loadTrainers = async () => {
+  const loadPhysicalTrainers = async () => {
     try {
       const data = await api.getTrainers();
-      setTrainers(data.filter((trainer) => (trainer.type || 'ENTRENADOR') === 'ENTRENADOR'));
+      setPhysicalTrainers(data.filter((trainer) => trainer.type === 'PREPARADOR_FISICO'));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -48,27 +47,27 @@ const Trainers = () => {
     }
   };
 
-  if (loading) return <div className="loading">Cargando entrenadores...</div>;
-  if (error) return <div className="error">Error al cargar entrenadores: {error}</div>;
+  if (loading) return <div className="loading">Cargando preparadores físicos...</div>;
+  if (error) return <div className="error">Error al cargar preparadores físicos: {error}</div>;
 
   return (
     <div className="trainers-page">
       <div className="trainers-hero">
-        <h1>Nuestros Entrenadores</h1>
+        <h1>Nuestros Preparadores Físicos</h1>
         <p className="subtitle">
-          Conocé al equipo de profesionales que lidera el hockey en BDSC
+          Conocé al equipo que lidera la preparación física del hockey en BDSC
         </p>
       </div>
 
       <div className="trainers-content">
         <div className="container">
           <div className="trainers-grid">
-            {trainers.map((trainer) => (
+            {physicalTrainers.map((trainer) => (
               <div key={trainer.id} className="trainer-card">
                 <div className="trainer-image">
-                  <img 
+                  <img
                     src={trainer.photoUrl || DEFAULT_TRAINER_IMAGE}
-                    alt={trainer.name} 
+                    alt={trainer.name}
                     onError={(e) => {
                       e.currentTarget.src = DEFAULT_TRAINER_IMAGE;
                     }}
@@ -76,19 +75,15 @@ const Trainers = () => {
                 </div>
                 <div className="trainer-info">
                   <h3>{trainer.name}</h3>
-                  {trainer.specialty && (
-                    <p className="specialty">{trainer.specialty}</p>
-                  )}
-                  {trainer.bio && (
-                    <p className="bio">{trainer.bio}</p>
-                  )}
+                  {trainer.specialty && <p className="specialty">{trainer.specialty}</p>}
+                  {trainer.bio && <p className="bio">{trainer.bio}</p>}
                 </div>
               </div>
             ))}
           </div>
 
-          {trainers.length === 0 && (
-            <p className="no-trainers">No hay entrenadores registrados aún.</p>
+          {physicalTrainers.length === 0 && (
+            <p className="no-trainers">No hay preparadores físicos registrados aún.</p>
           )}
         </div>
       </div>
@@ -96,4 +91,4 @@ const Trainers = () => {
   );
 };
 
-export default Trainers;
+export default PhysicalTrainers;

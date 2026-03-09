@@ -5,12 +5,17 @@ import { validateEmail, validatePassword, validateRequired, generateSlug } from 
 // CRUD Entrenadores
 export const createTrainer = async (req, res, next) => {
   try {
-    const { name, bio, specialty, photoUrl, cvUrl, email, password } = req.body;
+    const { name, type, bio, specialty, photoUrl, cvUrl, email, password } = req.body;
+    const normalizedType = (type || 'ENTRENADOR').toUpperCase();
+    const mappedRole = normalizedType === 'PREPARADOR_FISICO' ? 'PREPARADOR_FISICO' : 'ENTRENADOR';
 
     // Validar campos requeridos
     const errors = validateRequired(['name'], { name });
     if (errors.length > 0) {
       return res.status(400).json({ error: errors.join(', ') });
+    }
+    if (!['ENTRENADOR', 'PREPARADOR_FISICO'].includes(normalizedType)) {
+      return res.status(400).json({ error: 'Tipo de perfil inválido' });
     }
 
     // Validar email y password ANTES de crear el entrenador
@@ -46,6 +51,7 @@ export const createTrainer = async (req, res, next) => {
     const trainer = await prisma.trainer.create({
       data: {
         name,
+        type: normalizedType,
         slug,
         bio,
         specialty,
@@ -62,7 +68,7 @@ export const createTrainer = async (req, res, next) => {
         data: {
           email,
           passwordHash,
-          role: 'ENTRENADOR',
+          role: mappedRole,
           trainerId: trainer.id,
         },
       });
@@ -77,12 +83,20 @@ export const createTrainer = async (req, res, next) => {
 export const updateTrainer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, bio, specialty, photoUrl, cvUrl } = req.body;
+    const { name, type, bio, specialty, photoUrl, cvUrl } = req.body;
+    const trainerId = parseInt(id);
 
     const data = {};
     if (name) {
       data.name = name;
       data.slug = generateSlug(name);
+    }
+    if (type !== undefined) {
+      const normalizedType = type.toUpperCase();
+      if (!['ENTRENADOR', 'PREPARADOR_FISICO'].includes(normalizedType)) {
+        return res.status(400).json({ error: 'Tipo de perfil inválido' });
+      }
+      data.type = normalizedType;
     }
     if (bio !== undefined) data.bio = bio;
     if (specialty !== undefined) data.specialty = specialty;
@@ -90,9 +104,17 @@ export const updateTrainer = async (req, res, next) => {
     if (cvUrl !== undefined) data.cvUrl = cvUrl;
 
     const trainer = await prisma.trainer.update({
-      where: { id: parseInt(id) },
+      where: { id: trainerId },
       data,
     });
+
+    if (type !== undefined) {
+      const mappedRole = trainer.type === 'PREPARADOR_FISICO' ? 'PREPARADOR_FISICO' : 'ENTRENADOR';
+      await prisma.user.updateMany({
+        where: { trainerId },
+        data: { role: mappedRole },
+      });
+    }
 
     res.json(trainer);
   } catch (error) {

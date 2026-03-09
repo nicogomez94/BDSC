@@ -32,7 +32,7 @@ const Login = () => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
-          <h1>Acceso Entrenadores</h1>
+          <h1>Acceso Cuerpo Técnico</h1>
           <p className="subtitle">BDSC Hockey</p>
 
           {error && <div className="error-message">{error}</div>}

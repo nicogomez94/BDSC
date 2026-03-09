@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isCoordinador = user?.role === 'COORDINADOR';
-  const isEntrenador = user?.role === 'ENTRENADOR';
+  const isEntrenador = user?.role === 'ENTRENADOR' || user?.role === 'PREPARADOR_FISICO';
+  const isPreparadorFisico = user?.role === 'PREPARADOR_FISICO';
 
   return (
     <AuthContext.Provider
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user,
         isCoordinador,
         isEntrenador,
+        isPreparadorFisico,
       }}
     >
       {children}

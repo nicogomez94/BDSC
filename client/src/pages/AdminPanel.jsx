@@ -27,9 +27,14 @@ const MONTHS = [
   { value: 10, label: 'Octubre' },
   { value: 11, label: 'Noviembre' },
 ];
-const CREATE_TABS = ['trainers', 'sections', 'divisions', 'players', 'sessions'];
+const TRAINER_TYPE = {
+  ENTRENADOR: 'ENTRENADOR',
+  PREPARADOR_FISICO: 'PREPARADOR_FISICO',
+};
+const CREATE_TABS = ['trainers', 'physicalTrainers', 'sections', 'divisions', 'players', 'sessions'];
 const CREATE_MODAL_COPY = {
   trainers: { title: 'Crear entrenador', button: 'Nuevo entrenador' },
+  physicalTrainers: { title: 'Crear preparador físico', button: 'Nuevo preparador físico' },
   sections: { title: 'Crear sección', button: 'Nueva sección' },
   divisions: { title: 'Crear división', button: 'Nueva división' },
   players: { title: 'Crear jugadora', button: 'Nueva jugadora' },
@@ -37,6 +42,7 @@ const CREATE_MODAL_COPY = {
 };
 const PANEL_TABS = [
   { key: 'trainers', label: 'Entrenadores', icon: faUserTie },
+  { key: 'physicalTrainers', label: 'Preparadores físicos', icon: faUserTie },
   { key: 'sections', label: 'Secciones', icon: faFolderTree },
   { key: 'divisions', label: 'Divisiones', icon: faLayerGroup },
   { key: 'players', label: 'Jugadoras', icon: faPersonDress },
@@ -47,7 +53,16 @@ const PANEL_TABS = [
 
 const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
-const createEmptyTrainerForm = () => ({ name: '', bio: '', specialty: '', photoUrl: '', cvUrl: '', email: '', password: '' });
+const createEmptyTrainerForm = (type = TRAINER_TYPE.ENTRENADOR) => ({
+  name: '',
+  type,
+  bio: '',
+  specialty: '',
+  photoUrl: '',
+  cvUrl: '',
+  email: '',
+  password: '',
+});
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -80,7 +95,7 @@ const AdminPanel = () => {
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
-      ? { ...DEBUG_PREFILL.trainerForm }
+      ? { ...createEmptyTrainerForm(), ...DEBUG_PREFILL.trainerForm }
       : createEmptyTrainerForm()
   );
   const [sectionForm, setSectionForm] = useState(
@@ -95,6 +110,14 @@ const AdminPanel = () => {
     for (const division of divisions) map[division.id] = division;
     return map;
   }, [divisions]);
+  const headCoaches = useMemo(
+    () => trainers.filter((trainer) => (trainer.type || TRAINER_TYPE.ENTRENADOR) === TRAINER_TYPE.ENTRENADOR),
+    [trainers]
+  );
+  const physicalTrainers = useMemo(
+    () => trainers.filter((trainer) => trainer.type === TRAINER_TYPE.PREPARADOR_FISICO),
+    [trainers]
+  );
 
   const withLoad = async (fn) => {
     setLoading(true);
@@ -161,6 +184,7 @@ const AdminPanel = () => {
       if (editingTrainer) {
         await api.admin.updateTrainer(editingTrainer.id, {
           name: trainerForm.name,
+          type: trainerForm.type,
           bio: trainerForm.bio,
           specialty: trainerForm.specialty,
           photoUrl: trainerForm.photoUrl,
@@ -169,7 +193,11 @@ const AdminPanel = () => {
       } else {
         await api.admin.createTrainer(trainerForm);
       }
-      setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
+      setTrainerForm(
+        DEBUG_MODE
+          ? { ...createEmptyTrainerForm(), ...DEBUG_PREFILL.trainerForm }
+          : createEmptyTrainerForm()
+      );
       setEditingTrainer(null);
       setCreateModalTab(null);
       setTrainerCvFileName('');
@@ -325,9 +353,15 @@ const AdminPanel = () => {
     });
   };
   const openCreateModal = () => {
-    if (tab === 'trainers') {
+    if (tab === 'trainers' || tab === 'physicalTrainers') {
+      const isPhysicalTab = tab === 'physicalTrainers';
       setEditingTrainer(null);
-      setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
+      const defaultType = isPhysicalTab ? TRAINER_TYPE.PREPARADOR_FISICO : TRAINER_TYPE.ENTRENADOR;
+      setTrainerForm(
+        DEBUG_MODE
+          ? { ...createEmptyTrainerForm(defaultType), ...DEBUG_PREFILL.trainerForm, type: defaultType }
+          : createEmptyTrainerForm(defaultType)
+      );
       setTrainerModalError('');
       setTrainerCvFileName('');
     }
@@ -345,6 +379,7 @@ const AdminPanel = () => {
     setTrainerCvFileName('');
     setTrainerForm({
       name: trainer.name || '',
+      type: trainer.type || TRAINER_TYPE.ENTRENADOR,
       bio: trainer.bio || '',
       specialty: trainer.specialty || '',
       photoUrl: trainer.photoUrl || '',
@@ -357,7 +392,8 @@ const AdminPanel = () => {
   const canCreateInTab = CREATE_TABS.includes(tab);
 
   const renderCreateModalForm = () => {
-    if (createModalTab === 'trainers') {
+    if (createModalTab === 'trainers' || createModalTab === 'physicalTrainers') {
+      const roleLabel = trainerForm.type === TRAINER_TYPE.PREPARADOR_FISICO ? 'preparador físico' : 'entrenador';
       return (
         <form onSubmit={handleSaveTrainer} className="admin-form">
           {trainerModalError && <div className="error-message">{trainerModalError}</div>}
@@ -415,7 +451,7 @@ const AdminPanel = () => {
               </div>
             </div>
           )}
-          <button type="submit" className="btn-primary">{editingTrainer ? 'Guardar cambios' : 'Crear entrenador'}</button>
+          <button type="submit" className="btn-primary">{editingTrainer ? 'Guardar cambios' : `Crear ${roleLabel}`}</button>
         </form>
       );
     }
@@ -577,7 +613,30 @@ const AdminPanel = () => {
           <div className="tab-content">
             <h2>Entrenadores</h2>
             <div className="data-table">
-              {trainers.map((trainer) => (
+              {headCoaches.map((trainer) => (
+                <div className="data-row" key={trainer.id}>
+                  <div className="data-info">
+                    <h3>{trainer.name}</h3>
+                    <p>{trainer.specialty || 'Sin especialidad'}</p>
+                  </div>
+                  <div className="row-actions">
+                    {trainer.cvUrl && (
+                      <button className="btn-secondary" onClick={() => handleDownloadTrainerCv(trainer)}>Descargar CV</button>
+                    )}
+                    <button className="btn-secondary" onClick={() => openEditTrainerModal(trainer)}>Editar</button>
+                    <button className="btn-danger" onClick={() => handleDeleteTrainer(trainer.id)}>Eliminar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'physicalTrainers' && (
+          <div className="tab-content">
+            <h2>Preparadores físicos</h2>
+            <div className="data-table">
+              {physicalTrainers.map((trainer) => (
                 <div className="data-row" key={trainer.id}>
                   <div className="data-info">
                     <h3>{trainer.name}</h3>
@@ -981,8 +1040,8 @@ const AdminPanel = () => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div className="modal-header-copy">
-                  <h3>{createModalTab === 'trainers' && editingTrainer ? 'Editar entrenador' : CREATE_MODAL_COPY[createModalTab].title}</h3>
-                  <p>{createModalTab === 'trainers' && editingTrainer ? 'Actualizá los datos del entrenador.' : 'Completá los datos para crear un nuevo registro.'}</p>
+                  <h3>{(createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer ? 'Editar perfil técnico' : CREATE_MODAL_COPY[createModalTab].title}</h3>
+                  <p>{(createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer ? 'Actualizá los datos del perfil.' : 'Completá los datos para crear un nuevo registro.'}</p>
                 </div>
                 <button type="button" className="modal-close" onClick={closeCreateModal} aria-label="Cerrar modal">
                   x

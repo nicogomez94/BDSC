@@ -68,6 +68,11 @@ const sectionGroups = [
         icon: faUserTie,
         path: '/coordinacion/gestion-interna/coordinadores',
       },
+      {
+        name: 'Preparadores físicos',
+        icon: faUserTie,
+        path: '/coordinacion/gestion-interna/preparadores-fisicos',
+      },
       { name: 'Árbitros', icon: faGavel },
       { name: 'Fotos', icon: faCamera },
       { name: 'Capacitaciones', icon: faChalkboardUser },

@@ -6,6 +6,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Trainers from './pages/Trainers';
+import PhysicalTrainers from './pages/PhysicalTrainers';
 import Coordinacion from './pages/Coordinacion';
 import Recursos from './pages/Recursos';
 import Contact from './pages/Contact';
@@ -35,6 +36,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/coordinacion" element={<Coordinacion />} />
               <Route path="/coordinacion/gestion-interna/coordinadores" element={<Trainers />} />
+              <Route path="/coordinacion/gestion-interna/preparadores-fisicos" element={<PhysicalTrainers />} />
               <Route path="/recursos" element={<Recursos />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/login" element={<Login />} />
@@ -61,6 +63,10 @@ function App() {
               <Route
                 path="/entrenadores"
                 element={<Navigate to="/coordinacion/gestion-interna/coordinadores" replace />}
+              />
+              <Route
+                path="/preparadores-fisicos"
+                element={<Navigate to="/coordinacion/gestion-interna/preparadores-fisicos" replace />}
               />
               
               <Route path="*" element={<Navigate to="/" />} />

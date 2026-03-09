@@ -22,6 +22,7 @@ const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 
 const TrainerPanel = () => {
   const { user } = useAuth();
+  const panelTitle = user?.role === 'PREPARADOR_FISICO' ? 'Panel de Preparador Físico' : 'Panel de Entrenador';
   const [tab, setTab] = useState('attendance');
   const [sections, setSections] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -126,7 +127,7 @@ const TrainerPanel = () => {
   return (
     <div className="trainer-panel">
       <div className="container">
-        <h1>Panel de Entrenador</h1>
+        <h1>{panelTitle}</h1>
 
         <div className="tabs tabs-wrap">
           <button className={tab === 'attendance' ? 'active' : ''} onClick={() => setTab('attendance')}>Asistencia</button>
