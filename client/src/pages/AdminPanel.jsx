@@ -47,7 +47,7 @@ const PANEL_TABS = [
 
 const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
-const createEmptyTrainerForm = () => ({ name: '', bio: '', specialty: '', photoUrl: '', email: '', password: '' });
+const createEmptyTrainerForm = () => ({ name: '', bio: '', specialty: '', photoUrl: '', cvUrl: '', email: '', password: '' });
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -55,6 +55,10 @@ const fileToDataUrl = (file) =>
     reader.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
     reader.readAsDataURL(file);
   });
+const sanitizeFilename = (value, fallback = 'archivo') => {
+  const normalized = (value || fallback).trim().toLowerCase().replace(/\s+/g, '-');
+  return normalized.replace(/[^a-z0-9-_]/g, '') || fallback;
+};
 
 const AdminPanel = () => {
   const [tab, setTab] = useState('trainers');
@@ -72,6 +76,7 @@ const AdminPanel = () => {
   const [createModalTab, setCreateModalTab] = useState(null);
   const [editingTrainer, setEditingTrainer] = useState(null);
   const [trainerModalError, setTrainerModalError] = useState('');
+  const [trainerCvFileName, setTrainerCvFileName] = useState('');
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
@@ -144,6 +149,7 @@ const AdminPanel = () => {
     setCreateModalTab(null);
     setEditingTrainer(null);
     setTrainerModalError('');
+    setTrainerCvFileName('');
   }, [tab]);
 
   const handleSaveTrainer = async (e) => {
@@ -158,6 +164,7 @@ const AdminPanel = () => {
           bio: trainerForm.bio,
           specialty: trainerForm.specialty,
           photoUrl: trainerForm.photoUrl,
+          cvUrl: trainerForm.cvUrl,
         });
       } else {
         await api.admin.createTrainer(trainerForm);
@@ -165,6 +172,7 @@ const AdminPanel = () => {
       setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
       setEditingTrainer(null);
       setCreateModalTab(null);
+      setTrainerCvFileName('');
       await loadTrainers();
     } catch (err) {
       setTrainerModalError(err.message || 'Error al guardar entrenador');
@@ -184,6 +192,30 @@ const AdminPanel = () => {
       setTrainerModalError(err.message || 'No se pudo cargar la imagen.');
     }
     e.target.value = '';
+  };
+
+  const handleTrainerFormCvUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setTrainerModalError('');
+    try {
+      const cvDataUrl = await fileToDataUrl(file);
+      setTrainerForm((current) => ({ ...current, cvUrl: cvDataUrl }));
+      setTrainerCvFileName(file.name);
+    } catch (err) {
+      setTrainerModalError(err.message || 'No se pudo cargar el CV.');
+    }
+  };
+
+  const handleDownloadTrainerCv = (trainer) => {
+    if (!trainer?.cvUrl) return;
+    const fileName = `${sanitizeFilename(trainer.name || 'trainer')}-cv.pdf`;
+    const anchor = document.createElement('a');
+    anchor.href = trainer.cvUrl;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
   };
 
   const handleDeleteTrainer = async (id) => {
@@ -297,6 +329,7 @@ const AdminPanel = () => {
       setEditingTrainer(null);
       setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
       setTrainerModalError('');
+      setTrainerCvFileName('');
     }
     setCreateModalTab(tab);
   };
@@ -304,15 +337,18 @@ const AdminPanel = () => {
     setCreateModalTab(null);
     setEditingTrainer(null);
     setTrainerModalError('');
+    setTrainerCvFileName('');
   };
   const openEditTrainerModal = (trainer) => {
     setEditingTrainer(trainer);
     setTrainerModalError('');
+    setTrainerCvFileName('');
     setTrainerForm({
       name: trainer.name || '',
       bio: trainer.bio || '',
       specialty: trainer.specialty || '',
       photoUrl: trainer.photoUrl || '',
+      cvUrl: trainer.cvUrl || '',
       email: '',
       password: '',
     });
@@ -351,6 +387,21 @@ const AdminPanel = () => {
           <div className="form-group">
             <label>Foto (subir archivo)</label>
             <input type="file" accept="image/*" onChange={handleTrainerFormImageUpload} />
+          </div>
+          <div className="form-group">
+            <label>CV (subir archivo)</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleTrainerFormCvUpload}
+            />
+            {trainerCvFileName && <p>Archivo seleccionado: {trainerCvFileName}</p>}
+            {!trainerCvFileName && editingTrainer?.cvUrl && <p>CV actual cargado. Si no seleccionás otro archivo, se mantiene este.</p>}
+            {editingTrainer?.cvUrl && (
+              <button type="button" className="btn-secondary" onClick={() => handleDownloadTrainerCv(editingTrainer)}>
+                Descargar CV actual
+              </button>
+            )}
           </div>
           {!editingTrainer && (
             <div className="form-row">
@@ -533,6 +584,9 @@ const AdminPanel = () => {
                     <p>{trainer.specialty || 'Sin especialidad'}</p>
                   </div>
                   <div className="row-actions">
+                    {trainer.cvUrl && (
+                      <button className="btn-secondary" onClick={() => handleDownloadTrainerCv(trainer)}>Descargar CV</button>
+                    )}
                     <button className="btn-secondary" onClick={() => openEditTrainerModal(trainer)}>Editar</button>
                     <button className="btn-danger" onClick={() => handleDeleteTrainer(trainer.id)}>Eliminar</button>
                   </div>

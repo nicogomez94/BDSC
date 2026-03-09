@@ -15,6 +15,7 @@ export const DEBUG_PREFILL = {
     bio: 'Perfil de prueba generado para modo debug.',
     specialty: 'Hockey Juvenil',
     photoUrl: 'https://via.placeholder.com/400x400/1a4d2a/f5f0e8?text=Entrenador',
+    cvUrl: '',
     email: 'entrenador.debug@bdsc.com',
     password: 'trainer123',
   },
@@ -26,6 +27,7 @@ export const DEBUG_PREFILL = {
     bio: 'Bio de prueba para actualizar el perfil.',
     specialty: 'Entrenamiento Tecnico',
     photoUrl: 'https://via.placeholder.com/400x400/1a4d2a/f5f0e8?text=Perfil',
+    cvUrl: '',
     password: 'trainer123',
   },
 };

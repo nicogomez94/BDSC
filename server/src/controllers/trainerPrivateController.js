@@ -31,12 +31,13 @@ export const updateTrainerProfile = async (req, res, next) => {
       return res.status(403).json({ error: 'No tienes un perfil de entrenador asociado' });
     }
 
-    const { bio, specialty, photoUrl, password } = req.body;
+    const { bio, specialty, photoUrl, cvUrl, password } = req.body;
 
     const data = {};
     if (bio !== undefined) data.bio = bio;
     if (specialty !== undefined) data.specialty = specialty;
     if (photoUrl !== undefined) data.photoUrl = photoUrl;
+    if (cvUrl !== undefined) data.cvUrl = cvUrl;
 
     const trainer = await prisma.trainer.update({
       where: { id: req.user.trainerId },

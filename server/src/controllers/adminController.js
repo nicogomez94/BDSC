@@ -5,7 +5,7 @@ import { validateEmail, validatePassword, validateRequired, generateSlug } from 
 // CRUD Entrenadores
 export const createTrainer = async (req, res, next) => {
   try {
-    const { name, bio, specialty, photoUrl, email, password } = req.body;
+    const { name, bio, specialty, photoUrl, cvUrl, email, password } = req.body;
 
     // Validar campos requeridos
     const errors = validateRequired(['name'], { name });
@@ -50,6 +50,7 @@ export const createTrainer = async (req, res, next) => {
         bio,
         specialty,
         photoUrl,
+        cvUrl,
       },
     });
 
@@ -76,7 +77,7 @@ export const createTrainer = async (req, res, next) => {
 export const updateTrainer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, bio, specialty, photoUrl } = req.body;
+    const { name, bio, specialty, photoUrl, cvUrl } = req.body;
 
     const data = {};
     if (name) {
@@ -86,6 +87,7 @@ export const updateTrainer = async (req, res, next) => {
     if (bio !== undefined) data.bio = bio;
     if (specialty !== undefined) data.specialty = specialty;
     if (photoUrl !== undefined) data.photoUrl = photoUrl;
+    if (cvUrl !== undefined) data.cvUrl = cvUrl;
 
     const trainer = await prisma.trainer.update({
       where: { id: parseInt(id) },

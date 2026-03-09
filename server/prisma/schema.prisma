@@ -34,17 +34,18 @@ model User {
 }
 
 model Trainer {
-  id                    Int                    @id @default(autoincrement())
-  name                  String
-  slug                  String                 @unique
-  bio                   String?
-  specialty             String?
-  photoUrl              String?
-  user                  User?
-  sectionAccess         SectionAccess[]
-  divisionAccess        TrainerDivisionAccess[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  id             Int                     @id @default(autoincrement())
+  name           String
+  slug           String                  @unique
+  bio            String?
+  specialty      String?
+  photoUrl       String?
+  cvUrl          String?
+  user           User?
+  sectionAccess  SectionAccess[]
+  divisionAccess TrainerDivisionAccess[]
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
 
   @@map("trainers")
 }
@@ -73,44 +74,44 @@ model SectionAccess {
 }
 
 model Division {
-  id                Int                    @id @default(autoincrement())
-  name              String
-  seasonYear        Int
-  players           Player[]
-  trainingSessions  TrainingSession[]
-  trainerAccess     TrainerDivisionAccess[]
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  id               Int                     @id @default(autoincrement())
+  name             String
+  seasonYear       Int
+  players          Player[]
+  trainingSessions TrainingSession[]
+  trainerAccess    TrainerDivisionAccess[]
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
 
   @@unique([name, seasonYear])
   @@map("divisions")
 }
 
 model Player {
-  id          Int          @id @default(autoincrement())
-  fullName    String
-  birthYear   Int
-  active      Boolean      @default(true)
-  divisionId  Int
-  division    Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
-  attendance  Attendance[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id         Int          @id @default(autoincrement())
+  fullName   String
+  birthYear  Int
+  active     Boolean      @default(true)
+  divisionId Int
+  division   Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  attendance Attendance[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   @@index([divisionId])
   @@map("players")
 }
 
 model TrainingSession {
-  id          Int          @id @default(autoincrement())
-  divisionId  Int
-  division    Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
-  date        DateTime
-  month       Int
-  notes       String?
-  attendance  Attendance[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id         Int          @id @default(autoincrement())
+  divisionId Int
+  division   Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  date       DateTime
+  month      Int
+  notes      String?
+  attendance Attendance[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   @@unique([divisionId, date])
   @@index([divisionId, month])
@@ -137,12 +138,12 @@ model Attendance {
 }
 
 model TrainerDivisionAccess {
-  id         Int       @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   trainerId  Int
   divisionId Int
-  trainer    Trainer   @relation(fields: [trainerId], references: [id], onDelete: Cascade)
-  division   Division  @relation(fields: [divisionId], references: [id], onDelete: Cascade)
-  createdAt  DateTime  @default(now())
+  trainer    Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+  division   Division @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 
   @@unique([trainerId, divisionId])
   @@map("trainer_division_access")
