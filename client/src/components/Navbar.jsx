@@ -6,7 +6,9 @@ import {
   faSignOutAlt,
   faRightToBracket,
   faBars,
-  faTimes
+  faTimes,
+  faChevronRight,
+  faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import './Navbar.css';
 
@@ -15,6 +17,17 @@ const Navbar = () => {
   const panelPath = isAuthenticated && user?.role === 'COORDINADOR' ? '/admin' : '/panel';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [openSections, setOpenSections] = useState({
+    general: false,
+    ps: false,
+    pretemporada: false,
+    ahba: false,
+    herramientas: false,
+    material: false,
+    materialPlanificacion: false,
+    materialGuia: false,
+    archivos: false,
+  });
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -24,6 +37,10 @@ const Navbar = () => {
   const closeMenu = () => {
     setIsMenuOpen(false);
     setOpenDropdown(null);
+  };
+
+  const toggleSection = (key) => {
+    setOpenSections((current) => ({ ...current, [key]: !current[key] }));
   };
 
   const handleDropdownClick = (e, dropdownName) => {
@@ -62,53 +79,145 @@ const Navbar = () => {
           <ul className="navbar-menu">
             <li><Link to="/" onClick={closeMenu}>Inicio</Link></li>
             
-            <li className={`dropdown ${openDropdown === 'coordinacion' ? 'active' : ''}`}>
-              <Link to="/coordinacion" onClick={(e) => handleDropdownClick(e, 'coordinacion')}>Coordinación</Link>
+            <li className={`dropdown ${openDropdown === 'bdsc' ? 'active' : ''}`}>
+              <Link to="/coordinacion" onClick={(e) => handleDropdownClick(e, 'bdsc')}>BDSC</Link>
               <ul className="dropdown-menu">
-                <li className="dropdown-group-title">Operación</li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Planteles</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Asistencia</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Reunión de padres</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Distribución de espacios</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Competencia</li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría E1</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría 4ta B</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Fixture</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de partidos</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de rivales</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Temporada 2026</li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Plan de pretemporada</Link></li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Inicio de actividades</Link></li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Pretemporada de febrero</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Gestión interna</li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Entrenadores</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Árbitros</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Fotos</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Capacitaciones</Link></li>
-              </ul>
-            </li>
-            
-            <li className={`dropdown ${openDropdown === 'recursos' ? 'active' : ''}`}>
-              <Link to="/recursos" onClick={(e) => handleDropdownClick(e, 'recursos')}>Recursos</Link>
-              <ul className="dropdown-menu">
-                <li className="dropdown-group-title">Planificación deportiva</li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Modelo de juego</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Fases de la planificación</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Diagnóstico</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Objetivos</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Entrenamientos</li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Simbología</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de entrenamiento</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de partido</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Guía de gestos técnicos</Link></li>
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('general')}>
+                    <FontAwesomeIcon icon={openSections.general ? faChevronDown : faChevronRight} />
+                    BDSC General 2026
+                  </button>
+                  {openSections.general && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Staff Hockey</Link></li>
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Planteles</Link></li>
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Distribución de los espacios</Link></li>
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Asistencia</Link></li>
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Reunión de padres</Link></li>
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('ps')}>
+                    <FontAwesomeIcon icon={openSections.ps ? faChevronDown : faChevronRight} />
+                    BDSC PS 2026
+                  </button>
+                  {openSections.ps && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>PS - Código de convivencia</Link></li>
+                      <li><Link to="/coordinacion#operacion" onClick={closeMenu}>PS - Tercer estímulo</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#operacion" onClick={closeMenu}>actividades</Link></li>
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('pretemporada')}>
+                    <FontAwesomeIcon icon={openSections.pretemporada ? faChevronDown : faChevronRight} />
+                    Pretemporada 2026
+                  </button>
+                  {openSections.pretemporada && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Plan de pretemporada</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>novena</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>octava</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>etc (hasta cuarta)</Link></li>
+                      <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Inicio de actividades</Link></li>
+                      <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Pretemporada de febrero</Link></li>
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('ahba')}>
+                    <FontAwesomeIcon icon={openSections.ahba ? faChevronDown : faChevronRight} />
+                    AHBA 2026
+                  </button>
+                  {openSections.ahba && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría E1</Link></li>
+                      <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría 4ta B</Link></li>
+                      <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Fixture</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#competencia" onClick={closeMenu}>e1</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#competencia" onClick={closeMenu}>4ta B</Link></li>
+                      <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de partidos amistosos</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#competencia" onClick={closeMenu}>novena</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#competencia" onClick={closeMenu}>octava</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#competencia" onClick={closeMenu}>etc (hasta cuarta)</Link></li>
+                      <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de rivales</Link></li>
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('herramientas')}>
+                    <FontAwesomeIcon icon={openSections.herramientas ? faChevronDown : faChevronRight} />
+                    Herramientas para entrenadores
+                  </button>
+                  {openSections.herramientas && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Simbología</Link></li>
+                      <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de entrenamiento</Link></li>
+                      <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de partido</Link></li>
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('material')}>
+                    <FontAwesomeIcon icon={openSections.material ? faChevronDown : faChevronRight} />
+                    Material para entrenadores
+                  </button>
+                  {openSections.material && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Modelo de Juego</Link></li>
+                      <li>
+                        <button type="button" className="dropdown-section-toggle nested" onClick={() => toggleSection('materialPlanificacion')}>
+                          <FontAwesomeIcon icon={openSections.materialPlanificacion ? faChevronDown : faChevronRight} />
+                          Planificación
+                        </button>
+                      </li>
+                      {openSections.materialPlanificacion && (
+                        <>
+                          <li className="dropdown-subitem"><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Fases de la planificación</Link></li>
+                          <li className="dropdown-subitem"><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Diagnóstico</Link></li>
+                          <li className="dropdown-subitem"><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Objetivos</Link></li>
+                        </>
+                      )}
+                      <li>
+                        <button type="button" className="dropdown-section-toggle nested" onClick={() => toggleSection('materialGuia')}>
+                          <FontAwesomeIcon icon={openSections.materialGuia ? faChevronDown : faChevronRight} />
+                          Guía de gestos técnicos
+                        </button>
+                      </li>
+                      {openSections.materialGuia && (
+                        <>
+                          <li className="dropdown-subitem dropdown-subsubitem"><Link to="/recursos#entrenamientos" onClick={closeMenu}>Empuñaduras</Link></li>
+                          <li className="dropdown-subitem dropdown-subsubitem"><Link to="/recursos#entrenamientos" onClick={closeMenu}>Conducciones</Link></li>
+                          <li className="dropdown-subitem dropdown-subsubitem"><Link to="/recursos#entrenamientos" onClick={closeMenu}>Cómo conducir para tomar buenas decisiones</Link></li>
+                          <li className="dropdown-subitem dropdown-subsubitem"><Link to="/recursos#entrenamientos" onClick={closeMenu}>Posturas</Link></li>
+                        </>
+                      )}
+                    </ul>
+                  )}
+                </li>
+
+                <li className="dropdown-accordion">
+                  <button type="button" className="dropdown-section-toggle" onClick={() => toggleSection('archivos')}>
+                    <FontAwesomeIcon icon={openSections.archivos ? faChevronDown : faChevronRight} />
+                    Archivos de coordinación
+                  </button>
+                  {openSections.archivos && (
+                    <ul className="dropdown-submenu">
+                      <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Árbitros</Link></li>
+                      <li><Link to="/coordinacion/gestion-interna/coordinadores" onClick={closeMenu}>Coordinadores</Link></li>
+                      <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Fotos</Link></li>
+                      <li className="dropdown-subitem"><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>2026</Link></li>
+                      <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Capacitaciones</Link></li>
+                    </ul>
+                  )}
+                </li>
               </ul>
             </li>
             
