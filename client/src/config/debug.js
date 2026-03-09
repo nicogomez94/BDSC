@@ -8,6 +8,7 @@ export const DEBUG_PREFILL = {
   contact: {
     name: 'Juan Perez',
     email: 'juan.perez@email.com',
+    recipient: 'Deportivo',
     message: 'Hola, este es un mensaje de prueba para validar el formulario.',
   },
   trainerForm: {

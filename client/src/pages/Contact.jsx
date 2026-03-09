@@ -11,6 +11,7 @@ import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Contact.css';
 
 const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
+const CONTACT_RECIPIENTS = ['Deportivo', 'Administración'];
 
 const Contact = () => {
   const [formData, setFormData] = useState(
@@ -19,6 +20,7 @@ const Contact = () => {
       : {
           name: '',
           email: '',
+          recipient: '',
           message: ''
         }
   );
@@ -72,8 +74,9 @@ const Contact = () => {
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
+          recipient: formData.recipient,
           message: formData.message,
-          _subject: `Nuevo contacto de ${formData.name}`,
+          _subject: `Nuevo contacto (${formData.recipient}) de ${formData.name}`,
         }),
       });
 
@@ -83,7 +86,7 @@ const Contact = () => {
 
       setSubmitSuccess('Gracias por tu mensaje. Te contactaremos pronto.');
       setFormData(
-        DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', message: '' }
+        DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', recipient: '', message: '' }
       );
     } catch (error) {
       setSubmitError(error.message || 'Ocurrió un error al enviar.');
@@ -163,6 +166,23 @@ const Contact = () => {
                   required 
                   placeholder="tu@email.com"
                 />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="recipient">Dirigido a</label>
+                <select
+                  id="recipient"
+                  value={formData.recipient}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccionar destinatario</option>
+                  {CONTACT_RECIPIENTS.map((recipient) => (
+                    <option key={recipient} value={recipient}>
+                      {recipient}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
