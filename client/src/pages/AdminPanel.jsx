@@ -47,6 +47,14 @@ const PANEL_TABS = [
 
 const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
 const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
+const createEmptyTrainerForm = () => ({ name: '', bio: '', specialty: '', photoUrl: '', email: '', password: '' });
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
+    reader.readAsDataURL(file);
+  });
 
 const AdminPanel = () => {
   const [tab, setTab] = useState('trainers');
@@ -62,11 +70,13 @@ const AdminPanel = () => {
   const [report, setReport] = useState(null);
   const [filters, setFilters] = useState({ divisionId: '', month: '' });
   const [createModalTab, setCreateModalTab] = useState(null);
+  const [editingTrainer, setEditingTrainer] = useState(null);
+  const [trainerModalError, setTrainerModalError] = useState('');
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
       ? { ...DEBUG_PREFILL.trainerForm }
-      : { name: '', bio: '', specialty: '', photoUrl: '', email: '', password: '' }
+      : createEmptyTrainerForm()
   );
   const [sectionForm, setSectionForm] = useState(
     DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' }
@@ -132,16 +142,48 @@ const AdminPanel = () => {
 
   useEffect(() => {
     setCreateModalTab(null);
+    setEditingTrainer(null);
+    setTrainerModalError('');
   }, [tab]);
 
-  const handleCreateTrainer = async (e) => {
+  const handleSaveTrainer = async (e) => {
     e.preventDefault();
-    await withLoad(async () => {
-      await api.admin.createTrainer(trainerForm);
-      setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : { name: '', bio: '', specialty: '', photoUrl: '', email: '', password: '' });
+    setLoading(true);
+    setError('');
+    setTrainerModalError('');
+    try {
+      if (editingTrainer) {
+        await api.admin.updateTrainer(editingTrainer.id, {
+          name: trainerForm.name,
+          bio: trainerForm.bio,
+          specialty: trainerForm.specialty,
+          photoUrl: trainerForm.photoUrl,
+        });
+      } else {
+        await api.admin.createTrainer(trainerForm);
+      }
+      setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
+      setEditingTrainer(null);
       setCreateModalTab(null);
       await loadTrainers();
-    });
+    } catch (err) {
+      setTrainerModalError(err.message || 'Error al guardar entrenador');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTrainerFormImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setTrainerModalError('');
+    try {
+      const imageDataUrl = await fileToDataUrl(file);
+      setTrainerForm((current) => ({ ...current, photoUrl: imageDataUrl }));
+    } catch (err) {
+      setTrainerModalError(err.message || 'No se pudo cargar la imagen.');
+    }
+    e.target.value = '';
   };
 
   const handleDeleteTrainer = async (id) => {
@@ -250,14 +292,39 @@ const AdminPanel = () => {
       URL.revokeObjectURL(url);
     });
   };
-  const openCreateModal = () => setCreateModalTab(tab);
-  const closeCreateModal = () => setCreateModalTab(null);
+  const openCreateModal = () => {
+    if (tab === 'trainers') {
+      setEditingTrainer(null);
+      setTrainerForm(DEBUG_MODE ? { ...DEBUG_PREFILL.trainerForm } : createEmptyTrainerForm());
+      setTrainerModalError('');
+    }
+    setCreateModalTab(tab);
+  };
+  const closeCreateModal = () => {
+    setCreateModalTab(null);
+    setEditingTrainer(null);
+    setTrainerModalError('');
+  };
+  const openEditTrainerModal = (trainer) => {
+    setEditingTrainer(trainer);
+    setTrainerModalError('');
+    setTrainerForm({
+      name: trainer.name || '',
+      bio: trainer.bio || '',
+      specialty: trainer.specialty || '',
+      photoUrl: trainer.photoUrl || '',
+      email: '',
+      password: '',
+    });
+    setCreateModalTab('trainers');
+  };
   const canCreateInTab = CREATE_TABS.includes(tab);
 
   const renderCreateModalForm = () => {
     if (createModalTab === 'trainers') {
       return (
-        <form onSubmit={handleCreateTrainer} className="admin-form">
+        <form onSubmit={handleSaveTrainer} className="admin-form">
+          {trainerModalError && <div className="error-message">{trainerModalError}</div>}
           <div className="form-row">
             <div className="form-group">
               <label>Nombre</label>
@@ -272,17 +339,32 @@ const AdminPanel = () => {
             <label>Biografía</label>
             <textarea value={trainerForm.bio} onChange={(e) => setTrainerForm({ ...trainerForm, bio: e.target.value })} rows="3" />
           </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Email</label>
-              <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
-            </div>
-            <div className="form-group">
-              <label>Contraseña</label>
-              <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
-            </div>
+          <div className="form-group">
+            <label>Foto (URL)</label>
+            <input
+              type="url"
+              value={trainerForm.photoUrl}
+              onChange={(e) => setTrainerForm({ ...trainerForm, photoUrl: e.target.value })}
+              placeholder="https://..."
+            />
           </div>
-          <button type="submit" className="btn-primary">Crear entrenador</button>
+          <div className="form-group">
+            <label>Foto (subir archivo)</label>
+            <input type="file" accept="image/*" onChange={handleTrainerFormImageUpload} />
+          </div>
+          {!editingTrainer && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Email</label>
+                <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label>Contraseña</label>
+                <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
+              </div>
+            </div>
+          )}
+          <button type="submit" className="btn-primary">{editingTrainer ? 'Guardar cambios' : 'Crear entrenador'}</button>
         </form>
       );
     }
@@ -450,7 +532,10 @@ const AdminPanel = () => {
                     <h3>{trainer.name}</h3>
                     <p>{trainer.specialty || 'Sin especialidad'}</p>
                   </div>
-                  <button className="btn-danger" onClick={() => handleDeleteTrainer(trainer.id)}>Eliminar</button>
+                  <div className="row-actions">
+                    <button className="btn-secondary" onClick={() => openEditTrainerModal(trainer)}>Editar</button>
+                    <button className="btn-danger" onClick={() => handleDeleteTrainer(trainer.id)}>Eliminar</button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -842,8 +927,8 @@ const AdminPanel = () => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div className="modal-header-copy">
-                  <h3>{CREATE_MODAL_COPY[createModalTab].title}</h3>
-                  <p>Completá los datos para crear un nuevo registro.</p>
+                  <h3>{createModalTab === 'trainers' && editingTrainer ? 'Editar entrenador' : CREATE_MODAL_COPY[createModalTab].title}</h3>
+                  <p>{createModalTab === 'trainers' && editingTrainer ? 'Actualizá los datos del entrenador.' : 'Completá los datos para crear un nuevo registro.'}</p>
                 </div>
                 <button type="button" className="modal-close" onClick={closeCreateModal} aria-label="Cerrar modal">
                   x
