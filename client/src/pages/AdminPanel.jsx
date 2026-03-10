@@ -14,6 +14,7 @@ import {
 import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import AdminVirtualLibraryTab from '../components/AdminVirtualLibraryTab';
+import AdminSiteContentTab from '../components/AdminSiteContentTab';
 import './AdminPanel.css';
 
 const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE'];
@@ -46,6 +47,7 @@ const PANEL_TABS = [
   { key: 'trainers', label: 'Entrenadores', icon: faUserTie },
   { key: 'physicalTrainers', label: 'Preparadores físicos', icon: faUserTie },
   { key: 'sections', label: 'Secciones', icon: faFolderTree },
+  { key: 'siteContent', label: 'Menú principal', icon: faFolderTree },
   { key: 'virtualLibrary', label: 'Biblioteca virtual', icon: faBookOpen },
   { key: 'divisions', label: 'Divisiones', icon: faLayerGroup },
   { key: 'players', label: 'Jugadoras', icon: faPersonDress },
@@ -84,6 +86,7 @@ const AdminPanel = () => {
   const [error, setError] = useState('');
   const [trainers, setTrainers] = useState([]);
   const [sections, setSections] = useState([]);
+  const [siteContent, setSiteContent] = useState([]);
   const [virtualLibrary, setVirtualLibrary] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [players, setPlayers] = useState([]);
@@ -137,6 +140,7 @@ const AdminPanel = () => {
 
   const loadTrainers = async () => setTrainers(await api.getTrainers());
   const loadSections = async () => setSections(await api.admin.getSections());
+  const loadSiteContent = async () => setSiteContent(await api.admin.getSiteContent());
   const loadVirtualLibrary = async () => setVirtualLibrary(await api.admin.getVirtualLibrary());
   const loadDivisions = async () => setDivisions(await api.admin.getDivisions());
   const loadPlayers = async (divisionId) =>
@@ -166,6 +170,7 @@ const AdminPanel = () => {
       await loadTrainers();
       await loadDivisions();
       if (tab === 'sections') await loadSections();
+      if (tab === 'siteContent') await loadSiteContent();
       if (tab === 'virtualLibrary') await loadVirtualLibrary();
       if (tab === 'players') await loadPlayers(filters.divisionId);
       if (tab === 'sessions') await loadSessions(filters.divisionId, filters.month);
@@ -710,6 +715,10 @@ const AdminPanel = () => {
               ))}
             </div>
           </div>
+        )}
+
+        {tab === 'siteContent' && (
+          <AdminSiteContentTab data={siteContent} onReload={loadSiteContent} withLoad={withLoad} />
         )}
 
         {tab === 'virtualLibrary' && (

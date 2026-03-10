@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "prisma:seed": "node prisma/seed.js",
+    "site-content:bootstrap": "node scripts/bootstrapSiteContent.js",
     "build": "prisma generate"
   },
   "keywords": ["hockey", "bdsc", "coordination"],

@@ -9,7 +9,20 @@ import {
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { api } from '../services/api';
+import { SITE_SECTION_DEFAULTS, SITE_SECTION_KEYS } from '../config/siteContentDefaults';
 import './Navbar.css';
+
+const normalizeSiteMenu = (data, fallback) => (Array.isArray(data) && data.length > 0 ? data : fallback);
+
+const getMenuPagePath = (sectionKey, subdivisionSlug, pageSlug) => {
+  if (sectionKey === SITE_SECTION_KEYS.COORDINACION && subdivisionSlug === 'gestion-interna' && pageSlug === 'entrenadores') {
+    return '/coordinacion/gestion-interna/coordinadores';
+  }
+  if (sectionKey === SITE_SECTION_KEYS.COORDINACION && subdivisionSlug === 'gestion-interna' && pageSlug === 'preparadores-fisicos') {
+    return '/coordinacion/gestion-interna/preparadores-fisicos';
+  }
+  return `/contenido/${String(sectionKey).toLowerCase()}/${subdivisionSlug}/${pageSlug}`;
+};
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -17,20 +30,39 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [libraryMenu, setLibraryMenu] = useState([]);
+  const [coordinacionMenu, setCoordinacionMenu] = useState([]);
+  const [recursosMenu, setRecursosMenu] = useState([]);
 
   useEffect(() => {
     let mounted = true;
 
-    const loadLibrary = async () => {
+    const loadMenus = async () => {
       try {
-        const data = await api.library.getMenu();
-        if (mounted) setLibraryMenu(Array.isArray(data) ? data : []);
+        const [libraryData, coordinacionData, recursosData] = await Promise.all([
+          api.library.getMenu(),
+          api.siteContent.getBySection(SITE_SECTION_KEYS.COORDINACION),
+          api.siteContent.getBySection(SITE_SECTION_KEYS.RECURSOS),
+        ]);
+
+        if (mounted) {
+          setLibraryMenu(Array.isArray(libraryData) ? libraryData : []);
+          setCoordinacionMenu(
+            normalizeSiteMenu(coordinacionData, SITE_SECTION_DEFAULTS[SITE_SECTION_KEYS.COORDINACION])
+          );
+          setRecursosMenu(
+            normalizeSiteMenu(recursosData, SITE_SECTION_DEFAULTS[SITE_SECTION_KEYS.RECURSOS])
+          );
+        }
       } catch (error) {
-        if (mounted) setLibraryMenu([]);
+        if (mounted) {
+          setLibraryMenu([]);
+          setCoordinacionMenu(SITE_SECTION_DEFAULTS[SITE_SECTION_KEYS.COORDINACION]);
+          setRecursosMenu(SITE_SECTION_DEFAULTS[SITE_SECTION_KEYS.RECURSOS]);
+        }
       }
     };
 
-    loadLibrary();
+    loadMenus();
 
     return () => {
       mounted = false;
@@ -95,50 +127,42 @@ const Navbar = () => {
             <li className={`dropdown ${openDropdown === 'coordinacion' ? 'active' : ''}`}>
               <Link to="/coordinacion" onClick={(e) => handleDropdownClick(e, 'coordinacion')}>Coordinación</Link>
               <ul className="dropdown-menu">
-                <li className="dropdown-group-title">Operación</li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Planteles</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Asistencia</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Reunión de padres</Link></li>
-                <li><Link to="/coordinacion#operacion" onClick={closeMenu}>Distribución de espacios</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Competencia</li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría E1</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Categoría 4ta B</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Fixture</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de partidos</Link></li>
-                <li><Link to="/coordinacion#competencia" onClick={closeMenu}>Videos de rivales</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Temporada 2026</li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Plan de pretemporada</Link></li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Inicio de actividades</Link></li>
-                <li><Link to="/coordinacion#temporada-2026" onClick={closeMenu}>Pretemporada de febrero</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Gestión interna</li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Entrenadores</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Árbitros</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Fotos</Link></li>
-                <li><Link to="/coordinacion#gestion-interna" onClick={closeMenu}>Capacitaciones</Link></li>
+                {coordinacionMenu.map((subdivision, subdivisionIndex) => (
+                  <li key={subdivision.id}>
+                    <span className="dropdown-group-title">{subdivision.name}</span>
+                    {(subdivision.pages || []).map((page) => (
+                      <Link
+                        key={page.id}
+                        to={getMenuPagePath(SITE_SECTION_KEYS.COORDINACION, subdivision.slug, page.slug)}
+                        onClick={closeMenu}
+                      >
+                        {page.title}
+                      </Link>
+                    ))}
+                    {subdivisionIndex < coordinacionMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
+                  </li>
+                ))}
               </ul>
             </li>
             
             <li className={`dropdown ${openDropdown === 'recursos' ? 'active' : ''}`}>
               <Link to="/recursos" onClick={(e) => handleDropdownClick(e, 'recursos')}>Recursos</Link>
               <ul className="dropdown-menu">
-                <li className="dropdown-group-title">Planificación deportiva</li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Modelo de juego</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Fases de la planificación</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Diagnóstico</Link></li>
-                <li><Link to="/recursos#planificacion-deportiva" onClick={closeMenu}>Plan de acción - Objetivos</Link></li>
-                
-                <li className="dropdown-divider"></li>
-                <li className="dropdown-group-title">Entrenamientos</li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Simbología</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de entrenamiento</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de partido</Link></li>
-                <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Guía de gestos técnicos</Link></li>
+                {recursosMenu.map((subdivision, subdivisionIndex) => (
+                  <li key={subdivision.id}>
+                    <span className="dropdown-group-title">{subdivision.name}</span>
+                    {(subdivision.pages || []).map((page) => (
+                      <Link
+                        key={page.id}
+                        to={getMenuPagePath(SITE_SECTION_KEYS.RECURSOS, subdivision.slug, page.slug)}
+                        onClick={closeMenu}
+                      >
+                        {page.title}
+                      </Link>
+                    ))}
+                    {subdivisionIndex < recursosMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
+                  </li>
+                ))}
               </ul>
             </li>
 

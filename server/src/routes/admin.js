@@ -45,6 +45,15 @@ import {
   updateVirtualLibrarySection,
   updateVirtualLibraryVideo,
 } from '../controllers/adminVirtualLibraryController.js';
+import {
+  createSitePage,
+  createSiteSubdivision,
+  deleteSitePage,
+  deleteSiteSubdivision,
+  getSiteContentAdminData,
+  updateSitePage,
+  updateSiteSubdivision,
+} from '../controllers/adminSiteContentController.js';
 
 const router = express.Router();
 
@@ -108,5 +117,14 @@ router.delete('/virtual-library/categories/:id', deleteVirtualLibraryCategory);
 router.post('/virtual-library/videos', createVirtualLibraryVideo);
 router.put('/virtual-library/videos/:id', updateVirtualLibraryVideo);
 router.delete('/virtual-library/videos/:id', deleteVirtualLibraryVideo);
+
+// Contenido menú principal (Coordinación/Recursos)
+router.get('/site-content', getSiteContentAdminData);
+router.post('/site-content/subdivisions', createSiteSubdivision);
+router.put('/site-content/subdivisions/:id', updateSiteSubdivision);
+router.delete('/site-content/subdivisions/:id', deleteSiteSubdivision);
+router.post('/site-content/pages', createSitePage);
+router.put('/site-content/pages/:id', updateSitePage);
+router.delete('/site-content/pages/:id', deleteSitePage);
 
 export default router;

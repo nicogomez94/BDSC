@@ -6,6 +6,7 @@ import trainerRoutes from './routes/trainers.js';
 import adminRoutes from './routes/admin.js';
 import trainerPrivateRoutes from './routes/trainer.js';
 import virtualLibraryRoutes from './routes/virtualLibrary.js';
+import siteContentRoutes from './routes/siteContent.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -57,6 +58,7 @@ app.use('/api/trainers', trainerRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/trainer', trainerPrivateRoutes);
 app.use('/api/library', virtualLibraryRoutes);
+app.use('/api/site-content', siteContentRoutes);
 
 // Manejo de errores
 app.use(errorHandler);

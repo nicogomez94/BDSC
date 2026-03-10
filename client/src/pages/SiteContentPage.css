@@ -1,0 +1,76 @@
+.site-content-page {
+  min-height: 70vh;
+}
+
+.site-content-hero {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #164b45 100%);
+  color: var(--white);
+  padding: 56px 0 30px;
+}
+
+.site-content-hero h1 {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+
+.site-content-hero p {
+  color: var(--cream);
+}
+
+.site-content-body {
+  padding: 30px 20px 60px;
+}
+
+.site-content-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+}
+
+.site-content-breadcrumb {
+  font-weight: 600;
+  color: var(--secondary-color);
+  margin-bottom: 10px;
+}
+
+.site-content-summary {
+  color: var(--text-light);
+  margin-bottom: 18px;
+}
+
+.site-content-text {
+  color: var(--text-dark);
+  line-height: 1.7;
+}
+
+.site-content-links {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.site-content-links a {
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  text-decoration: none;
+  padding: 8px 12px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.site-content-links a.active {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}
+
+.site-content-back {
+  margin-top: 24px;
+  display: inline-block;
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 600;
+}

@@ -75,6 +75,24 @@ export const api = {
     },
   },
 
+  siteContent: {
+    getBySection: async (sectionKey) => {
+      return requestJson(
+        `${API_URL}/site-content/${sectionKey}`,
+        {},
+        'Error al obtener contenido de sección'
+      );
+    },
+
+    getPage: async (sectionKey, subdivisionSlug, pageSlug) => {
+      return requestJson(
+        `${API_URL}/site-content/${sectionKey}/${subdivisionSlug}/${pageSlug}`,
+        {},
+        'Error al obtener página'
+      );
+    },
+  },
+
   login: async (email, password) => {
     return requestJson(
       `${API_URL}/auth/login`,
@@ -615,6 +633,98 @@ export const api = {
           headers: getAuthHeader(),
         },
         'Error al eliminar video'
+      );
+    },
+
+    getSiteContent: async () => {
+      return requestJson(
+        `${API_URL}/admin/site-content`,
+        {
+          headers: getAuthHeader(),
+        },
+        'Error al obtener contenido del menú principal'
+      );
+    },
+
+    createSiteSubdivision: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subdivisions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear subdivisión'
+      );
+    },
+
+    updateSiteSubdivision: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subdivisions/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar subdivisión'
+      );
+    },
+
+    deleteSiteSubdivision: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subdivisions/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar subdivisión'
+      );
+    },
+
+    createSitePage: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/pages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear página'
+      );
+    },
+
+    updateSitePage: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/pages/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar página'
+      );
+    },
+
+    deleteSitePage: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/pages/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar página'
       );
     },
   },

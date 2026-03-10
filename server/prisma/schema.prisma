@@ -25,6 +25,11 @@ enum AttendanceStatus {
   TARDE
 }
 
+enum SiteSectionKey {
+  COORDINACION
+  RECURSOS
+}
+
 model User {
   id                 Int          @id @default(autoincrement())
   email              String       @unique
@@ -194,4 +199,35 @@ model VirtualLibraryVideo {
   updatedAt  DateTime               @updatedAt
 
   @@map("virtual_library_videos")
+}
+
+model SiteSubdivision {
+  id         Int             @id @default(autoincrement())
+  sectionKey SiteSectionKey
+  name       String
+  slug       String
+  description String?
+  sortOrder  Int             @default(0)
+  pages      SitePage[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([sectionKey, slug])
+  @@map("site_subdivisions")
+}
+
+model SitePage {
+  id            Int            @id @default(autoincrement())
+  subdivisionId Int
+  title         String
+  slug          String
+  summary       String?
+  content       String?
+  sortOrder     Int            @default(0)
+  subdivision   SiteSubdivision @relation(fields: [subdivisionId], references: [id], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([subdivisionId, slug])
+  @@map("site_pages")
 }
