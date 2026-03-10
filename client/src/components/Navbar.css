@@ -187,6 +187,17 @@
   padding-left: 24px;
 }
 
+.dropdown-empty {
+  display: block;
+  padding: 10px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+}
+
+.dropdown-divider-inline {
+  display: block;
+}
+
 /* Group titles in dropdown */
 .dropdown-group-title {
     display: block;

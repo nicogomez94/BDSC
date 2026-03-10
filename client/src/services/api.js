@@ -61,6 +61,20 @@ const requestJson = async (url, options = {}, fallbackMessage = 'Error en la sol
 };
 
 export const api = {
+  library: {
+    getMenu: async () => {
+      return requestJson(`${API_URL}/library/menu`, {}, 'Error al obtener biblioteca virtual');
+    },
+
+    getCategoryPage: async (sectionSlug, categorySlug) => {
+      return requestJson(
+        `${API_URL}/library/${sectionSlug}/${categorySlug}`,
+        {},
+        'Error al obtener videos de biblioteca virtual'
+      );
+    },
+  },
+
   login: async (email, password) => {
     return requestJson(
       `${API_URL}/auth/login`,
@@ -468,6 +482,139 @@ export const api = {
           body: JSON.stringify(data),
         },
         'Error al importar asistencia'
+      );
+    },
+
+    getVirtualLibrary: async () => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library`,
+        {
+          headers: getAuthHeader(),
+        },
+        'Error al obtener biblioteca virtual'
+      );
+    },
+
+    createVirtualLibrarySection: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/sections`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear subdivisión'
+      );
+    },
+
+    updateVirtualLibrarySection: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/sections/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar subdivisión'
+      );
+    },
+
+    deleteVirtualLibrarySection: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/sections/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar subdivisión'
+      );
+    },
+
+    createVirtualLibraryCategory: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/categories`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear categoría'
+      );
+    },
+
+    updateVirtualLibraryCategory: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/categories/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar categoría'
+      );
+    },
+
+    deleteVirtualLibraryCategory: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/categories/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar categoría'
+      );
+    },
+
+    createVirtualLibraryVideo: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/videos`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear video'
+      );
+    },
+
+    updateVirtualLibraryVideo: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/videos/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar video'
+      );
+    },
+
+    deleteVirtualLibraryVideo: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/virtual-library/videos/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar video'
       );
     },
   },

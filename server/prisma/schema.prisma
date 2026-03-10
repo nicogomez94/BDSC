@@ -155,3 +155,43 @@ model TrainerDivisionAccess {
   @@unique([trainerId, divisionId])
   @@map("trainer_division_access")
 }
+
+model VirtualLibrarySection {
+  id         Int                      @id @default(autoincrement())
+  name       String
+  slug       String                   @unique
+  sortOrder  Int                      @default(0)
+  categories VirtualLibraryCategory[]
+  createdAt  DateTime                 @default(now())
+  updatedAt  DateTime                 @updatedAt
+
+  @@map("virtual_library_sections")
+}
+
+model VirtualLibraryCategory {
+  id         Int                 @id @default(autoincrement())
+  sectionId  Int
+  name       String
+  slug       String
+  sortOrder  Int                 @default(0)
+  section    VirtualLibrarySection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  videos     VirtualLibraryVideo[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  @@unique([sectionId, slug])
+  @@map("virtual_library_categories")
+}
+
+model VirtualLibraryVideo {
+  id         Int                    @id @default(autoincrement())
+  categoryId Int
+  title      String
+  url        String
+  sortOrder  Int                    @default(0)
+  category   VirtualLibraryCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@map("virtual_library_videos")
+}

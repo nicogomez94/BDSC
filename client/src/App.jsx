@@ -13,6 +13,7 @@ import Contact from './pages/Contact';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import TrainerPanel from './pages/TrainerPanel';
+import VirtualLibraryCategory from './pages/VirtualLibraryCategory';
 import './styles/global.css';
 
 const Panel = () => {
@@ -38,6 +39,7 @@ function App() {
               <Route path="/coordinacion/gestion-interna/coordinadores" element={<Trainers />} />
               <Route path="/coordinacion/gestion-interna/preparadores-fisicos" element={<PhysicalTrainers />} />
               <Route path="/recursos" element={<Recursos />} />
+              <Route path="/biblioteca-virtual/:sectionSlug/:categorySlug" element={<VirtualLibraryCategory />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               

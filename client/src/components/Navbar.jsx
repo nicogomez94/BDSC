@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -8,6 +8,7 @@ import {
   faBars,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
+import { api } from '../services/api';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -15,6 +16,35 @@ const Navbar = () => {
   const panelPath = isAuthenticated && user?.role === 'COORDINADOR' ? '/admin' : '/panel';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [libraryMenu, setLibraryMenu] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadLibrary = async () => {
+      try {
+        const data = await api.library.getMenu();
+        if (mounted) setLibraryMenu(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (mounted) setLibraryMenu([]);
+      }
+    };
+
+    loadLibrary();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const defaultLibraryPath = useMemo(() => {
+    for (const section of libraryMenu) {
+      if (section.categories?.length > 0) {
+        return `/biblioteca-virtual/${section.slug}/${section.categories[0].slug}`;
+      }
+    }
+    return '/';
+  }, [libraryMenu]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -109,6 +139,30 @@ const Navbar = () => {
                 <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de entrenamiento</Link></li>
                 <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Planilla de partido</Link></li>
                 <li><Link to="/recursos#entrenamientos" onClick={closeMenu}>Guía de gestos técnicos</Link></li>
+              </ul>
+            </li>
+
+            <li className={`dropdown ${openDropdown === 'biblioteca-virtual' ? 'active' : ''}`}>
+              <Link to={defaultLibraryPath} onClick={(e) => handleDropdownClick(e, 'biblioteca-virtual')}>
+                Biblioteca virtual
+              </Link>
+              <ul className="dropdown-menu">
+                {libraryMenu.length === 0 && <li><span className="dropdown-empty">Sin contenido aún</span></li>}
+                {libraryMenu.map((section, sectionIndex) => (
+                  <li key={section.id}>
+                    <span className="dropdown-group-title">{section.name}</span>
+                    {section.categories?.map((category) => (
+                      <Link
+                        key={category.id}
+                        to={`/biblioteca-virtual/${section.slug}/${category.slug}`}
+                        onClick={closeMenu}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                    {sectionIndex < libraryMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
+                  </li>
+                ))}
               </ul>
             </li>
             

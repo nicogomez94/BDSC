@@ -33,6 +33,18 @@ import {
   exportAttendanceHandler,
   importInitialAttendanceHandler,
 } from '../controllers/adminAttendanceController.js';
+import {
+  createVirtualLibraryCategory,
+  createVirtualLibrarySection,
+  createVirtualLibraryVideo,
+  deleteVirtualLibraryCategory,
+  deleteVirtualLibrarySection,
+  deleteVirtualLibraryVideo,
+  getVirtualLibraryAdminData,
+  updateVirtualLibraryCategory,
+  updateVirtualLibrarySection,
+  updateVirtualLibraryVideo,
+} from '../controllers/adminVirtualLibraryController.js';
 
 const router = express.Router();
 
@@ -84,5 +96,17 @@ router.post('/attendance/import', importInitialAttendanceHandler);
 // Accesos de entrenadores por división
 router.post('/trainer-division-access', grantTrainerDivisionAccessHandler);
 router.delete('/trainer-division-access/:id', revokeTrainerDivisionAccessHandler);
+
+// Biblioteca virtual
+router.get('/virtual-library', getVirtualLibraryAdminData);
+router.post('/virtual-library/sections', createVirtualLibrarySection);
+router.put('/virtual-library/sections/:id', updateVirtualLibrarySection);
+router.delete('/virtual-library/sections/:id', deleteVirtualLibrarySection);
+router.post('/virtual-library/categories', createVirtualLibraryCategory);
+router.put('/virtual-library/categories/:id', updateVirtualLibraryCategory);
+router.delete('/virtual-library/categories/:id', deleteVirtualLibraryCategory);
+router.post('/virtual-library/videos', createVirtualLibraryVideo);
+router.put('/virtual-library/videos/:id', updateVirtualLibraryVideo);
+router.delete('/virtual-library/videos/:id', deleteVirtualLibraryVideo);
 
 export default router;

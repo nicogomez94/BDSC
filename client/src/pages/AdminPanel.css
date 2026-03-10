@@ -102,6 +102,55 @@
   gap: 20px;
 }
 
+.virtual-library-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.virtual-library-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.virtual-library-category-item {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px;
+  background: #fcfbf8;
+}
+
+.virtual-library-category-item h4 {
+  color: var(--primary-color);
+  font-size: 18px;
+}
+
+.virtual-library-videos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.virtual-library-videos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.virtual-library-videos li a {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
 .section-card {
   background-color: var(--white);
   padding: 25px;
