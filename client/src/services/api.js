@@ -91,6 +91,22 @@ export const api = {
         'Error al obtener página'
       );
     },
+
+    getAttendanceDivisions: async (filters = {}) => {
+      return requestJson(
+        `${API_URL}/site-content/attendance/divisions/list${buildQueryString(filters)}`,
+        {},
+        'Error al obtener divisiones de asistencia'
+      );
+    },
+
+    getAttendanceMatrix: async (filters = {}) => {
+      return requestJson(
+        `${API_URL}/site-content/attendance/matrix/list${buildQueryString(filters)}`,
+        {},
+        'Error al obtener planilla de asistencia'
+      );
+    },
   },
 
   login: async (email, password) => {

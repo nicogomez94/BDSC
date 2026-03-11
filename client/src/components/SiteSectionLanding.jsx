@@ -11,6 +11,9 @@ const getPagePath = (sectionKey, subdivisionSlug, pageSlug) => {
   if (sectionKey === 'COORDINACION' && subdivisionSlug === 'gestion-interna' && pageSlug === 'preparadores-fisicos') {
     return '/coordinacion/gestion-interna/preparadores-fisicos';
   }
+  if (sectionKey === 'COORDINACION' && subdivisionSlug === 'operacion' && pageSlug === 'asistencia') {
+    return '/coordinacion/operacion/asistencia';
+  }
 
   return `/contenido/${toSectionPath(sectionKey)}/${subdivisionSlug}/${pageSlug}`;
 };

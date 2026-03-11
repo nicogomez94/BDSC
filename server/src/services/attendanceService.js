@@ -572,7 +572,9 @@ export const getDivisionAttendanceMatrix = async (divisionIdValue, query = {}, u
   const month = parseIntField(query.month, 'month', { required: false, min: MIN_SEASON_MONTH, max: MAX_SEASON_MONTH });
   const active = parseBooleanField(query.active, 'active', { required: false });
 
-  await assertDivisionAccess(user, divisionId);
+  if (user) {
+    await assertDivisionAccess(user, divisionId);
+  }
 
   const division = await prisma.division.findUnique({
     where: { id: divisionId },

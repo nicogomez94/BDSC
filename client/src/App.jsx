@@ -15,6 +15,7 @@ import AdminPanel from './pages/AdminPanel';
 import TrainerPanel from './pages/TrainerPanel';
 import VirtualLibraryCategory from './pages/VirtualLibraryCategory';
 import SiteContentPage from './pages/SiteContentPage';
+import AttendanceSystemPage from './pages/AttendanceSystemPage';
 import './styles/global.css';
 
 const Panel = () => {
@@ -37,9 +38,17 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/coordinacion" element={<Coordinacion />} />
+              <Route
+                path="/coordinacion/operacion/asistencia"
+                element={<AttendanceSystemPage />}
+              />
               <Route path="/coordinacion/gestion-interna/coordinadores" element={<Trainers />} />
               <Route path="/coordinacion/gestion-interna/preparadores-fisicos" element={<PhysicalTrainers />} />
               <Route path="/recursos" element={<Recursos />} />
+              <Route
+                path="/contenido/coordinacion/operacion/asistencia"
+                element={<Navigate to="/coordinacion/operacion/asistencia" replace />}
+              />
               <Route path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug" element={<SiteContentPage />} />
               <Route path="/biblioteca-virtual/:sectionSlug/:categorySlug" element={<VirtualLibraryCategory />} />
               <Route path="/contacto" element={<Contact />} />

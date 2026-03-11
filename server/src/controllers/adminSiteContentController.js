@@ -9,6 +9,7 @@ const SYSTEM_SUBDIVISION_LOCK_ERROR = 'Subdivisión con páginas de sistema no e
 const PROTECTED_SYSTEM_PAGES = [
   { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'entrenadores' },
   { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'preparadores-fisicos' },
+  { sectionKey: 'COORDINACION', subdivisionSlug: 'operacion', pageSlug: 'asistencia' },
 ];
 
 const parseSortOrder = (value) => {

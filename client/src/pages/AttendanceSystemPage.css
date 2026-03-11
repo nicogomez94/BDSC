@@ -1,0 +1,24 @@
+.attendance-system-page {
+  min-height: 70vh;
+}
+
+.attendance-system-page .tab-content {
+  margin-top: 0;
+}
+
+.attendance-system-page .attendance-readonly-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 122px;
+  min-height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  background: #f9f9f9;
+  font-size: 12px;
+}
+
+.attendance-empty {
+  margin-top: 12px;
+}

@@ -1,5 +1,6 @@
 import prisma from '../utils/prisma.js';
 import { sanitizeSitePageContent } from '../utils/siteContentHtml.js';
+import { listDivisions, getDivisionAttendanceMatrix } from '../services/attendanceService.js';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
 
@@ -77,6 +78,29 @@ export const getSitePage = async (req, res, next) => {
       page: normalizedPage,
       pages: normalizedPages,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicAttendanceDivisions = async (req, res, next) => {
+  try {
+    const divisions = await listDivisions(req.query);
+    res.json(divisions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicAttendanceMatrix = async (req, res, next) => {
+  try {
+    const divisionId = req.query.divisionId;
+    if (!divisionId) {
+      return res.status(400).json({ error: 'divisionId es requerido' });
+    }
+
+    const matrix = await getDivisionAttendanceMatrix(divisionId, req.query, null);
+    res.json(matrix);
   } catch (error) {
     next(error);
   }

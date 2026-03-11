@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../services/api';
+import AttendanceSystemPage from './AttendanceSystemPage';
 import './SiteContentPage.css';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
 const sectionLabel = (sectionKey) => (sectionKey === 'RECURSOS' ? 'Recursos' : 'Coordinación');
+const getPagePath = (sectionKey, subdivisionSlug, pageSlug) => {
+  if (sectionKey === 'COORDINACION' && subdivisionSlug === 'gestion-interna' && pageSlug === 'entrenadores') {
+    return '/coordinacion/gestion-interna/coordinadores';
+  }
+  if (sectionKey === 'COORDINACION' && subdivisionSlug === 'gestion-interna' && pageSlug === 'preparadores-fisicos') {
+    return '/coordinacion/gestion-interna/preparadores-fisicos';
+  }
+  if (sectionKey === 'COORDINACION' && subdivisionSlug === 'operacion' && pageSlug === 'asistencia') {
+    return '/coordinacion/operacion/asistencia';
+  }
+  return `/contenido/${sectionKey.toLowerCase()}/${subdivisionSlug}/${pageSlug}`;
+};
 
 const SiteContentPage = () => {
   const { sectionKeySlug, subdivisionSlug, pageSlug } = useParams();
   const sectionKey = normalizeSectionKey(sectionKeySlug);
+  const isAttendanceSystemPage =
+    sectionKey === 'COORDINACION' && subdivisionSlug === 'operacion' && pageSlug === 'asistencia';
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pageData, setPageData] = useState(null);
+
+  if (isAttendanceSystemPage) {
+    return <AttendanceSystemPage />;
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -69,7 +88,7 @@ const SiteContentPage = () => {
                 {pageData.pages.map((page) => (
                   <Link
                     key={page.id}
-                    to={`/contenido/${sectionKey.toLowerCase()}/${pageData.subdivision.slug}/${page.slug}`}
+                    to={getPagePath(sectionKey, pageData.subdivision.slug, page.slug)}
                     className={page.slug === pageData.page.slug ? 'active' : ''}
                   >
                     {page.title}
