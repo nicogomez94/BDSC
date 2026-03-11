@@ -83,8 +83,38 @@ export const createTrainer = async (req, res, next) => {
 export const updateTrainer = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, type, bio, specialty, photoUrl, cvUrl } = req.body;
+    const { name, type, bio, specialty, photoUrl, cvUrl, email, password } = req.body;
     const trainerId = parseInt(id);
+    const emailInput = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const hasEmailInput = emailInput.length > 0;
+    const hasPasswordInput = typeof password === 'string' && password.length > 0;
+
+    const existingTrainer = await prisma.trainer.findUnique({
+      where: { id: trainerId },
+      include: { user: true },
+    });
+
+    if (!existingTrainer) {
+      return res.status(404).json({ error: 'Entrenador no encontrado' });
+    }
+
+    if (hasEmailInput && !validateEmail(emailInput)) {
+      return res.status(400).json({ error: 'Email inválido' });
+    }
+    if (hasPasswordInput && !validatePassword(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres' });
+    }
+    if (hasEmailInput) {
+      const emailOwner = await prisma.user.findUnique({
+        where: { email: emailInput },
+      });
+      if (emailOwner && emailOwner.trainerId !== trainerId) {
+        return res.status(409).json({ error: 'El email ya está en uso' });
+      }
+    }
+    if (!existingTrainer.user && ((hasEmailInput && !hasPasswordInput) || (!hasEmailInput && hasPasswordInput))) {
+      return res.status(400).json({ error: 'Para crear credenciales nuevas debés completar email y contraseña' });
+    }
 
     const data = {};
     if (name) {
@@ -108,11 +138,27 @@ export const updateTrainer = async (req, res, next) => {
       data,
     });
 
-    if (type !== undefined) {
-      const mappedRole = trainer.type === 'PREPARADOR_FISICO' ? 'PREPARADOR_FISICO' : 'ENTRENADOR';
-      await prisma.user.updateMany({
-        where: { trainerId },
-        data: { role: mappedRole },
+    const mappedRole = trainer.type === 'PREPARADOR_FISICO' ? 'PREPARADOR_FISICO' : 'ENTRENADOR';
+    if (existingTrainer.user) {
+      const userData = {};
+      if (type !== undefined) userData.role = mappedRole;
+      if (hasEmailInput) userData.email = emailInput;
+      if (hasPasswordInput) userData.passwordHash = await bcrypt.hash(password, 10);
+
+      if (Object.keys(userData).length > 0) {
+        await prisma.user.update({
+          where: { id: existingTrainer.user.id },
+          data: userData,
+        });
+      }
+    } else if (hasEmailInput && hasPasswordInput) {
+      await prisma.user.create({
+        data: {
+          email: emailInput,
+          passwordHash: await bcrypt.hash(password, 10),
+          role: mappedRole,
+          trainerId,
+        },
       });
     }
 

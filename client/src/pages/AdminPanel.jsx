@@ -208,6 +208,8 @@ const AdminPanel = () => {
           specialty: trainerForm.specialty,
           photoUrl: trainerForm.photoUrl,
           cvUrl: trainerForm.cvUrl,
+          email: trainerForm.email,
+          password: trainerForm.password,
         });
       } else {
         await api.admin.createTrainer(trainerForm);
@@ -570,18 +572,16 @@ const AdminPanel = () => {
               </button>
             )}
           </div>
-          {!editingTrainer && (
-            <div className="form-row">
-              <div className="form-group">
-                <label>Email</label>
-                <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
-              </div>
-              <div className="form-group">
-                <label>Contraseña</label>
-                <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
-              </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>{editingTrainer ? 'Email (opcional para cambiar)' : 'Email'}</label>
+              <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
             </div>
-          )}
+            <div className="form-group">
+              <label>{editingTrainer ? 'Contraseña nueva (opcional)' : 'Contraseña'}</label>
+              <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
+            </div>
+          </div>
           <button type="submit" className="btn-primary">{editingTrainer ? 'Guardar cambios' : `Crear ${roleLabel}`}</button>
         </form>
       );

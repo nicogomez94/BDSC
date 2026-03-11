@@ -17,17 +17,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsPath = path.resolve(__dirname, '..', 'uploads');
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Middleware
 const normalizeOrigin = (origin) => origin?.replace(/\/+$/, '');
 
-const allowedOrigins = process.env.NODE_ENV === 'production'
-  ? (process.env.FRONTEND_URL || '')
-      .split(',')
-      .map((origin) => origin.trim())
-      .filter(Boolean)
-      .map(normalizeOrigin)
-  : ['http://localhost:5173'];
+const allowedOrigins = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+  .map(normalizeOrigin);
+
+const isLocalDevOrigin = (origin) => {
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  } catch {
+    return false;
+  }
+};
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -36,6 +44,10 @@ const corsOptions = {
 
     const normalizedOrigin = normalizeOrigin(origin);
     if (allowedOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    if (!isProduction && isLocalDevOrigin(normalizedOrigin)) {
       return callback(null, true);
     }
 
