@@ -5,7 +5,7 @@ const emptySectionForm = { name: '', sortOrder: 0 };
 const emptyCategoryForm = { sectionId: '', name: '', sortOrder: 0 };
 const emptyVideoForm = { categoryId: '', title: '', url: '', sortOrder: 0 };
 
-const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
+const AdminVirtualLibraryTab = ({ sections, onReload, withLoad, onNotifySuccess }) => {
   const [sectionForm, setSectionForm] = useState(emptySectionForm);
   const [categoryForm, setCategoryForm] = useState(emptyCategoryForm);
   const [videoForm, setVideoForm] = useState(emptyVideoForm);
@@ -72,6 +72,7 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
   const handleSubmitSection = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingSection);
       if (editingSection) {
         await api.admin.updateVirtualLibrarySection(editingSection.id, {
           name: sectionForm.name,
@@ -83,12 +84,14 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
       setSectionForm(emptySectionForm);
       closeModal();
       await onReload();
+      onNotifySuccess?.(isEditing ? 'Subdivisión actualizada correctamente.' : 'Subdivisión creada correctamente.');
     });
   };
 
   const handleSubmitCategory = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingCategory);
       if (editingCategory) {
         await api.admin.updateVirtualLibraryCategory(editingCategory.id, {
           name: categoryForm.name,
@@ -103,12 +106,14 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
       setCategoryForm(emptyCategoryForm);
       closeModal();
       await onReload();
+      onNotifySuccess?.(isEditing ? 'Categoría actualizada correctamente.' : 'Categoría creada correctamente.');
     });
   };
 
   const handleSubmitVideo = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingVideo);
       if (editingVideo) {
         await api.admin.updateVirtualLibraryVideo(editingVideo.id, {
           title: videoForm.title,
@@ -124,6 +129,7 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
       setVideoForm(emptyVideoForm);
       closeModal();
       await onReload();
+      onNotifySuccess?.(isEditing ? 'Video actualizado correctamente.' : 'Video creado correctamente.');
     });
   };
 

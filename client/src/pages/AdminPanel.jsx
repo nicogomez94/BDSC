@@ -102,6 +102,7 @@ const AdminPanel = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [trainerModalError, setTrainerModalError] = useState('');
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
@@ -197,8 +198,9 @@ const AdminPanel = () => {
     setLoading(true);
     setError('');
     setTrainerModalError('');
+    const isEditing = Boolean(editingTrainer);
     try {
-      if (editingTrainer) {
+      if (isEditing) {
         await api.admin.updateTrainer(editingTrainer.id, {
           name: trainerForm.name,
           type: trainerForm.type,
@@ -219,11 +221,22 @@ const AdminPanel = () => {
       setCreateModalTab(null);
       setTrainerCvFileName('');
       await loadTrainers();
+      showSuccessMessage(isEditing ? 'Entrenador actualizado correctamente.' : 'Entrenador creado correctamente.');
     } catch (err) {
       setTrainerModalError(err.message || 'Error al guardar entrenador');
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!successMessage) return undefined;
+    const timeoutId = setTimeout(() => setSuccessMessage(''), 3000);
+    return () => clearTimeout(timeoutId);
+  }, [successMessage]);
+
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
   };
 
   const handleTrainerFormImageUpload = async (e) => {
@@ -278,6 +291,7 @@ const AdminPanel = () => {
       setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
       setCreateModalTab(null);
       await loadSections();
+      showSuccessMessage('Sección creada correctamente.');
     });
   };
 
@@ -292,7 +306,8 @@ const AdminPanel = () => {
   const handleSaveDivision = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      if (editingDivision) {
+      const isEditing = Boolean(editingDivision);
+      if (isEditing) {
         await api.admin.updateDivision(editingDivision.id, {
           name: divisionForm.name,
           seasonYear: Number(divisionForm.seasonYear),
@@ -304,19 +319,21 @@ const AdminPanel = () => {
       setEditingDivision(null);
       setCreateModalTab(null);
       await loadDivisions();
+      showSuccessMessage(isEditing ? 'División actualizada correctamente.' : 'División creada correctamente.');
     });
   };
 
   const handleSavePlayer = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingPlayer);
       const payload = {
         fullName: playerForm.fullName,
         birthYear: Number(playerForm.birthYear),
         divisionId: Number(playerForm.divisionId),
         active: playerForm.active,
       };
-      if (editingPlayer) {
+      if (isEditing) {
         await api.admin.updatePlayer(editingPlayer.id, payload);
       } else {
         await api.admin.createPlayer(payload);
@@ -325,13 +342,15 @@ const AdminPanel = () => {
       setEditingPlayer(null);
       setCreateModalTab(null);
       await loadPlayers(filters.divisionId);
+      showSuccessMessage(isEditing ? 'Jugadora actualizada correctamente.' : 'Jugadora creada correctamente.');
     });
   };
 
   const handleSaveSession = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      if (editingSession) {
+      const isEditing = Boolean(editingSession);
+      if (isEditing) {
         await api.admin.updateTrainingSession(editingSession.id, {
           date: sessionForm.date,
           notes: sessionForm.notes,
@@ -347,6 +366,7 @@ const AdminPanel = () => {
       setEditingSession(null);
       setCreateModalTab(null);
       await loadSessions(filters.divisionId, filters.month);
+      showSuccessMessage(isEditing ? 'Fecha actualizada correctamente.' : 'Fecha creada correctamente.');
     });
   };
 
@@ -372,6 +392,7 @@ const AdminPanel = () => {
       }
       await loadMatrix();
       await loadReport();
+      showSuccessMessage('Asistencia guardada correctamente.');
     });
   };
 
@@ -713,6 +734,7 @@ const AdminPanel = () => {
 
         {loading && <div className="loading">Cargando...</div>}
         {error && <div className="error-message">{error}</div>}
+        {successMessage && <div className="success-message">{successMessage}</div>}
         {canCreateInTab && (
           <div className="tab-actions">
             <button type="button" className="btn-primary" onClick={openCreateModal}>
@@ -819,7 +841,12 @@ const AdminPanel = () => {
         )}
 
         {tab === 'siteContent' && (
-          <AdminSiteContentTab data={siteContent} onReload={loadSiteContent} withLoad={withLoad} />
+          <AdminSiteContentTab
+            data={siteContent}
+            onReload={loadSiteContent}
+            withLoad={withLoad}
+            onNotifySuccess={showSuccessMessage}
+          />
         )}
 
         {tab === 'virtualLibrary' && (
@@ -827,6 +854,7 @@ const AdminPanel = () => {
             sections={virtualLibrary}
             onReload={loadVirtualLibrary}
             withLoad={withLoad}
+            onNotifySuccess={showSuccessMessage}
           />
         )}
 

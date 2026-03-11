@@ -23,7 +23,7 @@ const emptyPageForm = {
   sortOrder: 0,
 };
 
-const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
+const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
   const [subdivisionForm, setSubdivisionForm] = useState(emptySubdivisionForm);
   const [pageForm, setPageForm] = useState(emptyPageForm);
   const [modalType, setModalType] = useState(null);
@@ -85,6 +85,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
   const handleSubmitSubdivision = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingSubdivision);
       if (editingSubdivision) {
         await api.admin.updateSiteSubdivision(editingSubdivision.id, {
           name: subdivisionForm.name,
@@ -97,12 +98,14 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
       setSubdivisionForm(emptySubdivisionForm);
       closeModal();
       await onReload();
+      onNotifySuccess?.(isEditing ? 'Subdivisión actualizada correctamente.' : 'Subdivisión creada correctamente.');
     });
   };
 
   const handleSubmitPage = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
+      const isEditing = Boolean(editingPage);
       if (editingPage) {
         await api.admin.updateSitePage(editingPage.id, {
           title: pageForm.title,
@@ -119,6 +122,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
       setPageForm(emptyPageForm);
       closeModal();
       await onReload();
+      onNotifySuccess?.(isEditing ? 'Página actualizada correctamente.' : 'Página creada correctamente.');
     });
   };
 
