@@ -52,6 +52,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
   };
 
   const openEditSubdivisionModal = (subdivision) => {
+    if (subdivision?.isReadOnly) return;
     setSubdivisionForm({
       sectionKey: subdivision.sectionKey || SITE_SECTION_KEYS.COORDINACION,
       name: subdivision.name || '',
@@ -69,6 +70,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
   };
 
   const openEditPageModal = (page, subdivisionId) => {
+    if (page?.isReadOnly || page?.isSystemPage) return;
     setPageForm({
       subdivisionId: String(subdivisionId || ''),
       title: page.title || '',
@@ -243,7 +245,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
   };
 
   return (
-    <div className="tab-content">
+    <div className="tab-content site-content-admin">
       <h2>Menú principal: Coordinación y Recursos</h2>
 
       <div className="tab-actions">
@@ -260,28 +262,35 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
             {section.subdivisions.map((subdivision) => (
               <div className="virtual-library-category-item" key={subdivision.id}>
                 <div className="section-header">
-                  <h4>{subdivision.name}</h4>
+                  <h4>
+                    {subdivision.name}
+                    {subdivision.isReadOnly && <span className="system-badge">Sistema</span>}
+                  </h4>
                   <div className="row-actions">
-                    <button
-                      className="btn-secondary"
-                      type="button"
-                      onClick={() => openEditSubdivisionModal(subdivision)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="btn-danger"
-                      type="button"
-                      onClick={() => {
-                        if (!confirm('¿Eliminar subdivisión y todas sus páginas?')) return;
-                        withLoad(async () => {
-                          await api.admin.deleteSiteSubdivision(subdivision.id);
-                          await onReload();
-                        });
-                      }}
-                    >
-                      Eliminar
-                    </button>
+                    {!subdivision.isReadOnly && (
+                      <>
+                        <button
+                          className="btn-secondary"
+                          type="button"
+                          onClick={() => openEditSubdivisionModal(subdivision)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="btn-danger"
+                          type="button"
+                          onClick={() => {
+                            if (!confirm('¿Eliminar subdivisión y todas sus páginas?')) return;
+                            withLoad(async () => {
+                              await api.admin.deleteSiteSubdivision(subdivision.id);
+                              await onReload();
+                            });
+                          }}
+                        >
+                          Eliminar
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
                 {subdivision.description && <p>{subdivision.description}</p>}
@@ -290,28 +299,35 @@ const AdminSiteContentTab = ({ data, onReload, withLoad }) => {
                   <ul className="virtual-library-videos">
                     {subdivision.pages.map((page) => (
                       <li key={page.id}>
-                        <span>{page.title}</span>
+                        <span>
+                          {page.title}
+                          {(page.isSystemPage || page.isReadOnly) && <span className="system-badge">Sistema</span>}
+                        </span>
                         <div className="row-actions">
-                          <button
-                            className="btn-secondary btn-small"
-                            type="button"
-                            onClick={() => openEditPageModal(page, subdivision.id)}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            className="btn-danger btn-small"
-                            type="button"
-                            onClick={() => {
-                              if (!confirm('¿Eliminar página?')) return;
-                              withLoad(async () => {
-                                await api.admin.deleteSitePage(page.id);
-                                await onReload();
-                              });
-                            }}
-                          >
-                            Eliminar
-                          </button>
+                          {!page.isReadOnly && !page.isSystemPage && (
+                            <>
+                              <button
+                                className="btn-secondary btn-small"
+                                type="button"
+                                onClick={() => openEditPageModal(page, subdivision.id)}
+                              >
+                                Editar
+                              </button>
+                              <button
+                                className="btn-danger btn-small"
+                                type="button"
+                                onClick={() => {
+                                  if (!confirm('¿Eliminar página?')) return;
+                                  withLoad(async () => {
+                                    await api.admin.deleteSitePage(page.id);
+                                    await onReload();
+                                  });
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            </>
+                          )}
                         </div>
                       </li>
                     ))}

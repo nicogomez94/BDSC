@@ -151,6 +151,20 @@
   font-weight: 600;
 }
 
+.system-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: #e9ecef;
+  color: #495057;
+}
+
 .section-card {
   background-color: var(--white);
   padding: 25px;
@@ -482,6 +496,83 @@
   margin-top: 28px;
 }
 
+.site-content-admin .sections-list {
+  gap: 24px;
+}
+
+.site-content-admin .section-card {
+  border: 1px solid #d9d1c3;
+  border-radius: 14px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(26, 34, 22, 0.08);
+}
+
+.site-content-admin .section-card > h3 {
+  margin: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5ddcf;
+  background: linear-gradient(180deg, #f5f1e8 0%, #fcfaf5 100%);
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  color: var(--primary-color);
+}
+
+.site-content-admin .virtual-library-category-item {
+  margin: 16px;
+  border: 1px solid #d8d0c2;
+  border-radius: 12px;
+  background: #fffdfa;
+  padding: 16px;
+}
+
+.site-content-admin .virtual-library-category-item + .virtual-library-category-item {
+  margin-top: 0;
+}
+
+.site-content-admin .section-header {
+  margin-bottom: 10px;
+  align-items: flex-start;
+}
+
+.site-content-admin .section-header h4 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #1e4b2f;
+}
+
+.site-content-admin .virtual-library-category-item > p {
+  margin: 0 0 14px;
+  padding: 9px 12px;
+  background: #f5f2ec;
+  border-radius: 8px;
+  border: 1px solid #e2dacd;
+  color: #534d42;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.site-content-admin .virtual-library-videos {
+  gap: 10px;
+}
+
+.site-content-admin .virtual-library-videos li {
+  border: 1px solid #e4dccf;
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.site-content-admin .virtual-library-videos li > span {
+  font-weight: 600;
+  color: #2d2a24;
+}
+
+.site-content-admin .row-actions {
+  flex-wrap: wrap;
+}
+
 @media (max-width: 768px) {
   .data-row {
     flex-direction: column;
@@ -544,5 +635,23 @@
 
   .modal-content .admin-form {
     padding: 16px;
+  }
+
+  .site-content-admin .section-card > h3 {
+    font-size: 20px;
+    padding: 14px 16px;
+  }
+
+  .site-content-admin .virtual-library-category-item {
+    margin: 12px;
+    padding: 12px;
+  }
+
+  .site-content-admin .section-header h4 {
+    font-size: 17px;
+  }
+
+  .site-content-admin .virtual-library-category-item > p {
+    font-size: 14px;
   }
 }

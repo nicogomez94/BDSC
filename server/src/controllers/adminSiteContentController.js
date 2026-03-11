@@ -3,11 +3,34 @@ import { generateSlug, validateRequired } from '../utils/validation.js';
 import { sanitizeSitePageContent } from '../utils/siteContentHtml.js';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
+const normalizeSlug = (value) => String(value || '').trim().toLowerCase();
+const SYSTEM_PAGE_LOCK_ERROR = 'Página de sistema no editable';
+const SYSTEM_SUBDIVISION_LOCK_ERROR = 'Subdivisión con páginas de sistema no editable';
+const PROTECTED_SYSTEM_PAGES = [
+  { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'entrenadores' },
+  { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'preparadores-fisicos' },
+];
+
 const parseSortOrder = (value) => {
   if (value === undefined || value === null || value === '') return 0;
   const parsed = Number(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
+
+const isProtectedSystemPage = (sectionKey, subdivisionSlug, pageSlug) => {
+  const normalizedSectionKey = normalizeSectionKey(sectionKey);
+  const normalizedSubdivisionSlug = normalizeSlug(subdivisionSlug);
+  const normalizedPageSlug = normalizeSlug(pageSlug);
+  return PROTECTED_SYSTEM_PAGES.some(
+    (item) =>
+      item.sectionKey === normalizedSectionKey &&
+      item.subdivisionSlug === normalizedSubdivisionSlug &&
+      item.pageSlug === normalizedPageSlug
+  );
+};
+
+const isProtectedSystemSubdivision = (sectionKey, subdivisionSlug, pages = []) =>
+  pages.some((page) => isProtectedSystemPage(sectionKey, subdivisionSlug, page.slug));
 
 export const getSiteContentAdminData = async (req, res, next) => {
   try {
@@ -20,13 +43,25 @@ export const getSiteContentAdminData = async (req, res, next) => {
       },
     });
 
-    const normalized = data.map((subdivision) => ({
-      ...subdivision,
-      pages: (subdivision.pages || []).map((page) => ({
-        ...page,
-        content: sanitizeSitePageContent(page.content),
-      })),
-    }));
+    const normalized = data.map((subdivision) => {
+      const normalizedPages = (subdivision.pages || []).map((page) => {
+        const isSystemPage = isProtectedSystemPage(subdivision.sectionKey, subdivision.slug, page.slug);
+        return {
+          ...page,
+          content: sanitizeSitePageContent(page.content),
+          isSystemPage,
+          isReadOnly: isSystemPage,
+        };
+      });
+
+      const isReadOnly = isProtectedSystemSubdivision(subdivision.sectionKey, subdivision.slug, subdivision.pages);
+
+      return {
+        ...subdivision,
+        pages: normalizedPages,
+        isReadOnly,
+      };
+    });
 
     res.json(normalized);
   } catch (error) {
@@ -65,6 +100,20 @@ export const updateSiteSubdivision = async (req, res, next) => {
   try {
     const subdivisionId = Number(req.params.id);
     const { sectionKey, name, description, sortOrder } = req.body;
+
+    const subdivision = await prisma.siteSubdivision.findUnique({
+      where: { id: subdivisionId },
+      include: {
+        pages: {
+          select: { slug: true },
+        },
+      },
+    });
+    if (!subdivision) return res.status(404).json({ error: 'Subdivisión no encontrada' });
+    if (isProtectedSystemSubdivision(subdivision.sectionKey, subdivision.slug, subdivision.pages)) {
+      return res.status(403).json({ error: SYSTEM_SUBDIVISION_LOCK_ERROR });
+    }
+
     const data = {};
 
     if (sectionKey !== undefined) {
@@ -82,12 +131,12 @@ export const updateSiteSubdivision = async (req, res, next) => {
     if (description !== undefined) data.description = description || null;
     if (sortOrder !== undefined) data.sortOrder = parseSortOrder(sortOrder);
 
-    const subdivision = await prisma.siteSubdivision.update({
+    const updatedSubdivision = await prisma.siteSubdivision.update({
       where: { id: subdivisionId },
       data,
     });
 
-    res.json(subdivision);
+    res.json(updatedSubdivision);
   } catch (error) {
     if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una subdivisión con ese nombre' });
     next(error);
@@ -97,6 +146,19 @@ export const updateSiteSubdivision = async (req, res, next) => {
 export const deleteSiteSubdivision = async (req, res, next) => {
   try {
     const subdivisionId = Number(req.params.id);
+    const subdivision = await prisma.siteSubdivision.findUnique({
+      where: { id: subdivisionId },
+      include: {
+        pages: {
+          select: { slug: true },
+        },
+      },
+    });
+    if (!subdivision) return res.status(404).json({ error: 'Subdivisión no encontrada' });
+    if (isProtectedSystemSubdivision(subdivision.sectionKey, subdivision.slug, subdivision.pages)) {
+      return res.status(403).json({ error: SYSTEM_SUBDIVISION_LOCK_ERROR });
+    }
+
     await prisma.siteSubdivision.delete({ where: { id: subdivisionId } });
     res.json({ message: 'Subdivisión eliminada' });
   } catch (error) {
@@ -109,12 +171,22 @@ export const createSitePage = async (req, res, next) => {
     const { subdivisionId, title, summary, content, sortOrder } = req.body;
     const errors = validateRequired(['subdivisionId', 'title'], { subdivisionId, title });
     if (errors.length > 0) return res.status(400).json({ error: errors.join(', ') });
+    const subdivision = await prisma.siteSubdivision.findUnique({
+      where: { id: Number(subdivisionId) },
+      select: { sectionKey: true, slug: true },
+    });
+    if (!subdivision) return res.status(404).json({ error: 'Subdivisión no encontrada' });
+
+    const pageSlug = generateSlug(title);
+    if (isProtectedSystemPage(subdivision.sectionKey, subdivision.slug, pageSlug)) {
+      return res.status(403).json({ error: SYSTEM_PAGE_LOCK_ERROR });
+    }
 
     const page = await prisma.sitePage.create({
       data: {
         subdivisionId: Number(subdivisionId),
         title,
-        slug: generateSlug(title),
+        slug: pageSlug,
         summary: summary || null,
         content: sanitizeSitePageContent(content),
         sortOrder: parseSortOrder(sortOrder),
@@ -132,6 +204,22 @@ export const updateSitePage = async (req, res, next) => {
   try {
     const pageId = Number(req.params.id);
     const { title, summary, content, sortOrder } = req.body;
+    const currentPage = await prisma.sitePage.findUnique({
+      where: { id: pageId },
+      include: {
+        subdivision: {
+          select: {
+            sectionKey: true,
+            slug: true,
+          },
+        },
+      },
+    });
+    if (!currentPage) return res.status(404).json({ error: 'Página no encontrada' });
+    if (isProtectedSystemPage(currentPage.subdivision.sectionKey, currentPage.subdivision.slug, currentPage.slug)) {
+      return res.status(403).json({ error: SYSTEM_PAGE_LOCK_ERROR });
+    }
+
     const data = {};
     if (title !== undefined) {
       data.title = title;
@@ -169,6 +257,22 @@ export const uploadSiteContentImage = async (req, res, next) => {
 export const deleteSitePage = async (req, res, next) => {
   try {
     const pageId = Number(req.params.id);
+    const page = await prisma.sitePage.findUnique({
+      where: { id: pageId },
+      include: {
+        subdivision: {
+          select: {
+            sectionKey: true,
+            slug: true,
+          },
+        },
+      },
+    });
+    if (!page) return res.status(404).json({ error: 'Página no encontrada' });
+    if (isProtectedSystemPage(page.subdivision.sectionKey, page.subdivision.slug, page.slug)) {
+      return res.status(403).json({ error: SYSTEM_PAGE_LOCK_ERROR });
+    }
+
     await prisma.sitePage.delete({ where: { id: pageId } });
     res.json({ message: 'Página eliminada' });
   } catch (error) {
