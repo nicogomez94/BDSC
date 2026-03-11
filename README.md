@@ -223,6 +223,27 @@ cd server
 npm start
 ```
 
+### Keep-alive con cron-job.org (Render Free)
+Para minimizar el sleep del servicio en Render Free, este backend expone:
+
+- `GET /health`
+
+Configuración recomendada en `cron-job.org`:
+
+1. Crear cuenta e iniciar sesión en https://cron-job.org/en/
+2. Ir a **CREATE CRONJOB**.
+3. Completar:
+   - **Title**: `BDSC Render Keep Alive`
+   - **URL**: `https://<tu-servicio>.onrender.com/health`
+   - **Request method**: `GET`
+   - **Schedule**: cada `10` minutos (`*/10 * * * *`)
+4. Guardar con **CREATE**.
+5. Verificar en **Logs** de cron-job.org que responde `200`.
+
+Notas:
+- Usar `/health` evita cargar rutas pesadas o consultas de negocio.
+- Este enfoque es workaround para tier Free; para producción estable, usar instancia paga.
+
 ## 🤝 Contribución
 
 Este es un proyecto privado para BDSC. Para contribuir, contactar al coordinador técnico.

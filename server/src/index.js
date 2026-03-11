@@ -58,6 +58,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'API BDSC Hockey - Servidor funcionando' });
 });
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    ok: true,
+    service: 'bdsc-hockey-api',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/trainers', trainerRoutes);
 app.use('/api/admin', adminRoutes);
