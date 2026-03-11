@@ -9,36 +9,120 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
   const [sectionForm, setSectionForm] = useState(emptySectionForm);
   const [categoryForm, setCategoryForm] = useState(emptyCategoryForm);
   const [videoForm, setVideoForm] = useState(emptyVideoForm);
+  const [modalType, setModalType] = useState(null);
+  const [editingSection, setEditingSection] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingVideo, setEditingVideo] = useState(null);
 
-  const handleCreateSection = async (e) => {
+  const closeModal = () => {
+    setModalType(null);
+    setEditingSection(null);
+    setEditingCategory(null);
+    setEditingVideo(null);
+  };
+
+  const openCreateSectionModal = () => {
+    setSectionForm(emptySectionForm);
+    setEditingSection(null);
+    setModalType('create-section');
+  };
+
+  const openEditSectionModal = (section) => {
+    setSectionForm({
+      name: section.name || '',
+      sortOrder: Number(section.sortOrder) || 0,
+    });
+    setEditingSection(section);
+    setModalType('edit-section');
+  };
+
+  const openCreateCategoryModal = () => {
+    setCategoryForm(emptyCategoryForm);
+    setEditingCategory(null);
+    setModalType('create-category');
+  };
+
+  const openEditCategoryModal = (category) => {
+    setCategoryForm({
+      sectionId: String(category.sectionId || ''),
+      name: category.name || '',
+      sortOrder: Number(category.sortOrder) || 0,
+    });
+    setEditingCategory(category);
+    setModalType('edit-category');
+  };
+
+  const openCreateVideoModal = () => {
+    setVideoForm(emptyVideoForm);
+    setEditingVideo(null);
+    setModalType('create-video');
+  };
+
+  const openEditVideoModal = (video) => {
+    setVideoForm({
+      categoryId: String(video.categoryId || ''),
+      title: video.title || '',
+      url: video.url || '',
+      sortOrder: Number(video.sortOrder) || 0,
+    });
+    setEditingVideo(video);
+    setModalType('edit-video');
+  };
+
+  const handleSubmitSection = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createVirtualLibrarySection(sectionForm);
+      if (editingSection) {
+        await api.admin.updateVirtualLibrarySection(editingSection.id, {
+          name: sectionForm.name,
+          sortOrder: Number(sectionForm.sortOrder) || 0,
+        });
+      } else {
+        await api.admin.createVirtualLibrarySection(sectionForm);
+      }
       setSectionForm(emptySectionForm);
+      closeModal();
       await onReload();
     });
   };
 
-  const handleCreateCategory = async (e) => {
+  const handleSubmitCategory = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createVirtualLibraryCategory({
-        ...categoryForm,
-        sectionId: Number(categoryForm.sectionId),
-      });
+      if (editingCategory) {
+        await api.admin.updateVirtualLibraryCategory(editingCategory.id, {
+          name: categoryForm.name,
+          sortOrder: Number(categoryForm.sortOrder) || 0,
+        });
+      } else {
+        await api.admin.createVirtualLibraryCategory({
+          ...categoryForm,
+          sectionId: Number(categoryForm.sectionId),
+        });
+      }
       setCategoryForm(emptyCategoryForm);
+      closeModal();
       await onReload();
     });
   };
 
-  const handleCreateVideo = async (e) => {
+  const handleSubmitVideo = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createVirtualLibraryVideo({
-        ...videoForm,
-        categoryId: Number(videoForm.categoryId),
-      });
+      if (editingVideo) {
+        await api.admin.updateVirtualLibraryVideo(editingVideo.id, {
+          title: videoForm.title,
+          url: videoForm.url,
+          sortOrder: Number(videoForm.sortOrder) || 0,
+        });
+      } else {
+        await api.admin.createVirtualLibraryVideo({
+          ...videoForm,
+          categoryId: Number(videoForm.categoryId),
+        });
+      }
       setVideoForm(emptyVideoForm);
+      closeModal();
       await onReload();
     });
   };
@@ -50,13 +134,19 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
     }))
   );
 
-  return (
-    <div className="tab-content">
-      <h2>Biblioteca virtual</h2>
+  const modalTitleByType = {
+    'create-section': 'Crear subdivisión',
+    'edit-section': 'Editar subdivisión',
+    'create-category': 'Crear categoría',
+    'edit-category': 'Editar categoría',
+    'create-video': 'Cargar video',
+    'edit-video': 'Editar video',
+  };
 
-      <div className="virtual-library-admin-grid">
-        <form className="admin-form" onSubmit={handleCreateSection}>
-          <h3>Crear subdivisión</h3>
+  const renderModalBody = () => {
+    if (modalType === 'create-section' || modalType === 'edit-section') {
+      return (
+        <form className="admin-form" onSubmit={handleSubmitSection}>
           <div className="form-group">
             <label>Nombre</label>
             <input
@@ -73,24 +163,31 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
               onChange={(e) => setSectionForm((current) => ({ ...current, sortOrder: Number(e.target.value) }))}
             />
           </div>
-          <button type="submit" className="btn-primary">Crear subdivisión</button>
+          <button type="submit" className="btn-primary">
+            {editingSection ? 'Guardar cambios' : 'Crear subdivisión'}
+          </button>
         </form>
+      );
+    }
 
-        <form className="admin-form" onSubmit={handleCreateCategory}>
-          <h3>Crear categoría</h3>
-          <div className="form-group">
-            <label>Subdivisión</label>
-            <select
-              value={categoryForm.sectionId}
-              onChange={(e) => setCategoryForm((current) => ({ ...current, sectionId: e.target.value }))}
-              required
-            >
-              <option value="">Seleccionar</option>
-              {sections.map((section) => (
-                <option key={section.id} value={section.id}>{section.name}</option>
-              ))}
-            </select>
-          </div>
+    if (modalType === 'create-category' || modalType === 'edit-category') {
+      return (
+        <form className="admin-form" onSubmit={handleSubmitCategory}>
+          {!editingCategory && (
+            <div className="form-group">
+              <label>Subdivisión</label>
+              <select
+                value={categoryForm.sectionId}
+                onChange={(e) => setCategoryForm((current) => ({ ...current, sectionId: e.target.value }))}
+                required
+              >
+                <option value="">Seleccionar</option>
+                {sections.map((section) => (
+                  <option key={section.id} value={section.id}>{section.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="form-group">
             <label>Nombre categoría</label>
             <input
@@ -107,26 +204,33 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
               onChange={(e) => setCategoryForm((current) => ({ ...current, sortOrder: Number(e.target.value) }))}
             />
           </div>
-          <button type="submit" className="btn-primary">Crear categoría</button>
+          <button type="submit" className="btn-primary">
+            {editingCategory ? 'Guardar cambios' : 'Crear categoría'}
+          </button>
         </form>
+      );
+    }
 
-        <form className="admin-form" onSubmit={handleCreateVideo}>
-          <h3>Cargar video (link)</h3>
-          <div className="form-group">
-            <label>Categoría</label>
-            <select
-              value={videoForm.categoryId}
-              onChange={(e) => setVideoForm((current) => ({ ...current, categoryId: e.target.value }))}
-              required
-            >
-              <option value="">Seleccionar</option>
-              {allCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.sectionName} - {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+    if (modalType === 'create-video' || modalType === 'edit-video') {
+      return (
+        <form className="admin-form" onSubmit={handleSubmitVideo}>
+          {!editingVideo && (
+            <div className="form-group">
+              <label>Categoría</label>
+              <select
+                value={videoForm.categoryId}
+                onChange={(e) => setVideoForm((current) => ({ ...current, categoryId: e.target.value }))}
+                required
+              >
+                <option value="">Seleccionar</option>
+                {allCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.sectionName} - {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="form-group">
             <label>Título</label>
             <input
@@ -153,8 +257,24 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
               onChange={(e) => setVideoForm((current) => ({ ...current, sortOrder: Number(e.target.value) }))}
             />
           </div>
-          <button type="submit" className="btn-primary">Agregar video</button>
+          <button type="submit" className="btn-primary">
+            {editingVideo ? 'Guardar cambios' : 'Agregar video'}
+          </button>
         </form>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <div className="tab-content">
+      <h2>Biblioteca virtual</h2>
+
+      <div className="tab-actions">
+        <button type="button" className="btn-primary" onClick={openCreateSectionModal}>Crear subdivisión</button>
+        <button type="button" className="btn-primary" onClick={openCreateCategoryModal}>Crear categoría</button>
+        <button type="button" className="btn-primary" onClick={openCreateVideoModal}>Agregar video</button>
       </div>
 
       <div className="sections-list">
@@ -166,20 +286,14 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
               <div className="row-actions">
                 <button
                   className="btn-secondary"
-                  onClick={() => {
-                    const name = prompt('Nombre de subdivisión', section.name);
-                    if (!name) return;
-                    const sortOrder = prompt('Orden', section.sortOrder);
-                    withLoad(async () => {
-                      await api.admin.updateVirtualLibrarySection(section.id, { name, sortOrder: Number(sortOrder) || 0 });
-                      await onReload();
-                    });
-                  }}
+                  type="button"
+                  onClick={() => openEditSectionModal(section)}
                 >
                   Editar
                 </button>
                 <button
                   className="btn-danger"
+                  type="button"
                   onClick={() => {
                     if (!confirm('¿Eliminar subdivisión, categorías y videos?')) return;
                     withLoad(async () => {
@@ -202,23 +316,14 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
                       <div className="row-actions">
                         <button
                           className="btn-secondary"
-                          onClick={() => {
-                            const name = prompt('Nombre de categoría', category.name);
-                            if (!name) return;
-                            const sortOrder = prompt('Orden', category.sortOrder);
-                            withLoad(async () => {
-                              await api.admin.updateVirtualLibraryCategory(category.id, {
-                                name,
-                                sortOrder: Number(sortOrder) || 0,
-                              });
-                              await onReload();
-                            });
-                          }}
+                          type="button"
+                          onClick={() => openEditCategoryModal(category)}
                         >
                           Editar
                         </button>
                         <button
                           className="btn-danger"
+                          type="button"
                           onClick={() => {
                             if (!confirm('¿Eliminar categoría y videos?')) return;
                             withLoad(async () => {
@@ -241,26 +346,14 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
                             <div className="row-actions">
                               <button
                                 className="btn-secondary btn-small"
-                                onClick={() => {
-                                  const title = prompt('Título del video', video.title);
-                                  if (!title) return;
-                                  const url = prompt('Link del video', video.url);
-                                  if (!url) return;
-                                  const sortOrder = prompt('Orden', video.sortOrder);
-                                  withLoad(async () => {
-                                    await api.admin.updateVirtualLibraryVideo(video.id, {
-                                      title,
-                                      url,
-                                      sortOrder: Number(sortOrder) || 0,
-                                    });
-                                    await onReload();
-                                  });
-                                }}
+                                type="button"
+                                onClick={() => openEditVideoModal(video)}
                               >
                                 Editar
                               </button>
                               <button
                                 className="btn-danger btn-small"
+                                type="button"
                                 onClick={() => {
                                   if (!confirm('¿Eliminar video?')) return;
                                   withLoad(async () => {
@@ -287,6 +380,23 @@ const AdminVirtualLibraryTab = ({ sections, onReload, withLoad }) => {
           </div>
         ))}
       </div>
+
+      {modalType && (
+        <div className="modal-overlay">
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-header-copy">
+                <h3>{modalTitleByType[modalType]}</h3>
+                <p>Completá los datos para continuar.</p>
+              </div>
+              <button type="button" className="modal-close" onClick={closeModal} aria-label="Cerrar modal">
+                x
+              </button>
+            </div>
+            <div className="modal-body">{renderModalBody()}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

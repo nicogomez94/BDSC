@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 import trainerRoutes from './routes/trainers.js';
 import adminRoutes from './routes/admin.js';
@@ -13,6 +15,8 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const uploadsPath = path.resolve(__dirname, '..', 'uploads');
 
 // Middleware
 const normalizeOrigin = (origin) => origin?.replace(/\/+$/, '');
@@ -47,6 +51,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+app.use('/uploads', express.static(uploadsPath));
 
 // Rutas
 app.get('/', (req, res) => {

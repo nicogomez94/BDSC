@@ -1,0 +1,103 @@
+.rte-root {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.rte-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--border-color);
+  background: #f5f2eb;
+}
+
+.rte-toolbar button,
+.rte-table-actions button {
+  border: 1px solid #d9d3c8;
+  background: #fff;
+  color: var(--text-dark);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rte-toolbar button.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: #fff;
+}
+
+.rte-editor-content {
+  min-height: 240px;
+  max-height: 420px;
+  overflow: auto;
+  padding: 14px;
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+.rte-editor-content:focus {
+  outline: none;
+}
+
+.rte-editor-content p {
+  margin: 0 0 12px;
+}
+
+.rte-editor-content h1,
+.rte-editor-content h2,
+.rte-editor-content h3,
+.rte-editor-content h4 {
+  margin: 14px 0 10px;
+}
+
+.rte-editor-content ul,
+.rte-editor-content ol {
+  padding-left: 22px;
+  margin: 0 0 12px;
+}
+
+.rte-editor-content blockquote {
+  border-left: 4px solid var(--secondary-color);
+  padding-left: 12px;
+  margin: 0 0 12px;
+  color: var(--text-light);
+}
+
+.rte-editor-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+.rte-editor-content th,
+.rte-editor-content td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+}
+
+.rte-editor-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 10px auto;
+}
+
+.rte-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--border-color);
+  background: #fcfaf6;
+}
+
+.rte-hidden-file {
+  display: none;
+}

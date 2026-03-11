@@ -51,9 +51,11 @@ import {
   deleteSitePage,
   deleteSiteSubdivision,
   getSiteContentAdminData,
+  uploadSiteContentImage,
   updateSitePage,
   updateSiteSubdivision,
 } from '../controllers/adminSiteContentController.js';
+import { siteContentImageUpload } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -126,5 +128,6 @@ router.delete('/site-content/subdivisions/:id', deleteSiteSubdivision);
 router.post('/site-content/pages', createSitePage);
 router.put('/site-content/pages/:id', updateSitePage);
 router.delete('/site-content/pages/:id', deleteSitePage);
+router.post('/site-content/images', siteContentImageUpload.single('image'), uploadSiteContentImage);
 
 export default router;

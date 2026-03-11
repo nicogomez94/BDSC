@@ -1,6 +1,12 @@
 export const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      error: 'La imagen supera el tamaño máximo permitido (5MB).',
+    });
+  }
+
   if (err.name === 'ValidationError') {
     return res.status(400).json({
       error: 'Error de validación',

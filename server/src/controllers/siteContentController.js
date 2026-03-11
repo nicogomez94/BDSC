@@ -1,4 +1,5 @@
 import prisma from '../utils/prisma.js';
+import { sanitizeSitePageContent } from '../utils/siteContentHtml.js';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
 
@@ -19,7 +20,15 @@ export const getSiteContentBySection = async (req, res, next) => {
       },
     });
 
-    res.json(subdivisions);
+    res.json(
+      subdivisions.map((subdivision) => ({
+        ...subdivision,
+        pages: (subdivision.pages || []).map((page) => ({
+          ...page,
+          content: sanitizeSitePageContent(page.content),
+        })),
+      }))
+    );
   } catch (error) {
     next(error);
   }
@@ -47,8 +56,13 @@ export const getSitePage = async (req, res, next) => {
       return res.status(404).json({ error: 'Subdivisión no encontrada' });
     }
 
-    const page = subdivision.pages.find((item) => item.slug === pageSlug);
-    if (!page) {
+    const normalizedPages = (subdivision.pages || []).map((item) => ({
+      ...item,
+      content: sanitizeSitePageContent(item.content),
+    }));
+
+    const normalizedPage = normalizedPages.find((item) => item.slug === pageSlug);
+    if (!normalizedPage) {
       return res.status(404).json({ error: 'Página no encontrada' });
     }
 
@@ -60,8 +74,8 @@ export const getSitePage = async (req, res, next) => {
         slug: subdivision.slug,
         description: subdivision.description,
       },
-      page,
-      pages: subdivision.pages,
+      page: normalizedPage,
+      pages: normalizedPages,
     });
   } catch (error) {
     next(error);

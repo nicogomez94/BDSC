@@ -97,6 +97,9 @@ const AdminPanel = () => {
   const [filters, setFilters] = useState({ divisionId: '', month: '' });
   const [createModalTab, setCreateModalTab] = useState(null);
   const [editingTrainer, setEditingTrainer] = useState(null);
+  const [editingDivision, setEditingDivision] = useState(null);
+  const [editingPlayer, setEditingPlayer] = useState(null);
+  const [editingSession, setEditingSession] = useState(null);
   const [trainerModalError, setTrainerModalError] = useState('');
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
 
@@ -182,6 +185,9 @@ const AdminPanel = () => {
   useEffect(() => {
     setCreateModalTab(null);
     setEditingTrainer(null);
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
     setTrainerModalError('');
     setTrainerCvFileName('');
   }, [tab]);
@@ -283,40 +289,62 @@ const AdminPanel = () => {
     });
   };
 
-  const handleCreateDivision = async (e) => {
+  const handleSaveDivision = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createDivision({ name: divisionForm.name, seasonYear: Number(divisionForm.seasonYear) });
+      if (editingDivision) {
+        await api.admin.updateDivision(editingDivision.id, {
+          name: divisionForm.name,
+          seasonYear: Number(divisionForm.seasonYear),
+        });
+      } else {
+        await api.admin.createDivision({ name: divisionForm.name, seasonYear: Number(divisionForm.seasonYear) });
+      }
       setDivisionForm({ name: '', seasonYear: new Date().getFullYear() });
+      setEditingDivision(null);
       setCreateModalTab(null);
       await loadDivisions();
     });
   };
 
-  const handleCreatePlayer = async (e) => {
+  const handleSavePlayer = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createPlayer({
+      const payload = {
         fullName: playerForm.fullName,
         birthYear: Number(playerForm.birthYear),
         divisionId: Number(playerForm.divisionId),
         active: playerForm.active,
-      });
+      };
+      if (editingPlayer) {
+        await api.admin.updatePlayer(editingPlayer.id, payload);
+      } else {
+        await api.admin.createPlayer(payload);
+      }
       setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true });
+      setEditingPlayer(null);
       setCreateModalTab(null);
       await loadPlayers(filters.divisionId);
     });
   };
 
-  const handleCreateSession = async (e) => {
+  const handleSaveSession = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
-      await api.admin.createTrainingSession({
-        divisionId: Number(sessionForm.divisionId),
-        date: sessionForm.date,
-        notes: sessionForm.notes,
-      });
+      if (editingSession) {
+        await api.admin.updateTrainingSession(editingSession.id, {
+          date: sessionForm.date,
+          notes: sessionForm.notes,
+        });
+      } else {
+        await api.admin.createTrainingSession({
+          divisionId: Number(sessionForm.divisionId),
+          date: sessionForm.date,
+          notes: sessionForm.notes,
+        });
+      }
       setSessionForm({ divisionId: '', date: '', notes: '' });
+      setEditingSession(null);
       setCreateModalTab(null);
       await loadSessions(filters.divisionId, filters.month);
     });
@@ -364,6 +392,9 @@ const AdminPanel = () => {
     });
   };
   const openCreateModal = () => {
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
     if (tab === 'trainers' || tab === 'physicalTrainers') {
       const isPhysicalTab = tab === 'physicalTrainers';
       setEditingTrainer(null);
@@ -376,15 +407,30 @@ const AdminPanel = () => {
       setTrainerModalError('');
       setTrainerCvFileName('');
     }
+    if (tab === 'divisions') {
+      setDivisionForm({ name: '', seasonYear: new Date().getFullYear() });
+    }
+    if (tab === 'players') {
+      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true });
+    }
+    if (tab === 'sessions') {
+      setSessionForm({ divisionId: '', date: '', notes: '' });
+    }
     setCreateModalTab(tab);
   };
   const closeCreateModal = () => {
     setCreateModalTab(null);
     setEditingTrainer(null);
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
     setTrainerModalError('');
     setTrainerCvFileName('');
   };
   const openEditTrainerModal = (trainer) => {
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
     setEditingTrainer(trainer);
     setTrainerModalError('');
     setTrainerCvFileName('');
@@ -400,7 +446,60 @@ const AdminPanel = () => {
     });
     setCreateModalTab('trainers');
   };
+  const openEditDivisionModal = (division) => {
+    setEditingTrainer(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
+    setEditingDivision(division);
+    setDivisionForm({
+      name: division.name || '',
+      seasonYear: division.seasonYear || new Date().getFullYear(),
+    });
+    setCreateModalTab('divisions');
+  };
+  const openEditPlayerModal = (player) => {
+    setEditingTrainer(null);
+    setEditingDivision(null);
+    setEditingSession(null);
+    setEditingPlayer(player);
+    setPlayerForm({
+      fullName: player.fullName || '',
+      birthYear: player.birthYear || '',
+      divisionId: String(player.divisionId || ''),
+      active: Boolean(player.active),
+    });
+    setCreateModalTab('players');
+  };
+  const openEditSessionModal = (session) => {
+    setEditingTrainer(null);
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(session);
+    setSessionForm({
+      divisionId: String(session.divisionId || ''),
+      date: dateInput(session.date),
+      notes: session.notes || '',
+    });
+    setCreateModalTab('sessions');
+  };
   const canCreateInTab = CREATE_TABS.includes(tab);
+  const isEditingStandardEntity = Boolean(editingDivision || editingPlayer || editingSession);
+  const modalTitle = (() => {
+    if ((createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer) {
+      return 'Editar perfil técnico';
+    }
+    if (createModalTab === 'divisions' && editingDivision) return 'Editar división';
+    if (createModalTab === 'players' && editingPlayer) return 'Editar jugadora';
+    if (createModalTab === 'sessions' && editingSession) return 'Editar fecha';
+    return createModalTab ? CREATE_MODAL_COPY[createModalTab].title : '';
+  })();
+  const modalDescription = (() => {
+    if ((createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer) {
+      return 'Actualizá los datos del perfil.';
+    }
+    if (isEditingStandardEntity) return 'Actualizá los datos del registro.';
+    return 'Completá los datos para crear un nuevo registro.';
+  })();
 
   const renderCreateModalForm = () => {
     if (createModalTab === 'trainers' || createModalTab === 'physicalTrainers') {
@@ -485,7 +584,7 @@ const AdminPanel = () => {
 
     if (createModalTab === 'divisions') {
       return (
-        <form onSubmit={handleCreateDivision} className="admin-form">
+        <form onSubmit={handleSaveDivision} className="admin-form">
           <div className="form-row">
             <div className="form-group">
               <label>Nombre</label>
@@ -496,14 +595,14 @@ const AdminPanel = () => {
               <input type="number" value={divisionForm.seasonYear} onChange={(e) => setDivisionForm({ ...divisionForm, seasonYear: e.target.value })} required />
             </div>
           </div>
-          <button type="submit" className="btn-primary">Crear división</button>
+          <button type="submit" className="btn-primary">{editingDivision ? 'Guardar cambios' : 'Crear división'}</button>
         </form>
       );
     }
 
     if (createModalTab === 'players') {
       return (
-        <form onSubmit={handleCreatePlayer} className="admin-form">
+        <form onSubmit={handleSavePlayer} className="admin-form">
           <div className="form-row">
             <div className="form-group">
               <label>Nombre completo</label>
@@ -531,24 +630,26 @@ const AdminPanel = () => {
               </label>
             </div>
           </div>
-          <button type="submit" className="btn-primary">Crear jugadora</button>
+          <button type="submit" className="btn-primary">{editingPlayer ? 'Guardar cambios' : 'Crear jugadora'}</button>
         </form>
       );
     }
 
     if (createModalTab === 'sessions') {
       return (
-        <form onSubmit={handleCreateSession} className="admin-form">
+        <form onSubmit={handleSaveSession} className="admin-form">
           <div className="form-row">
-            <div className="form-group">
-              <label>División</label>
-              <select value={sessionForm.divisionId} onChange={(e) => setSessionForm({ ...sessionForm, divisionId: e.target.value })} required>
-                <option value="">Seleccionar</option>
-                {divisions.map((division) => (
-                  <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
-                ))}
-              </select>
-            </div>
+            {!editingSession && (
+              <div className="form-group">
+                <label>División</label>
+                <select value={sessionForm.divisionId} onChange={(e) => setSessionForm({ ...sessionForm, divisionId: e.target.value })} required>
+                  <option value="">Seleccionar</option>
+                  {divisions.map((division) => (
+                    <option key={division.id} value={division.id}>{division.name} - {division.seasonYear}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="form-group">
               <label>Fecha</label>
               <input type="date" value={sessionForm.date} onChange={(e) => setSessionForm({ ...sessionForm, date: e.target.value })} required />
@@ -558,7 +659,7 @@ const AdminPanel = () => {
             <label>Notas</label>
             <input value={sessionForm.notes} onChange={(e) => setSessionForm({ ...sessionForm, notes: e.target.value })} />
           </div>
-          <button type="submit" className="btn-primary">Crear fecha</button>
+          <button type="submit" className="btn-primary">{editingSession ? 'Guardar cambios' : 'Crear fecha'}</button>
         </form>
       );
     }
@@ -744,16 +845,7 @@ const AdminPanel = () => {
                     <div className="row-actions">
                       <button
                         className="btn-secondary"
-                        onClick={() => {
-                          const name = prompt('Nombre de división', division.name);
-                          if (!name) return;
-                          const seasonYear = prompt('Temporada', division.seasonYear);
-                          if (!seasonYear) return;
-                          withLoad(async () => {
-                            await api.admin.updateDivision(division.id, { name, seasonYear: Number(seasonYear) });
-                            await loadDivisions();
-                          });
-                        }}
+                        onClick={() => openEditDivisionModal(division)}
                       >
                         Editar
                       </button>
@@ -842,22 +934,7 @@ const AdminPanel = () => {
                   <div className="row-actions">
                     <button
                       className="btn-secondary"
-                      onClick={() => {
-                        const fullName = prompt('Nombre completo', player.fullName);
-                        if (!fullName) return;
-                        const birthYear = prompt('Año de nacimiento', player.birthYear);
-                        if (!birthYear) return;
-                        const active = confirm('Aceptar para ACTIVA. Cancelar para INACTIVA.');
-                        withLoad(async () => {
-                          await api.admin.updatePlayer(player.id, {
-                            fullName,
-                            birthYear: Number(birthYear),
-                            divisionId: player.divisionId,
-                            active,
-                          });
-                          await loadPlayers(filters.divisionId);
-                        });
-                      }}
+                      onClick={() => openEditPlayerModal(player)}
                     >
                       Editar
                     </button>
@@ -901,15 +978,7 @@ const AdminPanel = () => {
                   <div className="row-actions">
                     <button
                       className="btn-secondary"
-                      onClick={() => {
-                        const date = prompt('Fecha (YYYY-MM-DD)', dateInput(session.date));
-                        if (!date) return;
-                        const notes = prompt('Notas', session.notes || '') || '';
-                        withLoad(async () => {
-                          await api.admin.updateTrainingSession(session.id, { date, notes });
-                          await loadSessions(filters.divisionId, filters.month);
-                        });
-                      }}
+                      onClick={() => openEditSessionModal(session)}
                     >
                       Editar
                     </button>
@@ -1059,12 +1128,12 @@ const AdminPanel = () => {
         )}
 
         {createModalTab && (
-          <div className="modal-overlay" onClick={closeCreateModal}>
+          <div className="modal-overlay">
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div className="modal-header-copy">
-                  <h3>{(createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer ? 'Editar perfil técnico' : CREATE_MODAL_COPY[createModalTab].title}</h3>
-                  <p>{(createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer ? 'Actualizá los datos del perfil.' : 'Completá los datos para crear un nuevo registro.'}</p>
+                  <h3>{modalTitle}</h3>
+                  <p>{modalDescription}</p>
                 </div>
                 <button type="button" className="modal-close" onClick={closeCreateModal} aria-label="Cerrar modal">
                   x

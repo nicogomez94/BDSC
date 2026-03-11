@@ -45,6 +45,43 @@
   line-height: 1.7;
 }
 
+.site-content-text p {
+  margin: 0 0 14px;
+}
+
+.site-content-text ul,
+.site-content-text ol {
+  padding-left: 24px;
+  margin: 0 0 14px;
+}
+
+.site-content-text blockquote {
+  border-left: 4px solid var(--secondary-color);
+  padding-left: 12px;
+  color: var(--text-light);
+  margin: 0 0 14px;
+}
+
+.site-content-text img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 12px auto;
+  border-radius: 8px;
+}
+
+.site-content-text table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+}
+
+.site-content-text th,
+.site-content-text td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+}
+
 .site-content-links {
   margin-top: 24px;
   display: flex;

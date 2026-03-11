@@ -58,7 +58,7 @@ const SiteContentPage = () => {
             {pageData.page.summary && <p className="site-content-summary">{pageData.page.summary}</p>}
             <div className="site-content-text">
               {pageData.page.content ? (
-                <p>{pageData.page.content}</p>
+                <div dangerouslySetInnerHTML={{ __html: pageData.page.content }} />
               ) : (
                 <p>Contenido en armado.</p>
               )}

@@ -1,5 +1,6 @@
 import prisma from '../utils/prisma.js';
 import { generateSlug, validateRequired } from '../utils/validation.js';
+import { sanitizeSitePageContent } from '../utils/siteContentHtml.js';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
 const parseSortOrder = (value) => {
@@ -18,7 +19,16 @@ export const getSiteContentAdminData = async (req, res, next) => {
         },
       },
     });
-    res.json(data);
+
+    const normalized = data.map((subdivision) => ({
+      ...subdivision,
+      pages: (subdivision.pages || []).map((page) => ({
+        ...page,
+        content: sanitizeSitePageContent(page.content),
+      })),
+    }));
+
+    res.json(normalized);
   } catch (error) {
     next(error);
   }
@@ -106,7 +116,7 @@ export const createSitePage = async (req, res, next) => {
         title,
         slug: generateSlug(title),
         summary: summary || null,
-        content: content || null,
+        content: sanitizeSitePageContent(content),
         sortOrder: parseSortOrder(sortOrder),
       },
     });
@@ -128,7 +138,7 @@ export const updateSitePage = async (req, res, next) => {
       data.slug = generateSlug(title);
     }
     if (summary !== undefined) data.summary = summary || null;
-    if (content !== undefined) data.content = content || null;
+    if (content !== undefined) data.content = sanitizeSitePageContent(content);
     if (sortOrder !== undefined) data.sortOrder = parseSortOrder(sortOrder);
 
     const page = await prisma.sitePage.update({
@@ -139,6 +149,19 @@ export const updateSitePage = async (req, res, next) => {
     res.json(page);
   } catch (error) {
     if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una página con ese nombre' });
+    next(error);
+  }
+};
+
+export const uploadSiteContentImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Debes adjuntar una imagen.' });
+    }
+
+    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/site-content/${req.file.filename}`;
+    res.status(201).json({ url: imageUrl });
+  } catch (error) {
     next(error);
   }
 };

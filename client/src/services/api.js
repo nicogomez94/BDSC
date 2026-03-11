@@ -727,6 +727,21 @@ export const api = {
         'Error al eliminar página'
       );
     },
+
+    uploadSiteContentImage: async (file) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      return requestJson(
+        `${API_URL}/admin/site-content/images`,
+        {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: formData,
+        },
+        'Error al subir imagen'
+      );
+    },
   },
 
   trainer: {
