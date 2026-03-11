@@ -154,7 +154,7 @@
 .section-subtitle {
   font-size: 18px;
   margin-bottom: 30px;
-  color: var(--cream);
+  color: grey;
 }
 
 .trainers-preview .btn-secondary {
@@ -296,6 +296,81 @@
   transform: scale(0.9) translateY(20px);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
   transition-delay: calc(var(--card-index, 0) * 0.1s);
+}
+
+/* Sponsors Section */
+.sponsors {
+  padding: 70px 0 60px;
+  background-color: var(--white);
+  text-align: center;
+  overflow: hidden;
+}
+
+.sponsors h2 {
+  font-size: 40px;
+  color: var(--primary-color);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.sponsors-subtitle {
+  margin-bottom: 40px;
+}
+
+.sponsors-track-wrapper {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.sponsors-track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  animation: sponsorsScroll 28s linear infinite;
+  padding: 10px 0;
+}
+
+.sponsors-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes sponsorsScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.sponsor-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 80px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.sponsor-logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+}
+
+.sponsor-logo span {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  user-select: none;
 }
 
 .scroll-reveal.visible .category-card {
