@@ -47,12 +47,15 @@ import {
 } from '../controllers/adminVirtualLibraryController.js';
 import {
   createSitePage,
+  createSiteSubpage,
   createSiteSubdivision,
   deleteSitePage,
+  deleteSiteSubpage,
   deleteSiteSubdivision,
   getSiteContentAdminData,
   uploadSiteContentImage,
   updateSitePage,
+  updateSiteSubpage,
   updateSiteSubdivision,
 } from '../controllers/adminSiteContentController.js';
 import { siteContentImageUpload } from '../middleware/upload.js';
@@ -128,6 +131,9 @@ router.delete('/site-content/subdivisions/:id', deleteSiteSubdivision);
 router.post('/site-content/pages', createSitePage);
 router.put('/site-content/pages/:id', updateSitePage);
 router.delete('/site-content/pages/:id', deleteSitePage);
+router.post('/site-content/subpages', createSiteSubpage);
+router.put('/site-content/subpages/:id', updateSiteSubpage);
+router.delete('/site-content/subpages/:id', deleteSiteSubpage);
 router.post('/site-content/images', siteContentImageUpload.single('image'), uploadSiteContentImage);
 
 export default router;

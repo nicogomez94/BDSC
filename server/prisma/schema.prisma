@@ -224,10 +224,27 @@ model SitePage {
   summary       String?
   content       String?
   sortOrder     Int            @default(0)
+  subpages      SiteSubpage[]
   subdivision   SiteSubdivision @relation(fields: [subdivisionId], references: [id], onDelete: Cascade)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   @@unique([subdivisionId, slug])
   @@map("site_pages")
+}
+
+model SiteSubpage {
+  id        Int      @id @default(autoincrement())
+  pageId    Int
+  title     String
+  slug      String
+  summary   String?
+  content   String?
+  sortOrder Int      @default(0)
+  page      SitePage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pageId, slug])
+  @@map("site_subpages")
 }

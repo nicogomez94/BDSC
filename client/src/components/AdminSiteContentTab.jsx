@@ -23,12 +23,22 @@ const emptyPageForm = {
   sortOrder: 0,
 };
 
+const emptySubpageForm = {
+  pageId: '',
+  title: '',
+  summary: '',
+  content: '',
+  sortOrder: 0,
+};
+
 const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
   const [subdivisionForm, setSubdivisionForm] = useState(emptySubdivisionForm);
   const [pageForm, setPageForm] = useState(emptyPageForm);
+  const [subpageForm, setSubpageForm] = useState(emptySubpageForm);
   const [modalType, setModalType] = useState(null);
   const [editingSubdivision, setEditingSubdivision] = useState(null);
   const [editingPage, setEditingPage] = useState(null);
+  const [editingSubpage, setEditingSubpage] = useState(null);
 
   const groupedData = useMemo(
     () =>
@@ -39,10 +49,30 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
     [data]
   );
 
+  const allPages = useMemo(
+    () =>
+      data.flatMap((subdivision) =>
+        (subdivision.pages || []).map((page) => ({
+          ...page,
+          subdivisionId: subdivision.id,
+          subdivisionName: subdivision.name,
+          sectionKey: subdivision.sectionKey,
+          sectionLabel: subdivision.sectionKey === SITE_SECTION_KEYS.COORDINACION ? 'Coordinación' : 'Recursos',
+        }))
+      ),
+    [data]
+  );
+
+  const editablePages = useMemo(
+    () => allPages.filter((page) => !page.isReadOnly && !page.isSystemPage),
+    [allPages]
+  );
+
   const closeModal = () => {
     setModalType(null);
     setEditingSubdivision(null);
     setEditingPage(null);
+    setEditingSubpage(null);
   };
 
   const openCreateSubdivisionModal = () => {
@@ -80,6 +110,28 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
     });
     setEditingPage(page);
     setModalType('edit-page');
+  };
+
+  const openCreateSubpageModal = (pageId = '') => {
+    setSubpageForm({
+      ...emptySubpageForm,
+      pageId: pageId ? String(pageId) : '',
+    });
+    setEditingSubpage(null);
+    setModalType('create-subpage');
+  };
+
+  const openEditSubpageModal = (subpage, pageId) => {
+    if (subpage?.isReadOnly || subpage?.isSystemPage) return;
+    setSubpageForm({
+      pageId: String(pageId || ''),
+      title: subpage.title || '',
+      summary: subpage.summary || '',
+      content: subpage.content || '',
+      sortOrder: Number(subpage.sortOrder) || 0,
+    });
+    setEditingSubpage(subpage);
+    setModalType('edit-subpage');
   };
 
   const handleSubmitSubdivision = async (e) => {
@@ -126,6 +178,30 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
     });
   };
 
+  const handleSubmitSubpage = async (e) => {
+    e.preventDefault();
+    await withLoad(async () => {
+      const isEditing = Boolean(editingSubpage);
+      if (editingSubpage) {
+        await api.admin.updateSiteSubpage(editingSubpage.id, {
+          title: subpageForm.title,
+          summary: subpageForm.summary || '',
+          content: subpageForm.content || '',
+          sortOrder: Number(subpageForm.sortOrder) || 0,
+        });
+      } else {
+        await api.admin.createSiteSubpage({
+          ...subpageForm,
+          pageId: Number(subpageForm.pageId),
+        });
+      }
+      setSubpageForm(emptySubpageForm);
+      closeModal();
+      await onReload();
+      onNotifySuccess?.(isEditing ? 'Subpágina actualizada correctamente.' : 'Subpágina creada correctamente.');
+    });
+  };
+
   const handleUploadPageImage = async (file) => {
     if (!file) throw new Error('Seleccioná una imagen.');
     return api.admin.uploadSiteContentImage(file);
@@ -136,6 +212,8 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
     'edit-subdivision': 'Editar subdivisión',
     'create-page': 'Crear página',
     'edit-page': 'Editar página',
+    'create-subpage': 'Crear subpágina',
+    'edit-subpage': 'Editar subpágina',
   };
 
   const renderModalBody = () => {
@@ -245,6 +323,72 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
       );
     }
 
+    if (modalType === 'create-subpage' || modalType === 'edit-subpage') {
+      return (
+        <form className="admin-form" onSubmit={handleSubmitSubpage}>
+          {!editingSubpage && (
+            <div className="form-group">
+              <label>Página padre</label>
+              <select
+                value={subpageForm.pageId}
+                onChange={(e) => setSubpageForm((current) => ({ ...current, pageId: e.target.value }))}
+                required
+                disabled={editablePages.length === 0}
+              >
+                <option value="">Seleccionar</option>
+                {editablePages.map((page) => (
+                  <option key={page.id} value={page.id}>
+                    {page.sectionLabel} - {page.subdivisionName} - {page.title}
+                  </option>
+                ))}
+              </select>
+              {editablePages.length === 0 && (
+                <p className="site-content-lock-note">No hay páginas disponibles para crear subpáginas.</p>
+              )}
+            </div>
+          )}
+          <div className="form-group">
+            <label>Título de subpágina</label>
+            <input
+              value={subpageForm.title}
+              onChange={(e) => setSubpageForm((current) => ({ ...current, title: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Resumen</label>
+            <input
+              value={subpageForm.summary}
+              onChange={(e) => setSubpageForm((current) => ({ ...current, summary: e.target.value }))}
+            />
+          </div>
+          <div className="form-group">
+            <label>Contenido</label>
+            <RichTextEditor
+              value={subpageForm.content}
+              onChange={(content) => setSubpageForm((current) => ({ ...current, content }))}
+              onUploadImage={handleUploadPageImage}
+            />
+          </div>
+          <div className="form-group">
+            <label>Orden</label>
+            <input
+              type="number"
+              value={subpageForm.sortOrder}
+              onChange={(e) => setSubpageForm((current) => ({ ...current, sortOrder: Number(e.target.value) }))}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={!editingSubpage && editablePages.length === 0}
+          >
+            {editingSubpage ? 'Guardar cambios' : 'Crear subpágina'}
+          </button>
+        </form>
+      );
+    }
+
     return null;
   };
 
@@ -255,6 +399,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
       <div className="tab-actions">
         <button type="button" className="btn-primary" onClick={openCreateSubdivisionModal}>Crear subdivisión</button>
         <button type="button" className="btn-primary" onClick={openCreatePageModal}>Crear página</button>
+        <button type="button" className="btn-primary" onClick={() => openCreateSubpageModal()}>Crear subpágina</button>
       </div>
 
       <div className="sections-list">
@@ -302,37 +447,93 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
                 {subdivision.pages?.length > 0 ? (
                   <ul className="virtual-library-videos">
                     {subdivision.pages.map((page) => (
-                      <li key={page.id}>
-                        <span>
-                          {page.title}
-                          {(page.isSystemPage || page.isReadOnly) && <span className="system-badge">Sistema</span>}
-                        </span>
-                        <div className="row-actions">
-                          {!page.isReadOnly && !page.isSystemPage && (
-                            <>
-                              <button
-                                className="btn-secondary btn-small"
-                                type="button"
-                                onClick={() => openEditPageModal(page, subdivision.id)}
-                              >
-                                Editar
-                              </button>
-                              <button
-                                className="btn-danger btn-small"
-                                type="button"
-                                onClick={() => {
-                                  if (!confirm('¿Eliminar página?')) return;
-                                  withLoad(async () => {
-                                    await api.admin.deleteSitePage(page.id);
-                                    await onReload();
-                                  });
-                                }}
-                              >
-                                Eliminar
-                              </button>
-                            </>
-                          )}
+                      <li key={page.id} className="site-content-page-row">
+                        <div className="site-content-page-main">
+                          <span>
+                            {page.title}
+                            {(page.isSystemPage || page.isReadOnly) && <span className="system-badge">Sistema</span>}
+                          </span>
+                          <div className="row-actions">
+                            {!page.isReadOnly && !page.isSystemPage && (
+                              <>
+                                <button
+                                  className="btn-secondary btn-small"
+                                  type="button"
+                                  onClick={() => openEditPageModal(page, subdivision.id)}
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  className="btn-secondary btn-small"
+                                  type="button"
+                                  onClick={() => openCreateSubpageModal(page.id)}
+                                >
+                                  Nueva subpágina
+                                </button>
+                                <button
+                                  className="btn-danger btn-small"
+                                  type="button"
+                                  onClick={() => {
+                                    if (!confirm('¿Eliminar página?')) return;
+                                    withLoad(async () => {
+                                      await api.admin.deleteSitePage(page.id);
+                                      await onReload();
+                                    });
+                                  }}
+                                >
+                                  Eliminar
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
+
+                        {(page.isSystemPage || page.isReadOnly) && (
+                          <p className="site-content-lock-note">Las páginas de sistema no permiten subpáginas.</p>
+                        )}
+
+                        {page.subpages?.length > 0 && (
+                          <ul className="site-content-subpages">
+                            {page.subpages.map((subpage) => (
+                              <li key={subpage.id}>
+                                <span>
+                                  {subpage.title}
+                                  {(subpage.isSystemPage || subpage.isReadOnly) && <span className="system-badge">Sistema</span>}
+                                </span>
+                                <div className="row-actions">
+                                  {!subpage.isReadOnly && !subpage.isSystemPage && (
+                                    <>
+                                      <button
+                                        className="btn-secondary btn-small"
+                                        type="button"
+                                        onClick={() => openEditSubpageModal(subpage, page.id)}
+                                      >
+                                        Editar
+                                      </button>
+                                      <button
+                                        className="btn-danger btn-small"
+                                        type="button"
+                                        onClick={() => {
+                                          if (!confirm('¿Eliminar subpágina?')) return;
+                                          withLoad(async () => {
+                                            await api.admin.deleteSiteSubpage(subpage.id);
+                                            await onReload();
+                                          });
+                                        }}
+                                      >
+                                        Eliminar
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {!page.isReadOnly && !page.isSystemPage && (!page.subpages || page.subpages.length === 0) && (
+                          <p className="site-content-empty-subpages">Sin subpáginas.</p>
+                        )}
                       </li>
                     ))}
                   </ul>

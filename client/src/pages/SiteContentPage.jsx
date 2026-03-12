@@ -18,12 +18,14 @@ const getPagePath = (sectionKey, subdivisionSlug, pageSlug) => {
   }
   return `/contenido/${sectionKey.toLowerCase()}/${subdivisionSlug}/${pageSlug}`;
 };
+const getSubpagePath = (sectionKey, subdivisionSlug, pageSlug, subpageSlug) =>
+  `${getPagePath(sectionKey, subdivisionSlug, pageSlug)}/${subpageSlug}`;
 
 const SiteContentPage = () => {
-  const { sectionKeySlug, subdivisionSlug, pageSlug } = useParams();
+  const { sectionKeySlug, subdivisionSlug, pageSlug, subpageSlug } = useParams();
   const sectionKey = normalizeSectionKey(sectionKeySlug);
   const isAttendanceSystemPage =
-    sectionKey === 'COORDINACION' && subdivisionSlug === 'operacion' && pageSlug === 'asistencia';
+    sectionKey === 'COORDINACION' && subdivisionSlug === 'operacion' && pageSlug === 'asistencia' && !subpageSlug;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pageData, setPageData] = useState(null);
@@ -39,7 +41,9 @@ const SiteContentPage = () => {
       setLoading(true);
       setError('');
       try {
-        const data = await api.siteContent.getPage(sectionKey, subdivisionSlug, pageSlug);
+        const data = subpageSlug
+          ? await api.siteContent.getSubpage(sectionKey, subdivisionSlug, pageSlug, subpageSlug)
+          : await api.siteContent.getPage(sectionKey, subdivisionSlug, pageSlug);
         if (mounted) setPageData(data);
       } catch (err) {
         if (mounted) setError(err.message || 'No se pudo cargar la página.');
@@ -52,15 +56,18 @@ const SiteContentPage = () => {
     return () => {
       mounted = false;
     };
-  }, [sectionKey, subdivisionSlug, pageSlug]);
+  }, [sectionKey, subdivisionSlug, pageSlug, subpageSlug]);
 
   const sectionRoute = sectionKey === 'RECURSOS' ? '/recursos' : '/coordinacion';
+  const activeTitle = pageData?.subpage?.title || pageData?.page?.title || 'Página';
+  const activeSummary = pageData?.subpage?.summary ?? pageData?.page?.summary ?? '';
+  const activeContent = pageData?.subpage?.content ?? pageData?.page?.content ?? '';
 
   return (
     <div className="site-content-page">
       <header className="site-content-hero">
         <div className="container">
-          <h1>{pageData?.page?.title || 'Página'}</h1>
+          <h1>{activeTitle}</h1>
           <p>{sectionLabel(sectionKey)}</p>
         </div>
       </header>
@@ -72,12 +79,15 @@ const SiteContentPage = () => {
         {!loading && !error && pageData && (
           <article className="site-content-card">
             <p className="site-content-breadcrumb">
-              {pageData.subdivision.name} / {pageData.page.title}
+              {pageData.subdivision.name}
+              {' / '}
+              {pageData.page.title}
+              {pageData.subpage ? ` / ${pageData.subpage.title}` : ''}
             </p>
-            {pageData.page.summary && <p className="site-content-summary">{pageData.page.summary}</p>}
+            {activeSummary && <p className="site-content-summary">{activeSummary}</p>}
             <div className="site-content-text">
-              {pageData.page.content ? (
-                <div dangerouslySetInnerHTML={{ __html: pageData.page.content }} />
+              {activeContent ? (
+                <div dangerouslySetInnerHTML={{ __html: activeContent }} />
               ) : (
                 <p>Contenido en armado.</p>
               )}
@@ -92,6 +102,26 @@ const SiteContentPage = () => {
                     className={page.slug === pageData.page.slug ? 'active' : ''}
                   >
                     {page.title}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {pageData.subpages?.length > 0 && (
+              <div className="site-content-links">
+                <Link
+                  to={getPagePath(sectionKey, pageData.subdivision.slug, pageData.page.slug)}
+                  className={!pageData.subpage ? 'active' : ''}
+                >
+                  {pageData.page.title}
+                </Link>
+                {pageData.subpages.map((subpage) => (
+                  <Link
+                    key={subpage.id}
+                    to={getSubpagePath(sectionKey, pageData.subdivision.slug, pageData.page.slug, subpage.slug)}
+                    className={subpage.slug === pageData.subpage?.slug ? 'active' : ''}
+                  >
+                    {subpage.title}
                   </Link>
                 ))}
               </div>

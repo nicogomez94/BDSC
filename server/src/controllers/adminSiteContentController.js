@@ -6,6 +6,7 @@ const normalizeSectionKey = (value) => String(value || '').toUpperCase();
 const normalizeSlug = (value) => String(value || '').trim().toLowerCase();
 const SYSTEM_PAGE_LOCK_ERROR = 'Página de sistema no editable';
 const SYSTEM_SUBDIVISION_LOCK_ERROR = 'Subdivisión con páginas de sistema no editable';
+const SYSTEM_SUBPAGE_LOCK_ERROR = 'No se pueden gestionar subpáginas en páginas de sistema';
 const PROTECTED_SYSTEM_PAGES = [
   { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'entrenadores' },
   { sectionKey: 'COORDINACION', subdivisionSlug: 'gestion-interna', pageSlug: 'preparadores-fisicos' },
@@ -40,6 +41,11 @@ export const getSiteContentAdminData = async (req, res, next) => {
       include: {
         pages: {
           orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+          include: {
+            subpages: {
+              orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+            },
+          },
         },
       },
     });
@@ -50,6 +56,12 @@ export const getSiteContentAdminData = async (req, res, next) => {
         return {
           ...page,
           content: sanitizeSitePageContent(page.content),
+          subpages: (page.subpages || []).map((subpage) => ({
+            ...subpage,
+            content: sanitizeSitePageContent(subpage.content),
+            isSystemPage,
+            isReadOnly: isSystemPage,
+          })),
           isSystemPage,
           isReadOnly: isSystemPage,
         };
@@ -201,6 +213,46 @@ export const createSitePage = async (req, res, next) => {
   }
 };
 
+export const createSiteSubpage = async (req, res, next) => {
+  try {
+    const { pageId, title, summary, content, sortOrder } = req.body;
+    const errors = validateRequired(['pageId', 'title'], { pageId, title });
+    if (errors.length > 0) return res.status(400).json({ error: errors.join(', ') });
+
+    const page = await prisma.sitePage.findUnique({
+      where: { id: Number(pageId) },
+      include: {
+        subdivision: {
+          select: {
+            sectionKey: true,
+            slug: true,
+          },
+        },
+      },
+    });
+    if (!page) return res.status(404).json({ error: 'Página no encontrada' });
+    if (isProtectedSystemPage(page.subdivision.sectionKey, page.subdivision.slug, page.slug)) {
+      return res.status(403).json({ error: SYSTEM_SUBPAGE_LOCK_ERROR });
+    }
+
+    const subpage = await prisma.siteSubpage.create({
+      data: {
+        pageId: Number(pageId),
+        title,
+        slug: generateSlug(title),
+        summary: summary || null,
+        content: sanitizeSitePageContent(content),
+        sortOrder: parseSortOrder(sortOrder),
+      },
+    });
+
+    res.status(201).json(subpage);
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una subpágina con ese nombre' });
+    next(error);
+  }
+};
+
 export const updateSitePage = async (req, res, next) => {
   try {
     const pageId = Number(req.params.id);
@@ -255,6 +307,51 @@ export const uploadSiteContentImage = async (req, res, next) => {
   }
 };
 
+export const updateSiteSubpage = async (req, res, next) => {
+  try {
+    const subpageId = Number(req.params.id);
+    const { title, summary, content, sortOrder } = req.body;
+    const currentSubpage = await prisma.siteSubpage.findUnique({
+      where: { id: subpageId },
+      include: {
+        page: {
+          include: {
+            subdivision: {
+              select: {
+                sectionKey: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!currentSubpage) return res.status(404).json({ error: 'Subpágina no encontrada' });
+    if (isProtectedSystemPage(currentSubpage.page.subdivision.sectionKey, currentSubpage.page.subdivision.slug, currentSubpage.page.slug)) {
+      return res.status(403).json({ error: SYSTEM_SUBPAGE_LOCK_ERROR });
+    }
+
+    const data = {};
+    if (title !== undefined) {
+      data.title = title;
+      data.slug = generateSlug(title);
+    }
+    if (summary !== undefined) data.summary = summary || null;
+    if (content !== undefined) data.content = sanitizeSitePageContent(content);
+    if (sortOrder !== undefined) data.sortOrder = parseSortOrder(sortOrder);
+
+    const subpage = await prisma.siteSubpage.update({
+      where: { id: subpageId },
+      data,
+    });
+
+    res.json(subpage);
+  } catch (error) {
+    if (error.code === 'P2002') return res.status(409).json({ error: 'Ya existe una subpágina con ese nombre' });
+    next(error);
+  }
+};
+
 export const deleteSitePage = async (req, res, next) => {
   try {
     const pageId = Number(req.params.id);
@@ -276,6 +373,36 @@ export const deleteSitePage = async (req, res, next) => {
 
     await prisma.sitePage.delete({ where: { id: pageId } });
     res.json({ message: 'Página eliminada' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSiteSubpage = async (req, res, next) => {
+  try {
+    const subpageId = Number(req.params.id);
+    const subpage = await prisma.siteSubpage.findUnique({
+      where: { id: subpageId },
+      include: {
+        page: {
+          include: {
+            subdivision: {
+              select: {
+                sectionKey: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!subpage) return res.status(404).json({ error: 'Subpágina no encontrada' });
+    if (isProtectedSystemPage(subpage.page.subdivision.sectionKey, subpage.page.subdivision.slug, subpage.page.slug)) {
+      return res.status(403).json({ error: SYSTEM_SUBPAGE_LOCK_ERROR });
+    }
+
+    await prisma.siteSubpage.delete({ where: { id: subpageId } });
+    res.json({ message: 'Subpágina eliminada' });
   } catch (error) {
     next(error);
   }

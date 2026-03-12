@@ -26,12 +26,15 @@ const getMenuPagePath = (sectionKey, subdivisionSlug, pageSlug) => {
   }
   return `/contenido/${String(sectionKey).toLowerCase()}/${subdivisionSlug}/${pageSlug}`;
 };
+const getMenuSubpagePath = (sectionKey, subdivisionSlug, pageSlug, subpageSlug) =>
+  `${getMenuPagePath(sectionKey, subdivisionSlug, pageSlug)}/${subpageSlug}`;
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const panelPath = isAuthenticated && user?.role === 'COORDINADOR' ? '/admin' : '/panel';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
+  const [openNestedDropdowns, setOpenNestedDropdowns] = useState({});
   const [libraryMenu, setLibraryMenu] = useState([]);
   const [coordinacionMenu, setCoordinacionMenu] = useState([]);
   const [recursosMenu, setRecursosMenu] = useState([]);
@@ -83,21 +86,95 @@ const Navbar = () => {
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-    setOpenDropdown(null); // Reset dropdowns when closing menu
+    setOpenDropdown(null);
+    setOpenNestedDropdowns({});
   };
 
   const closeMenu = () => {
     setIsMenuOpen(false);
     setOpenDropdown(null);
+    setOpenNestedDropdowns({});
   };
 
   const handleDropdownClick = (e, dropdownName) => {
-    // En mobile, prevenir navegación y toggle el dropdown
     if (window.innerWidth <= 982) {
       e.preventDefault();
       setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
     }
   };
+
+  const handleSubmenuToggle = (e, key) => {
+    if (window.innerWidth > 982) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setOpenNestedDropdowns((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  };
+
+  const renderSiteDropdown = (sectionKey, sectionName, items) => (
+    <li className={`dropdown ${openDropdown === sectionName ? 'active' : ''}`}>
+      <Link to={`/${sectionName}`} onClick={(e) => handleDropdownClick(e, sectionName)}>
+        {sectionName === 'coordinacion' ? 'Coordinación' : 'Recursos'}
+      </Link>
+      <ul className="dropdown-menu">
+        {items.map((subdivision, subdivisionIndex) => (
+          <li key={subdivision.id}>
+            <span className="dropdown-group-title">{subdivision.name}</span>
+            {(subdivision.pages || []).map((page) => {
+              const hasSubpages = Array.isArray(page.subpages) && page.subpages.length > 0;
+              const nestedKey = `${sectionName}-${subdivision.id}-${page.id}`;
+
+              return (
+                <div
+                  key={page.id}
+                  className={`dropdown-page-item ${hasSubpages ? 'has-submenu' : ''} ${openNestedDropdowns[nestedKey] ? 'submenu-open' : ''}`}
+                >
+                  <div className="dropdown-page-main">
+                    <Link
+                      className="dropdown-page-link"
+                      to={getMenuPagePath(sectionKey, subdivision.slug, page.slug)}
+                      onClick={closeMenu}
+                    >
+                      {page.title}
+                    </Link>
+                    {hasSubpages && (
+                      <button
+                        type="button"
+                        className="dropdown-submenu-toggle"
+                        onClick={(e) => handleSubmenuToggle(e, nestedKey)}
+                        aria-label={`Mostrar subpáginas de ${page.title}`}
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+
+                  {hasSubpages && (
+                    <ul className="dropdown-submenu">
+                      {page.subpages.map((subpage) => (
+                        <li key={subpage.id}>
+                          <Link
+                            className="dropdown-submenu-link"
+                            to={getMenuSubpagePath(sectionKey, subdivision.slug, page.slug, subpage.slug)}
+                            onClick={closeMenu}
+                          >
+                            {subpage.title}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+            {subdivisionIndex < items.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
+          </li>
+        ))}
+      </ul>
+    </li>
+  );
 
   return (
     <nav className="navbar">
@@ -126,48 +203,9 @@ const Navbar = () => {
 
           <ul className="navbar-menu">
             <li><Link to="/" onClick={closeMenu}>Inicio</Link></li>
-            
-            <li className={`dropdown ${openDropdown === 'coordinacion' ? 'active' : ''}`}>
-              <Link to="/coordinacion" onClick={(e) => handleDropdownClick(e, 'coordinacion')}>Coordinación</Link>
-              <ul className="dropdown-menu">
-                {coordinacionMenu.map((subdivision, subdivisionIndex) => (
-                  <li key={subdivision.id}>
-                    <span className="dropdown-group-title">{subdivision.name}</span>
-                    {(subdivision.pages || []).map((page) => (
-                      <Link
-                        key={page.id}
-                        to={getMenuPagePath(SITE_SECTION_KEYS.COORDINACION, subdivision.slug, page.slug)}
-                        onClick={closeMenu}
-                      >
-                        {page.title}
-                      </Link>
-                    ))}
-                    {subdivisionIndex < coordinacionMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
-                  </li>
-                ))}
-              </ul>
-            </li>
-            
-            <li className={`dropdown ${openDropdown === 'recursos' ? 'active' : ''}`}>
-              <Link to="/recursos" onClick={(e) => handleDropdownClick(e, 'recursos')}>Recursos</Link>
-              <ul className="dropdown-menu">
-                {recursosMenu.map((subdivision, subdivisionIndex) => (
-                  <li key={subdivision.id}>
-                    <span className="dropdown-group-title">{subdivision.name}</span>
-                    {(subdivision.pages || []).map((page) => (
-                      <Link
-                        key={page.id}
-                        to={getMenuPagePath(SITE_SECTION_KEYS.RECURSOS, subdivision.slug, page.slug)}
-                        onClick={closeMenu}
-                      >
-                        {page.title}
-                      </Link>
-                    ))}
-                    {subdivisionIndex < recursosMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
-                  </li>
-                ))}
-              </ul>
-            </li>
+
+            {renderSiteDropdown(SITE_SECTION_KEYS.COORDINACION, 'coordinacion', coordinacionMenu)}
+            {renderSiteDropdown(SITE_SECTION_KEYS.RECURSOS, 'recursos', recursosMenu)}
 
             <li className={`dropdown ${openDropdown === 'biblioteca-virtual' ? 'active' : ''}`}>
               <Link to={defaultLibraryPath} onClick={(e) => handleDropdownClick(e, 'biblioteca-virtual')}>

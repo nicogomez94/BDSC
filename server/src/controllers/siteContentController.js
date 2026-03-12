@@ -3,6 +3,17 @@ import { sanitizeSitePageContent } from '../utils/siteContentHtml.js';
 import { listDivisions, getDivisionAttendanceMatrix } from '../services/attendanceService.js';
 
 const normalizeSectionKey = (value) => String(value || '').toUpperCase();
+const normalizeSubpages = (subpages = []) =>
+  subpages.map((item) => ({
+    ...item,
+    content: sanitizeSitePageContent(item.content),
+  }));
+
+const normalizePageWithSubpages = (page) => ({
+  ...page,
+  content: sanitizeSitePageContent(page.content),
+  subpages: normalizeSubpages(page.subpages || []),
+});
 
 export const getSiteContentBySection = async (req, res, next) => {
   try {
@@ -17,6 +28,11 @@ export const getSiteContentBySection = async (req, res, next) => {
       include: {
         pages: {
           orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+          include: {
+            subpages: {
+              orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+            },
+          },
         },
       },
     });
@@ -24,10 +40,7 @@ export const getSiteContentBySection = async (req, res, next) => {
     res.json(
       subdivisions.map((subdivision) => ({
         ...subdivision,
-        pages: (subdivision.pages || []).map((page) => ({
-          ...page,
-          content: sanitizeSitePageContent(page.content),
-        })),
+        pages: (subdivision.pages || []).map(normalizePageWithSubpages),
       }))
     );
   } catch (error) {
@@ -49,6 +62,11 @@ export const getSitePage = async (req, res, next) => {
       include: {
         pages: {
           orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+          include: {
+            subpages: {
+              orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+            },
+          },
         },
       },
     });
@@ -57,10 +75,7 @@ export const getSitePage = async (req, res, next) => {
       return res.status(404).json({ error: 'Subdivisión no encontrada' });
     }
 
-    const normalizedPages = (subdivision.pages || []).map((item) => ({
-      ...item,
-      content: sanitizeSitePageContent(item.content),
-    }));
+    const normalizedPages = (subdivision.pages || []).map(normalizePageWithSubpages);
 
     const normalizedPage = normalizedPages.find((item) => item.slug === pageSlug);
     if (!normalizedPage) {
@@ -77,6 +92,63 @@ export const getSitePage = async (req, res, next) => {
       },
       page: normalizedPage,
       pages: normalizedPages,
+      subpages: normalizedPage.subpages || [],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSiteSubpage = async (req, res, next) => {
+  try {
+    const sectionKey = normalizeSectionKey(req.params.sectionKey);
+    const { subdivisionSlug, pageSlug, subpageSlug } = req.params;
+
+    if (!['COORDINACION', 'RECURSOS'].includes(sectionKey)) {
+      return res.status(400).json({ error: 'sectionKey inválido' });
+    }
+
+    const subdivision = await prisma.siteSubdivision.findFirst({
+      where: { sectionKey, slug: subdivisionSlug },
+      include: {
+        pages: {
+          orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+          include: {
+            subpages: {
+              orderBy: [{ sortOrder: 'asc' }, { title: 'asc' }],
+            },
+          },
+        },
+      },
+    });
+
+    if (!subdivision) {
+      return res.status(404).json({ error: 'Subdivisión no encontrada' });
+    }
+
+    const normalizedPages = (subdivision.pages || []).map(normalizePageWithSubpages);
+    const normalizedPage = normalizedPages.find((item) => item.slug === pageSlug);
+    if (!normalizedPage) {
+      return res.status(404).json({ error: 'Página no encontrada' });
+    }
+
+    const normalizedSubpage = (normalizedPage.subpages || []).find((item) => item.slug === subpageSlug);
+    if (!normalizedSubpage) {
+      return res.status(404).json({ error: 'Subpágina no encontrada' });
+    }
+
+    res.json({
+      sectionKey,
+      subdivision: {
+        id: subdivision.id,
+        name: subdivision.name,
+        slug: subdivision.slug,
+        description: subdivision.description,
+      },
+      page: normalizedPage,
+      pages: normalizedPages,
+      subpage: normalizedSubpage,
+      subpages: normalizedPage.subpages || [],
     });
   } catch (error) {
     next(error);

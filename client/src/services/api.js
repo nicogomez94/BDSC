@@ -92,6 +92,14 @@ export const api = {
       );
     },
 
+    getSubpage: async (sectionKey, subdivisionSlug, pageSlug, subpageSlug) => {
+      return requestJson(
+        `${API_URL}/site-content/${sectionKey}/${subdivisionSlug}/${pageSlug}/${subpageSlug}`,
+        {},
+        'Error al obtener subpágina'
+      );
+    },
+
     getAttendanceDivisions: async (filters = {}) => {
       return requestJson(
         `${API_URL}/site-content/attendance/divisions/list${buildQueryString(filters)}`,
@@ -741,6 +749,47 @@ export const api = {
           headers: getAuthHeader(),
         },
         'Error al eliminar página'
+      );
+    },
+
+    createSiteSubpage: async (data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subpages`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear subpágina'
+      );
+    },
+
+    updateSiteSubpage: async (id, data) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subpages/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar subpágina'
+      );
+    },
+
+    deleteSiteSubpage: async (id) => {
+      return requestJson(
+        `${API_URL}/admin/site-content/subpages/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar subpágina'
       );
     },
 

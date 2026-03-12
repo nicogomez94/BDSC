@@ -49,6 +49,7 @@ function App() {
                 path="/contenido/coordinacion/operacion/asistencia"
                 element={<Navigate to="/coordinacion/operacion/asistencia" replace />}
               />
+              <Route path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug/:subpageSlug" element={<SiteContentPage />} />
               <Route path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug" element={<SiteContentPage />} />
               <Route path="/biblioteca-virtual/:sectionSlug/:categorySlug" element={<VirtualLibraryCategory />} />
               <Route path="/contacto" element={<Contact />} />
