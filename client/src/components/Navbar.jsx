@@ -104,7 +104,6 @@ const Navbar = () => {
   };
 
   const handleSubmenuToggle = (e, key) => {
-    if (window.innerWidth > 982) return;
     e.preventDefault();
     e.stopPropagation();
     setOpenNestedDropdowns((current) => ({

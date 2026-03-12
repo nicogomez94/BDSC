@@ -13,6 +13,24 @@ const PhysicalTrainers = () => {
     loadPhysicalTrainers();
   }, []);
 
+  const handleDownloadCv = (trainer) => {
+    if (!trainer?.cvUrl) return;
+    const fileNameBase = (trainer.name || 'preparador-fisico')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    const fileName = `${fileNameBase || 'preparador-fisico'}-cv.pdf`;
+
+    const anchor = document.createElement('a');
+    anchor.href = trainer.cvUrl;
+    anchor.download = fileName;
+    anchor.target = '_blank';
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+  };
+
   useEffect(() => {
     const observerOptions = {
       root: null,
@@ -77,6 +95,15 @@ const PhysicalTrainers = () => {
                   <h3>{trainer.name}</h3>
                   {trainer.specialty && <p className="specialty">{trainer.specialty}</p>}
                   {trainer.bio && <p className="bio">{trainer.bio}</p>}
+                  {trainer.cvUrl && (
+                    <button
+                      type="button"
+                      className="cv-download-btn"
+                      onClick={() => handleDownloadCv(trainer)}
+                    >
+                      Descargar CV
+                    </button>
+                  )}
                 </div>
               </div>
             ))}

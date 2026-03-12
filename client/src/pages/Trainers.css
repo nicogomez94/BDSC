@@ -93,6 +93,25 @@
   font-size: 15px;
 }
 
+.cv-download-btn {
+  margin-top: 18px;
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary-color);
+  color: var(--white);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.cv-download-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
 .no-trainers {
   text-align: center;
   color: var(--text-light);
