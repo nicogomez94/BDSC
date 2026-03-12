@@ -137,40 +137,8 @@ const Home = () => {
         <div className="container">
           <h2>Nuestros Sponsors</h2>
           <p className="section-subtitle sponsors-subtitle">Marcas que acompañan al hockey de BDSC</p>
-        </div>
-        <div className="sponsors-track-wrapper">
-          <div className="sponsors-track">
-            {[
-              { name: 'Adidas', bg: '#000000', color: '#ffffff' },
-              { name: 'Nike', bg: '#111111', color: '#ffffff' },
-              { name: 'Gryphon', bg: '#1a4d2a', color: '#ffffff' },
-              { name: 'Kookaburra', bg: '#f5a623', color: '#ffffff' },
-              { name: 'TK Hockey', bg: '#003087', color: '#ffffff' },
-              { name: 'Dita', bg: '#e31e25', color: '#ffffff' },
-              { name: 'Reece', bg: '#ff6600', color: '#ffffff' },
-              { name: 'Grays', bg: '#2c2c2c', color: '#ffffff' },
-              { name: 'STX', bg: '#005f9e', color: '#ffffff' },
-              { name: 'Y1', bg: '#6a0dad', color: '#ffffff' },
-            ].concat([
-              { name: 'Adidas', bg: '#000000', color: '#ffffff' },
-              { name: 'Nike', bg: '#111111', color: '#ffffff' },
-              { name: 'Gryphon', bg: '#1a4d2a', color: '#ffffff' },
-              { name: 'Kookaburra', bg: '#f5a623', color: '#ffffff' },
-              { name: 'TK Hockey', bg: '#003087', color: '#ffffff' },
-              { name: 'Dita', bg: '#e31e25', color: '#ffffff' },
-              { name: 'Reece', bg: '#ff6600', color: '#ffffff' },
-              { name: 'Grays', bg: '#2c2c2c', color: '#ffffff' },
-              { name: 'STX', bg: '#005f9e', color: '#ffffff' },
-              { name: 'Y1', bg: '#6a0dad', color: '#ffffff' },
-            ]).map((sponsor, i) => (
-              <div
-                key={i}
-                className="sponsor-logo"
-                style={{ backgroundColor: sponsor.bg, color: sponsor.color }}
-              >
-                <span>{sponsor.name}</span>
-              </div>
-            ))}
+          <div className="sponsor-image-wrapper">
+            <img src="/Zona.jpg" alt="Zona Z" className="sponsor-image" />
           </div>
         </div>
       </section>
