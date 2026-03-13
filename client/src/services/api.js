@@ -807,6 +807,21 @@ export const api = {
         'Error al subir imagen'
       );
     },
+
+    uploadSiteContentPdf: async (file) => {
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      return requestJson(
+        `${API_URL}/admin/site-content/pdfs`,
+        {
+          method: 'POST',
+          headers: getAuthHeader(),
+          body: formData,
+        },
+        'Error al subir PDF'
+      );
+    },
   },
 
   trainer: {

@@ -43,6 +43,7 @@ const sanitizeOptions = {
     'hr',
     'a',
     'img',
+    'iframe',
     'table',
     'thead',
     'tbody',
@@ -53,6 +54,7 @@ const sanitizeOptions = {
   allowedAttributes: {
     a: ['href', 'target', 'rel'],
     img: ['src', 'alt', 'title'],
+    iframe: ['src', 'title', 'width', 'height', 'loading', 'frameborder', 'class', 'data-pdf-embed'],
     th: ['colspan', 'rowspan'],
     td: ['colspan', 'rowspan'],
     p: ['style'],

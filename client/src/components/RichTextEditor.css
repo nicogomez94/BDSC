@@ -89,6 +89,16 @@
   margin: 10px auto;
 }
 
+.rte-editor-content iframe[data-pdf-embed] {
+  width: 100%;
+  min-height: 520px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #121212;
+  display: block;
+  margin: 12px 0;
+}
+
 .rte-table-actions {
   display: flex;
   flex-wrap: wrap;

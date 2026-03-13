@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
+import { Node, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
@@ -30,8 +31,50 @@ const MENU_BUTTONS = [
   { label: 'Just', command: (editor) => editor.chain().focus().setTextAlign('justify').run() },
 ];
 
-const RichTextEditor = ({ value, onChange, onUploadImage }) => {
-  const fileInputRef = useRef(null);
+const PdfEmbed = Node.create({
+  name: 'pdfEmbed',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      title: {
+        default: 'Documento PDF',
+      },
+      width: {
+        default: '100%',
+      },
+      height: {
+        default: '720',
+      },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'iframe[data-pdf-embed="true"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'iframe',
+      mergeAttributes(
+        {
+          'data-pdf-embed': 'true',
+          class: 'rte-pdf-embed',
+          loading: 'lazy',
+          frameborder: '0',
+        },
+        HTMLAttributes
+      ),
+    ];
+  },
+});
+
+const RichTextEditor = ({ value, onChange, onUploadImage, onUploadPdf }) => {
+  const imageFileInputRef = useRef(null);
+  const pdfFileInputRef = useRef(null);
 
   const editor = useEditor({
     extensions: [
@@ -43,6 +86,7 @@ const RichTextEditor = ({ value, onChange, onUploadImage }) => {
         defaultProtocol: 'https',
       }),
       Image,
+      PdfEmbed,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
@@ -91,7 +135,11 @@ const RichTextEditor = ({ value, onChange, onUploadImage }) => {
   };
 
   const handleOpenFilePicker = () => {
-    fileInputRef.current?.click();
+    imageFileInputRef.current?.click();
+  };
+
+  const handleOpenPdfPicker = () => {
+    pdfFileInputRef.current?.click();
   };
 
   const handleImageUpload = async (event) => {
@@ -106,6 +154,35 @@ const RichTextEditor = ({ value, onChange, onUploadImage }) => {
       editor.chain().focus().setImage({ src: result.url, alt: file.name }).run();
     } catch (error) {
       alert(error.message || 'No se pudo subir la imagen.');
+    }
+  };
+
+  const handlePdfUpload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !editor) return;
+    if (!onUploadPdf) {
+      alert('La subida de PDF no está disponible.');
+      return;
+    }
+
+    try {
+      const result = await onUploadPdf(file);
+      if (!result?.url) throw new Error('No se pudo obtener URL del PDF.');
+
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'pdfEmbed',
+          attrs: {
+            src: `${result.url}#view=FitH`,
+            title: file.name || 'Documento PDF',
+          },
+        })
+        .run();
+    } catch (error) {
+      alert(error.message || 'No se pudo subir el PDF.');
     }
   };
 
@@ -126,6 +203,7 @@ const RichTextEditor = ({ value, onChange, onUploadImage }) => {
         ))}
         <button type="button" onClick={addLink}>Link</button>
         <button type="button" onClick={handleOpenFilePicker}>Imagen</button>
+        {onUploadPdf && <button type="button" onClick={handleOpenPdfPicker}>PDF</button>}
         <button type="button" onClick={addTable}>Tabla</button>
         <button type="button" onClick={() => editor.chain().focus().undo().run()}>Undo</button>
         <button type="button" onClick={() => editor.chain().focus().redo().run()}>Redo</button>
@@ -144,10 +222,17 @@ const RichTextEditor = ({ value, onChange, onUploadImage }) => {
       </div>
 
       <input
-        ref={fileInputRef}
+        ref={imageFileInputRef}
         type="file"
         accept="image/*"
         onChange={handleImageUpload}
+        className="rte-hidden-file"
+      />
+      <input
+        ref={pdfFileInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        onChange={handlePdfUpload}
         className="rte-hidden-file"
       />
     </div>

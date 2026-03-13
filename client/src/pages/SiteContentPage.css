@@ -71,6 +71,16 @@
   border-radius: 8px;
 }
 
+.site-content-text iframe[data-pdf-embed] {
+  width: 100%;
+  min-height: 720px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: #111;
+  display: block;
+  margin: 14px 0;
+}
+
 .site-content-text table {
   width: 100%;
   border-collapse: collapse;

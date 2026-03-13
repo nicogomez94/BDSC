@@ -207,6 +207,11 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
     return api.admin.uploadSiteContentImage(file);
   };
 
+  const handleUploadPagePdf = async (file) => {
+    if (!file) throw new Error('Seleccioná un PDF.');
+    return api.admin.uploadSiteContentPdf(file);
+  };
+
   const modalTitleByType = {
     'create-subdivision': 'Crear subdivisión',
     'edit-subdivision': 'Editar subdivisión',
@@ -306,6 +311,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
               value={pageForm.content}
               onChange={(content) => setPageForm((current) => ({ ...current, content }))}
               onUploadImage={handleUploadPageImage}
+              onUploadPdf={handleUploadPagePdf}
             />
           </div>
           <div className="form-group">
@@ -368,6 +374,7 @@ const AdminSiteContentTab = ({ data, onReload, withLoad, onNotifySuccess }) => {
               value={subpageForm.content}
               onChange={(content) => setSubpageForm((current) => ({ ...current, content }))}
               onUploadImage={handleUploadPageImage}
+              onUploadPdf={handleUploadPagePdf}
             />
           </div>
           <div className="form-group">

@@ -54,11 +54,12 @@ import {
   deleteSiteSubdivision,
   getSiteContentAdminData,
   uploadSiteContentImage,
+  uploadSiteContentPdf,
   updateSitePage,
   updateSiteSubpage,
   updateSiteSubdivision,
 } from '../controllers/adminSiteContentController.js';
-import { siteContentImageUpload } from '../middleware/upload.js';
+import { siteContentImageUpload, siteContentPdfUpload } from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -135,5 +136,6 @@ router.post('/site-content/subpages', createSiteSubpage);
 router.put('/site-content/subpages/:id', updateSiteSubpage);
 router.delete('/site-content/subpages/:id', deleteSiteSubpage);
 router.post('/site-content/images', siteContentImageUpload.single('image'), uploadSiteContentImage);
+router.post('/site-content/pdfs', siteContentPdfUpload.single('pdf'), uploadSiteContentPdf);
 
 export default router;

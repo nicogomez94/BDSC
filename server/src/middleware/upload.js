@@ -16,7 +16,9 @@ const IMAGE_EXTENSIONS_BY_MIME = {
   'image/gif': '.gif',
   'image/svg+xml': '.svg',
   'image/avif': '.avif',
+  'application/pdf': '.pdf',
 };
+const PDF_MIME_TYPE = 'application/pdf';
 
 const storage = multer.diskStorage({
   destination: (_req, _file, callback) => {
@@ -45,5 +47,25 @@ export const siteContentImageUpload = multer({
   fileFilter: imageFileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024,
+  },
+});
+
+const pdfFileFilter = (_req, file, callback) => {
+  const extension = path.extname(file.originalname || '').toLowerCase();
+  if (file.mimetype === PDF_MIME_TYPE || extension === '.pdf') {
+    callback(null, true);
+    return;
+  }
+
+  const error = new Error('Solo se permiten archivos PDF.');
+  error.status = 400;
+  callback(error);
+};
+
+export const siteContentPdfUpload = multer({
+  storage,
+  fileFilter: pdfFileFilter,
+  limits: {
+    fileSize: 20 * 1024 * 1024,
   },
 });

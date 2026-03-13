@@ -307,6 +307,19 @@ export const uploadSiteContentImage = async (req, res, next) => {
   }
 };
 
+export const uploadSiteContentPdf = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Debes adjuntar un PDF.' });
+    }
+
+    const pdfUrl = `${req.protocol}://${req.get('host')}/uploads/site-content/${req.file.filename}`;
+    res.status(201).json({ url: pdfUrl });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateSiteSubpage = async (req, res, next) => {
   try {
     const subpageId = Number(req.params.id);
