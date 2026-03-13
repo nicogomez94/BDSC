@@ -34,6 +34,15 @@ const isProtectedSystemPage = (sectionKey, subdivisionSlug, pageSlug) => {
 const isProtectedSystemSubdivision = (sectionKey, subdivisionSlug, pages = []) =>
   pages.some((page) => isProtectedSystemPage(sectionKey, subdivisionSlug, page.slug));
 
+const resolvePublicBaseUrl = (req) => {
+  const configured = String(process.env.PUBLIC_BASE_URL || '').trim();
+  if (configured) return configured.replace(/\/+$/, '');
+
+  const protoHeader = String(req.get('x-forwarded-proto') || '').split(',')[0].trim();
+  const protocol = protoHeader || req.protocol;
+  return `${protocol}://${req.get('host')}`;
+};
+
 export const getSiteContentAdminData = async (req, res, next) => {
   try {
     const data = await prisma.siteSubdivision.findMany({
@@ -300,7 +309,7 @@ export const uploadSiteContentImage = async (req, res, next) => {
       return res.status(400).json({ error: 'Debes adjuntar una imagen.' });
     }
 
-    const imageUrl = `${req.protocol}://${req.get('host')}/uploads/site-content/${req.file.filename}`;
+    const imageUrl = `${resolvePublicBaseUrl(req)}/uploads/site-content/${req.file.filename}`;
     res.status(201).json({ url: imageUrl });
   } catch (error) {
     next(error);
@@ -313,7 +322,7 @@ export const uploadSiteContentPdf = async (req, res, next) => {
       return res.status(400).json({ error: 'Debes adjuntar un PDF.' });
     }
 
-    const pdfUrl = `${req.protocol}://${req.get('host')}/uploads/site-content/${req.file.filename}`;
+    const pdfUrl = `${resolvePublicBaseUrl(req)}/uploads/site-content/${req.file.filename}`;
     res.status(201).json({ url: pdfUrl });
   } catch (error) {
     next(error);

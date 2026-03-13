@@ -19,6 +19,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsPath = path.resolve(__dirname, '..', 'uploads');
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Required behind reverse proxies (Render, Nginx, etc.) so req.protocol resolves to https correctly.
+app.set('trust proxy', 1);
+
 // Middleware
 const normalizeOrigin = (origin) => origin?.replace(/\/+$/, '');
 
