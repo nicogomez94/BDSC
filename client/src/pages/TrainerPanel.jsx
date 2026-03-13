@@ -214,7 +214,7 @@ const TrainerPanel = () => {
               {sections.map((section) => (
                 <div className="section-card" key={section.id}>
                   <h3>{section.title}</h3>
-                  <div className="section-content">{section.content}</div>
+                  <div className="section-content" dangerouslySetInnerHTML={{ __html: section.content || '' }} />
                   <p className="section-date">Actualizado: {new Date(section.updatedAt).toLocaleDateString()}</p>
                 </div>
               ))}

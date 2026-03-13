@@ -15,6 +15,7 @@ import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import AdminVirtualLibraryTab from '../components/AdminVirtualLibraryTab';
 import AdminSiteContentTab from '../components/AdminSiteContentTab';
+import RichTextEditor from '../components/RichTextEditor';
 import './AdminPanel.css';
 
 const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE'];
@@ -288,13 +289,28 @@ const AdminPanel = () => {
 
   const handleCreateSection = async (e) => {
     e.preventDefault();
+    const normalizedContent = String(sectionForm.content || '').trim();
+    if (!normalizedContent || normalizedContent === '<p></p>' || normalizedContent === '<p><br></p>') {
+      setError('El contenido es obligatorio.');
+      return;
+    }
     await withLoad(async () => {
-      await api.admin.createSection(sectionForm);
+      await api.admin.createSection({ ...sectionForm, content: normalizedContent });
       setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
       setCreateModalTab(null);
       await loadSections();
       showSuccessMessage('Sección creada correctamente.');
     });
+  };
+
+  const handleUploadSectionImage = async (file) => {
+    if (!file) throw new Error('Seleccioná una imagen.');
+    return api.admin.uploadSiteContentImage(file);
+  };
+
+  const handleUploadSectionPdf = async (file) => {
+    if (!file) throw new Error('Seleccioná un PDF.');
+    return api.admin.uploadSiteContentPdf(file);
   };
 
   const handleDeleteSection = async (id) => {
@@ -596,7 +612,12 @@ const AdminPanel = () => {
           </div>
           <div className="form-group">
             <label>Contenido</label>
-            <textarea value={sectionForm.content} onChange={(e) => setSectionForm({ ...sectionForm, content: e.target.value })} rows="4" required />
+            <RichTextEditor
+              value={sectionForm.content}
+              onChange={(content) => setSectionForm({ ...sectionForm, content })}
+              onUploadImage={handleUploadSectionImage}
+              onUploadPdf={handleUploadSectionPdf}
+            />
           </div>
           <button type="submit" className="btn-primary">Crear sección</button>
         </form>
@@ -799,7 +820,7 @@ const AdminPanel = () => {
                     <h3>{section.title}</h3>
                     <button className="btn-danger" onClick={() => handleDeleteSection(section.id)}>Eliminar</button>
                   </div>
-                  <p>{section.content}</p>
+                  <div className="section-rich-content" dangerouslySetInnerHTML={{ __html: section.content || '' }} />
                   <div className="section-access">
                     <h4>Accesos</h4>
                     {section.sectionAccess?.length > 0 ? (

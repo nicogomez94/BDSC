@@ -184,10 +184,18 @@
   color: var(--primary-color);
 }
 
-.section-card > p {
+.section-rich-content {
   color: var(--text-dark);
   line-height: 1.6;
   margin-bottom: 20px;
+}
+
+.section-rich-content > :first-child {
+  margin-top: 0;
+}
+
+.section-rich-content > :last-child {
+  margin-bottom: 0;
 }
 
 .section-access {
