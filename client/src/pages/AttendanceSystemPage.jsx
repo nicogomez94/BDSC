@@ -45,7 +45,24 @@ const AttendanceSystemPage = () => {
 
   const loadDivisions = async () => {
     const data = await api.siteContent.getAttendanceDivisions();
-    setDivisions(Array.isArray(data) ? data : []);
+    const normalizedDivisions = Array.isArray(data) ? data : [];
+    setDivisions(normalizedDivisions);
+
+    if (normalizedDivisions.length === 0) {
+      setMatrix(null);
+      return;
+    }
+
+    const selectedDivisionId = filters.divisionId || String(normalizedDivisions[0].id);
+    if (!filters.divisionId) {
+      setFilters((current) => ({ ...current, divisionId: selectedDivisionId }));
+    }
+
+    const initialMatrix = await api.siteContent.getAttendanceMatrix({
+      divisionId: selectedDivisionId,
+      month: filters.month || undefined,
+    });
+    setMatrix(initialMatrix);
   };
 
   const loadMatrix = async () => {
@@ -79,7 +96,7 @@ const AttendanceSystemPage = () => {
                 value={filters.divisionId}
                 onChange={(e) => setFilters((current) => ({ ...current, divisionId: e.target.value }))}
               >
-                <option value="">Todas</option>
+                <option value="">Seleccionar división</option>
                 {divisions.map((division) => (
                   <option key={division.id} value={division.id}>
                     {division.name} - {division.seasonYear}
@@ -113,7 +130,7 @@ const AttendanceSystemPage = () => {
           {loading && <div className="loading">Cargando...</div>}
           {error && <div className="error-message">{error}</div>}
 
-          {matrix && matrix.sessions?.length > 0 ? (
+          {matrix && matrix.players?.length > 0 ? (
             <div className="attendance-grid-wrapper">
               <table className="attendance-grid">
                 <thead>
@@ -140,12 +157,15 @@ const AttendanceSystemPage = () => {
                   ))}
                 </tbody>
               </table>
+              {matrix.sessions?.length === 0 && (
+                <p className="attendance-empty">No hay fechas cargadas para la división seleccionada.</p>
+              )}
             </div>
           ) : (
             <p className="attendance-empty">
               {filters.divisionId
-                ? `No hay planillas para ${divisionMap[Number(filters.divisionId)]?.name || 'la división seleccionada'}.`
-                : 'Seleccioná una división y cargá la planilla.'}
+                ? `No hay jugadoras para ${divisionMap[Number(filters.divisionId)]?.name || 'la división seleccionada'}.`
+                : 'Seleccioná una división para ver la planilla.'}
             </p>
           )}
         </div>
