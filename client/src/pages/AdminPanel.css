@@ -504,6 +504,26 @@
   margin-top: 28px;
 }
 
+.attendance-help-modal {
+  width: min(760px, 100%);
+}
+
+.attendance-help-body p {
+  margin: 0 0 10px;
+}
+
+.attendance-help-csv {
+  margin: 10px 0 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: #f8f7f4;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+}
+
 .site-content-admin .sections-list {
   gap: 24px;
 }

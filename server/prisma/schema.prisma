@@ -103,6 +103,9 @@ model Player {
   id         Int          @id @default(autoincrement())
   fullName   String
   birthYear  Int
+  phone      String?
+  email      String?
+  parentName String?
   active     Boolean      @default(true)
   divisionId Int
   division   Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)

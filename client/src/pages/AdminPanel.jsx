@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUserTie,
@@ -81,6 +81,152 @@ const sanitizeFilename = (value, fallback = 'archivo') => {
   return normalized.replace(/[^a-z0-9-_]/g, '') || fallback;
 };
 
+const normalizeImportHeader = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\s_-]+/g, '');
+
+const normalizeImportDate = (value) => {
+  const raw = String(value || '').trim();
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (!slashMatch) return raw;
+  const [, dd, mm, yyyy] = slashMatch;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+};
+
+const normalizeImportStatus = (value) => {
+  const raw = String(value || '').trim().toUpperCase();
+  const map = {
+    P: 'PRESENTE',
+    A: 'AUSENTE',
+    J: 'JUSTIFICADA',
+    T: 'TARDE',
+  };
+  return map[raw] || raw;
+};
+
+const normalizeImportActive = (value) => {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return undefined;
+  if (['si', 'sí', 'true', '1', 'activo', 'activa'].includes(raw)) return true;
+  if (['no', 'false', '0', 'inactivo', 'inactiva'].includes(raw)) return false;
+  return undefined;
+};
+
+const parseCsvText = (text) => {
+  const content = String(text || '').replace(/^\uFEFF/, '');
+  const firstLine = content.split(/\r?\n/, 1)[0] || '';
+  const delimiter = firstLine.includes(';') ? ';' : ',';
+  const rows = [];
+  let field = '';
+  let row = [];
+  let inQuotes = false;
+
+  for (let i = 0; i < content.length; i += 1) {
+    const char = content[i];
+    const next = content[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        field += '"';
+        i += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (!inQuotes && char === delimiter) {
+      row.push(field);
+      field = '';
+      continue;
+    }
+
+    if (!inQuotes && (char === '\n' || char === '\r')) {
+      if (char === '\r' && next === '\n') i += 1;
+      row.push(field);
+      field = '';
+      rows.push(row);
+      row = [];
+      continue;
+    }
+
+    field += char;
+  }
+
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows
+    .map((currentRow) => currentRow.map((cell) => String(cell || '').trim()))
+    .filter((currentRow) => currentRow.some((cell) => cell));
+};
+
+const parseAttendanceImportRows = (csvText) => {
+  const rows = parseCsvText(csvText);
+  if (rows.length < 2) {
+    throw new Error('La planilla está vacía o no tiene encabezados.');
+  }
+
+  const headers = rows[0].map(normalizeImportHeader);
+  const indexByField = {
+    fullName: headers.findIndex((header) => ['fullname', 'nombre', 'jugadora'].includes(header)),
+    birthYear: headers.findIndex((header) => ['birthyear', 'anionacimiento', 'anonacimiento', 'anodenacimiento'].includes(header)),
+    date: headers.findIndex((header) => ['date', 'fecha'].includes(header)),
+    status: headers.findIndex((header) => ['status', 'estado'].includes(header)),
+    observation: headers.findIndex((header) => ['observation', 'observacion', 'obs'].includes(header)),
+    notes: headers.findIndex((header) => ['notes', 'nota', 'notas'].includes(header)),
+    active: headers.findIndex((header) => ['active', 'activa', 'activo'].includes(header)),
+  };
+
+  const requiredFields = ['fullName', 'birthYear', 'date', 'status'];
+  const missing = requiredFields.filter((field) => indexByField[field] < 0);
+  if (missing.length > 0) {
+    throw new Error('Faltan columnas obligatorias en CSV: fullName/nombre, birthYear/añoNacimiento, date/fecha, status/estado.');
+  }
+
+  return rows.slice(1).map((cells, index) => {
+    const fullName = cells[indexByField.fullName];
+    const birthYear = cells[indexByField.birthYear];
+    const date = normalizeImportDate(cells[indexByField.date]);
+    const status = normalizeImportStatus(cells[indexByField.status]);
+
+    if (!fullName || !birthYear || !date || !status) {
+      throw new Error(`Fila ${index + 2}: faltan datos obligatorios.`);
+    }
+
+    const birthYearNumber = Number(birthYear);
+    if (Number.isNaN(birthYearNumber)) {
+      throw new Error(`Fila ${index + 2}: birthYear/añoNacimiento debe ser numérico.`);
+    }
+
+    const parsed = {
+      fullName,
+      birthYear: birthYearNumber,
+      date,
+      status,
+    };
+
+    if (indexByField.observation >= 0 && cells[indexByField.observation]) {
+      parsed.observation = cells[indexByField.observation];
+    }
+    if (indexByField.notes >= 0 && cells[indexByField.notes]) {
+      parsed.notes = cells[indexByField.notes];
+    }
+    if (indexByField.active >= 0) {
+      const active = normalizeImportActive(cells[indexByField.active]);
+      if (active !== undefined) parsed.active = active;
+    }
+
+    return parsed;
+  });
+};
+
 const AdminPanel = () => {
   const [tab, setTab] = useState('trainers');
   const [loading, setLoading] = useState(false);
@@ -104,6 +250,8 @@ const AdminPanel = () => {
   const [trainerModalError, setTrainerModalError] = useState('');
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isAttendanceGuideOpen, setIsAttendanceGuideOpen] = useState(false);
+  const attendanceImportInputRef = useRef(null);
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
@@ -114,7 +262,7 @@ const AdminPanel = () => {
     DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' }
   );
   const [divisionForm, setDivisionForm] = useState({ name: '', seasonYear: new Date().getFullYear() });
-  const [playerForm, setPlayerForm] = useState({ fullName: '', birthYear: '', divisionId: '', active: true });
+  const [playerForm, setPlayerForm] = useState({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
   const [sessionForm, setSessionForm] = useState({ divisionId: '', date: '', notes: '' });
 
   const divisionMap = useMemo(() => {
@@ -350,13 +498,16 @@ const AdminPanel = () => {
         birthYear: Number(playerForm.birthYear),
         divisionId: Number(playerForm.divisionId),
         active: playerForm.active,
+        phone: playerForm.phone || null,
+        email: playerForm.email || null,
+        parentName: playerForm.parentName || null,
       };
       if (isEditing) {
         await api.admin.updatePlayer(editingPlayer.id, payload);
       } else {
         await api.admin.createPlayer(payload);
       }
-      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true });
+      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
       setEditingPlayer(null);
       setCreateModalTab(null);
       await loadPlayers(filters.divisionId);
@@ -430,6 +581,34 @@ const AdminPanel = () => {
       URL.revokeObjectURL(url);
     });
   };
+
+  const openAttendanceImportPicker = () => {
+    attendanceImportInputRef.current?.click();
+  };
+  const openAttendanceGuideModal = () => setIsAttendanceGuideOpen(true);
+  const closeAttendanceGuideModal = () => setIsAttendanceGuideOpen(false);
+
+  const handleImportAttendanceCsv = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+
+    if (!filters.divisionId) {
+      setError('Seleccioná una división antes de importar planilla.');
+      return;
+    }
+
+    await withLoad(async () => {
+      const text = await file.text();
+      const rows = parseAttendanceImportRows(text);
+      await api.admin.importAttendanceRows({
+        divisionId: Number(filters.divisionId),
+        rows,
+      });
+      await loadMatrix();
+      showSuccessMessage(`Planilla importada correctamente (${rows.length} filas).`);
+    });
+  };
   const openCreateModal = () => {
     setEditingDivision(null);
     setEditingPlayer(null);
@@ -450,7 +629,7 @@ const AdminPanel = () => {
       setDivisionForm({ name: '', seasonYear: new Date().getFullYear() });
     }
     if (tab === 'players') {
-      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true });
+      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
     }
     if (tab === 'sessions') {
       setSessionForm({ divisionId: '', date: '', notes: '' });
@@ -506,6 +685,9 @@ const AdminPanel = () => {
       birthYear: player.birthYear || '',
       divisionId: String(player.divisionId || ''),
       active: Boolean(player.active),
+      phone: player.phone || '',
+      email: player.email || '',
+      parentName: player.parentName || '',
     });
     setCreateModalTab('players');
   };
@@ -653,6 +835,22 @@ const AdminPanel = () => {
             <div className="form-group">
               <label>Año nacimiento</label>
               <input type="number" value={playerForm.birthYear} onChange={(e) => setPlayerForm({ ...playerForm, birthYear: e.target.value })} required />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Teléfono</label>
+              <input type="tel" value={playerForm.phone} onChange={(e) => setPlayerForm({ ...playerForm, phone: e.target.value })} />
+            </div>
+            <div className="form-group">
+              <label>Email</label>
+              <input type="email" value={playerForm.email} onChange={(e) => setPlayerForm({ ...playerForm, email: e.target.value })} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nombre padre/madre</label>
+              <input value={playerForm.parentName} onChange={(e) => setPlayerForm({ ...playerForm, parentName: e.target.value })} />
             </div>
           </div>
           <div className="form-row">
@@ -1056,7 +1254,16 @@ const AdminPanel = () => {
             {filterRow}
             <div className="filters-actions">
               <button className="btn-secondary" type="button" onClick={() => withLoad(loadMatrix)}>Cargar planilla</button>
+              <button className="btn-secondary" type="button" onClick={openAttendanceImportPicker}>Importar CSV</button>
+              <button className="btn-secondary" type="button" onClick={openAttendanceGuideModal}>COMO SUBIR?</button>
               <button className="btn-primary" type="button" onClick={saveAttendance}>Guardar cambios</button>
+              <input
+                ref={attendanceImportInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={handleImportAttendanceCsv}
+                style={{ display: 'none' }}
+              />
             </div>
 
             {matrix && matrix.sessions.length > 0 ? (
@@ -1173,6 +1380,35 @@ const AdminPanel = () => {
                 </section>
               </div>
             )}
+          </div>
+        )}
+
+        {isAttendanceGuideOpen && (
+          <div className="modal-overlay" onClick={closeAttendanceGuideModal}>
+            <div className="modal-content attendance-help-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-header-copy">
+                  <h3>Formato rápido de planilla</h3>
+                  <p>Usá este formato para importar asistencia desde CSV.</p>
+                </div>
+                <button type="button" className="modal-close" onClick={closeAttendanceGuideModal} aria-label="Cerrar modal">
+                  x
+                </button>
+              </div>
+              <div className="modal-body attendance-help-body">
+                <p><strong>Columnas obligatorias:</strong> <code>fullName</code>, <code>birthYear</code>, <code>date</code>, <code>status</code></p>
+                <p><strong>Columnas opcionales:</strong> <code>observation</code>, <code>notes</code>, <code>active</code></p>
+                <p><strong>Estados válidos:</strong> <code>PRESENTE</code>, <code>AUSENTE</code>, <code>JUSTIFICADA</code>, <code>TARDE</code> (también <code>P/A/J/T</code>)</p>
+                <p><strong>Fecha:</strong> <code>yyyy-mm-dd</code> o <code>dd/mm/yyyy</code></p>
+                <p><strong>Ejemplo CSV:</strong></p>
+                <pre className="attendance-help-csv">
+fullName,birthYear,date,status,observation,notes,active
+Abril Medina,2008,2026-03-08,PRESENTE,,Entrenamiento normal,true
+Camila Perez,2009,08/03/2026,T,,Llegó tarde por colegio,true
+Luz Gomez,2008,2026-03-08,AUSENTE,Sin aviso,,true
+                </pre>
+              </div>
+            </div>
           </div>
         )}
 

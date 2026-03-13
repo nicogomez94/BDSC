@@ -305,6 +305,9 @@ export const createPlayer = async (payload) => {
   const birthYear = parseIntField(payload.birthYear, 'birthYear', { min: 1900, max: 2100 });
   const divisionId = parseIntField(payload.divisionId, 'divisionId', { min: 1 });
   const active = parseBooleanField(payload.active, 'active', { required: false });
+  const phone = payload.phone != null ? parseStringField(payload.phone, 'phone', { required: false, maxLength: 30 }) : undefined;
+  const email = payload.email != null ? parseStringField(payload.email, 'email', { required: false, maxLength: 120 }) : undefined;
+  const parentName = payload.parentName != null ? parseStringField(payload.parentName, 'parentName', { required: false, maxLength: 120 }) : undefined;
 
   await ensureDivisionExists(divisionId);
 
@@ -314,6 +317,9 @@ export const createPlayer = async (payload) => {
       birthYear,
       divisionId,
       active: active ?? true,
+      phone: phone ?? null,
+      email: email ?? null,
+      parentName: parentName ?? null,
     },
     include: {
       division: true,
@@ -337,6 +343,15 @@ export const updatePlayer = async (playerIdValue, payload) => {
   if (payload.divisionId !== undefined) {
     data.divisionId = parseIntField(payload.divisionId, 'divisionId', { min: 1 });
     await ensureDivisionExists(data.divisionId);
+  }
+  if (payload.phone !== undefined) {
+    data.phone = payload.phone ? parseStringField(payload.phone, 'phone', { maxLength: 30 }) : null;
+  }
+  if (payload.email !== undefined) {
+    data.email = payload.email ? parseStringField(payload.email, 'email', { maxLength: 120 }) : null;
+  }
+  if (payload.parentName !== undefined) {
+    data.parentName = payload.parentName ? parseStringField(payload.parentName, 'parentName', { maxLength: 120 }) : null;
   }
 
   if (Object.keys(data).length === 0) {
