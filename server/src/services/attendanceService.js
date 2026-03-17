@@ -145,6 +145,8 @@ const assertDivisionAccess = async (user, divisionId) => {
   if (user.role === 'COORDINADOR') return;
 
   const accessRows = await getTrainerDivisionAccessRows(user);
+  if (accessRows.length === 0) return;
+
   const allowed = toDivisionAccessSet(accessRows);
   if (!allowed.has(divisionId)) {
     throw createHttpError(403, 'No tienes permisos para acceder a esta división');
@@ -157,6 +159,10 @@ const getScopedDivisionIds = async (user, requestedDivisionId) => {
   }
 
   const accessRows = await getTrainerDivisionAccessRows(user);
+  if (accessRows.length === 0) {
+    return requestedDivisionId ? [requestedDivisionId] : null;
+  }
+
   const allowed = toDivisionAccessSet(accessRows);
 
   if (requestedDivisionId) {
@@ -548,13 +554,16 @@ export const getTrainerDivisions = async (user, query = {}) => {
   }
 
   const seasonYear = parseIntField(query.seasonYear, 'seasonYear', { required: false, min: 2000, max: 2100 });
-  const where = {
-    trainerAccess: {
+  const accessRows = await getTrainerDivisionAccessRows(user);
+  const where = {};
+
+  if (accessRows.length > 0) {
+    where.trainerAccess = {
       some: {
         trainerId: user.trainerId,
       },
-    },
-  };
+    };
+  }
 
   if (seasonYear !== undefined) {
     where.seasonYear = seasonYear;
