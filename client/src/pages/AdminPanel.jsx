@@ -57,8 +57,26 @@ const PANEL_TABS = [
   { key: 'reports', label: 'Reportes', icon: faChartColumn },
 ];
 
-const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
-const dateInput = (value) => new Date(value).toISOString().slice(0, 10);
+const getUtcDateParts = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return {
+    day: String(date.getUTCDate()).padStart(2, '0'),
+    month: String(date.getUTCMonth() + 1).padStart(2, '0'),
+    year: date.getUTCFullYear(),
+  };
+};
+const dateLabel = (value) => {
+  const parts = getUtcDateParts(value);
+  if (!parts) return '';
+  return `${parts.day}/${parts.month}/${parts.year}`;
+};
+const dateInput = (value) => {
+  const parts = getUtcDateParts(value);
+  if (!parts) return '';
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
 const createEmptyTrainerForm = (type = TRAINER_TYPE.ENTRENADOR) => ({
   name: '',
   type,
