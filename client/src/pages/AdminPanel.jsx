@@ -621,6 +621,42 @@ const AdminPanel = () => {
       URL.revokeObjectURL(url);
     });
   };
+  const exportAttendanceExcel = async () => {
+    if (!filters.divisionId) {
+      setError('Seleccioná una división antes de exportar la planilla.');
+      return;
+    }
+
+    if (!matrix || !Array.isArray(matrix.players) || !Array.isArray(matrix.sessions) || matrix.sessions.length === 0) {
+      setError('Cargá una planilla con fechas antes de exportar.');
+      return;
+    }
+
+    const headers = ['Jugadora', ...matrix.sessions.map((session) => dateLabel(session.date))];
+    const rows = matrix.players.map((player) => [
+      player.active ? player.fullName : `${player.fullName} (Inactiva)`,
+      ...matrix.sessions.map((session) => cellValue(player.id, session.id) || '-'),
+    ]);
+
+    const xlsxModule = await import('xlsx');
+    const XLSX = xlsxModule.default || xlsxModule;
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    worksheet['!cols'] = [{ wch: 36 }, ...matrix.sessions.map(() => ({ wch: 14 }))];
+
+    const workbook = XLSX.utils.book_new();
+    const division = divisionMap[Number(filters.divisionId)];
+    const sheetTitle = `${division?.name || 'Asistencia'} ${division?.seasonYear || ''}`
+      .trim()
+      .replace(/[:\\/?*\[\]]/g, '')
+      .slice(0, 31) || 'Asistencia';
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle);
+
+    const monthLabel = filters.month
+      ? MONTHS.find((month) => String(month.value) === String(filters.month))?.label || `Mes ${filters.month}`
+      : 'Todos';
+    const filename = `planilla_asistencia_${sanitizeFilename(division?.name || `division-${filters.divisionId}`, 'division')}_${sanitizeFilename(monthLabel, 'todos')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+  };
 
   const openAttendanceImportPicker = () => {
     attendanceImportInputRef.current?.click();
@@ -1317,16 +1353,8 @@ const AdminPanel = () => {
             {filterRow}
             <div className="filters-actions">
               <button className="btn-secondary" type="button" onClick={() => withLoad(loadMatrix)}>Cargar planilla</button>
-              <button className="btn-secondary" type="button" onClick={openAttendanceImportPicker}>Importar CSV</button>
-              <button className="btn-secondary" type="button" onClick={openAttendanceGuideModal}>COMO SUBIR?</button>
               <button className="btn-primary" type="button" onClick={saveAttendance}>Guardar cambios</button>
-              <input
-                ref={attendanceImportInputRef}
-                type="file"
-                accept=".csv,text/csv"
-                onChange={handleImportAttendanceCsv}
-                style={{ display: 'none' }}
-              />
+              <button className="btn-secondary" type="button" onClick={() => withLoad(exportAttendanceExcel)}>Exportar Excel</button>
             </div>
 
             {matrix && matrix.sessions.length > 0 ? (
