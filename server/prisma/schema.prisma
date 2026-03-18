@@ -106,6 +106,8 @@ model Player {
   phone      String?
   email      String?
   parentName String?
+  parentEmail String?
+  parentPhone String?
   active     Boolean      @default(true)
   divisionId Int
   division   Division     @relation(fields: [divisionId], references: [id], onDelete: Cascade)

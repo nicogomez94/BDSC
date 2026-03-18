@@ -280,7 +280,17 @@ const AdminPanel = () => {
     DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' }
   );
   const [divisionForm, setDivisionForm] = useState({ name: '', seasonYear: new Date().getFullYear() });
-  const [playerForm, setPlayerForm] = useState({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
+  const [playerForm, setPlayerForm] = useState({
+    fullName: '',
+    birthYear: '',
+    divisionId: '',
+    active: true,
+    phone: '',
+    email: '',
+    parentName: '',
+    parentEmail: '',
+    parentPhone: '',
+  });
   const [sessionForm, setSessionForm] = useState({ divisionId: '', date: '', notes: '' });
 
   const divisionMap = useMemo(() => {
@@ -519,13 +529,25 @@ const AdminPanel = () => {
         phone: playerForm.phone || null,
         email: playerForm.email || null,
         parentName: playerForm.parentName || null,
+        parentEmail: playerForm.parentEmail || null,
+        parentPhone: playerForm.parentPhone || null,
       };
       if (isEditing) {
         await api.admin.updatePlayer(editingPlayer.id, payload);
       } else {
         await api.admin.createPlayer(payload);
       }
-      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
+      setPlayerForm({
+        fullName: '',
+        birthYear: '',
+        divisionId: '',
+        active: true,
+        phone: '',
+        email: '',
+        parentName: '',
+        parentEmail: '',
+        parentPhone: '',
+      });
       setEditingPlayer(null);
       setCreateModalTab(null);
       await loadPlayers(filters.divisionId);
@@ -647,7 +669,17 @@ const AdminPanel = () => {
       setDivisionForm({ name: '', seasonYear: new Date().getFullYear() });
     }
     if (tab === 'players') {
-      setPlayerForm({ fullName: '', birthYear: '', divisionId: '', active: true, phone: '', email: '', parentName: '' });
+      setPlayerForm({
+        fullName: '',
+        birthYear: '',
+        divisionId: '',
+        active: true,
+        phone: '',
+        email: '',
+        parentName: '',
+        parentEmail: '',
+        parentPhone: '',
+      });
     }
     if (tab === 'sessions') {
       setSessionForm({ divisionId: '', date: '', notes: '' });
@@ -706,6 +738,8 @@ const AdminPanel = () => {
       phone: player.phone || '',
       email: player.email || '',
       parentName: player.parentName || '',
+      parentEmail: player.parentEmail || '',
+      parentPhone: player.parentPhone || '',
     });
     setCreateModalTab('players');
   };
@@ -870,6 +904,16 @@ const AdminPanel = () => {
               <label>Nombre padre/madre</label>
               <input value={playerForm.parentName} onChange={(e) => setPlayerForm({ ...playerForm, parentName: e.target.value })} />
             </div>
+            <div className="form-group">
+              <label>Mail padre/madre</label>
+              <input type="email" value={playerForm.parentEmail} onChange={(e) => setPlayerForm({ ...playerForm, parentEmail: e.target.value })} />
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label>Teléfono padre/madre</label>
+              <input type="tel" value={playerForm.parentPhone} onChange={(e) => setPlayerForm({ ...playerForm, parentPhone: e.target.value })} />
+            </div>
           </div>
           <div className="form-row">
             <div className="form-group">
@@ -882,9 +926,10 @@ const AdminPanel = () => {
               </select>
             </div>
             <div className="form-group checkbox-group">
-              <label>
+              <label className="active-toggle">
                 <input type="checkbox" checked={playerForm.active} onChange={(e) => setPlayerForm({ ...playerForm, active: e.target.checked })} />
-                Activa
+                <span className="active-toggle-track" aria-hidden="true" />
+                <span>Activa</span>
               </label>
             </div>
           </div>

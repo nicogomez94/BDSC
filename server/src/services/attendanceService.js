@@ -67,7 +67,9 @@ const parseDateField = (value, fieldName = 'date', options = {}) => {
   const rawValue = value.toString().trim();
   const date =
     /^\d{4}-\d{2}-\d{2}$/.test(rawValue)
-      ? new Date(`${rawValue}T00:00:00.000Z`)
+      // Usamos mediodía UTC para evitar corrimientos de día al persistir DateTime
+      // en bases configuradas con zona horaria local.
+      ? new Date(`${rawValue}T12:00:00.000Z`)
       : new Date(rawValue);
 
   if (Number.isNaN(date.getTime())) {
@@ -314,6 +316,8 @@ export const createPlayer = async (payload) => {
   const phone = payload.phone != null ? parseStringField(payload.phone, 'phone', { required: false, maxLength: 30 }) : undefined;
   const email = payload.email != null ? parseStringField(payload.email, 'email', { required: false, maxLength: 120 }) : undefined;
   const parentName = payload.parentName != null ? parseStringField(payload.parentName, 'parentName', { required: false, maxLength: 120 }) : undefined;
+  const parentEmail = payload.parentEmail != null ? parseStringField(payload.parentEmail, 'parentEmail', { required: false, maxLength: 120 }) : undefined;
+  const parentPhone = payload.parentPhone != null ? parseStringField(payload.parentPhone, 'parentPhone', { required: false, maxLength: 30 }) : undefined;
 
   await ensureDivisionExists(divisionId);
 
@@ -326,6 +330,8 @@ export const createPlayer = async (payload) => {
       phone: phone ?? null,
       email: email ?? null,
       parentName: parentName ?? null,
+      parentEmail: parentEmail ?? null,
+      parentPhone: parentPhone ?? null,
     },
     include: {
       division: true,
@@ -358,6 +364,12 @@ export const updatePlayer = async (playerIdValue, payload) => {
   }
   if (payload.parentName !== undefined) {
     data.parentName = payload.parentName ? parseStringField(payload.parentName, 'parentName', { maxLength: 120 }) : null;
+  }
+  if (payload.parentEmail !== undefined) {
+    data.parentEmail = payload.parentEmail ? parseStringField(payload.parentEmail, 'parentEmail', { maxLength: 120 }) : null;
+  }
+  if (payload.parentPhone !== undefined) {
+    data.parentPhone = payload.parentPhone ? parseStringField(payload.parentPhone, 'parentPhone', { maxLength: 30 }) : null;
   }
 
   if (Object.keys(data).length === 0) {

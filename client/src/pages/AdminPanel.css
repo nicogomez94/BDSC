@@ -264,11 +264,77 @@
   margin-bottom: 14px;
 }
 
+.checkbox-group {
+  display: flex;
+  align-items: flex-end;
+}
+
 .checkbox-group label {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 24px;
+  margin-top: 0;
+}
+
+.active-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2f3c30;
+  user-select: none;
+}
+
+.active-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.active-toggle-track {
+  display: inline-block;
+  flex-shrink: 0;
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: #d8d2c6;
+  border: 1px solid #c6beaf;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.active-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease;
+}
+
+.active-toggle input:checked + .active-toggle-track {
+  background: #1f5d36;
+  border-color: #1f5d36;
+}
+
+.active-toggle input:checked + .active-toggle-track::after {
+  transform: translateX(20px);
+}
+
+.active-toggle input:focus-visible + .active-toggle-track {
+  outline: 2px solid #295f40;
+  outline-offset: 2px;
 }
 
 .attendance-grid-wrapper {
@@ -501,7 +567,7 @@
 }
 
 .modal-content .checkbox-group label {
-  margin-top: 28px;
+  margin-top: 0;
 }
 
 .attendance-help-modal {
