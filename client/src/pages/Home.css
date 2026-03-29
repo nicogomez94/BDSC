@@ -218,39 +218,87 @@
   color: var(--text-light);
 }
 
-/* CTA Section */
-.cta {
-  padding: 80px 20px;
-  background-color: var(--secondary-color);
-  text-align: center;
-  color: var(--white);
+.category-years {
+  display: block;
+  font-size: 13px;
+  color: var(--secondary-color);
+  font-weight: 600;
+  margin-top: 6px;
 }
 
-.cta h2 {
-  font-size: 36px;
-  margin-bottom: 30px;
-  font-weight: 700;
-}
-
-.btn-cta {
+/* Location Section */
+.location-section {
+  padding: 60px 20px;
   background-color: var(--cream);
+  text-align: center;
+}
+
+.location-section h2 {
+  font-size: 32px;
+  font-weight: 700;
   color: var(--primary-color);
-  padding: 15px 40px;
-  border: none;
-  border-radius: 5px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.location-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--white);
+  border: 2px solid var(--secondary-color);
+  border-radius: 12px;
+  padding: 30px 40px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.location-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+}
+
+.location-icon {
+  font-size: 28px;
+  color: var(--secondary-color);
+  flex-shrink: 0;
+}
+
+.location-label {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin: 0 0 2px;
+  letter-spacing: 0.5px;
+}
+
+.location-address {
   font-size: 18px;
   font-weight: 600;
-  text-decoration: none;
-  display: inline-block;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+  color: var(--primary-color);
+  margin: 0;
 }
 
-.btn-cta:hover {
-  background-color: var(--white);
+.btn-map {
+  background-color: var(--secondary-color);
+  color: var(--white);
+  padding: 12px 28px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-map:hover {
+  background-color: var(--primary-color);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }

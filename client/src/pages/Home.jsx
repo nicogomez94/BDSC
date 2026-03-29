@@ -8,7 +8,8 @@ import {
   faChildReaching,
   faUserGroup,
   faTrophy,
-  faPhone
+  faPhone,
+  faLocationDot
 } from '@fortawesome/free-solid-svg-icons';
 import './Home.css';
 
@@ -92,44 +93,63 @@ const Home = () => {
 
       <section className="info-section scroll-reveal">
         <div className="container">
-          <h2>Información y Categorías</h2>
+          <h2>Divisiones</h2>
           <div className="categories-grid">
             <div className="category-card">
               <FontAwesomeIcon className="category-icon" icon={faChildReaching} />
               <h3>Iniciación</h3>
               <p>Décima</p>
+              <span className="category-years">2018/2019</span>
             </div>
             <div className="category-card">
               <FontAwesomeIcon className="category-icon" icon={faPersonRunning} />
               <h3>Infantiles</h3>
               <p>Novena y octava</p>
+              <span className="category-years">2016/2017 y 2014/2015</span>
             </div>
             <div className="category-card">
               <FontAwesomeIcon className="category-icon" icon={faUserGroup} />
               <h3>Juveniles</h3>
               <p>Séptima, sexta y quinta</p>
+              <span className="category-years">2012/2013, 2011/2010 y 2009/2008</span>
             </div>
             <div className="category-card">
               <FontAwesomeIcon className="category-icon" icon={faTrophy} />
               <h3>Plantel superior</h3>
               <p>Intermedia y primera</p>
+              <span className="category-years">2007 en adelante</span>
             </div>
             <div className="category-card">
               <FontAwesomeIcon className="category-icon" icon={faUsers} />
               <h3>Cuarta</h3>
               <p>Más de 35 años</p>
+              <span className="category-years">1990 en adelante</span>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="cta scroll-reveal">
+      <section className="location-section scroll-reveal">
         <div className="container">
-          <h2>¿Querés ser parte de BDSC Hockey?</h2>
-          <Link to="/contacto" className="btn-cta">
-            <FontAwesomeIcon icon={faPhone} />
-            Contactanos
-          </Link>
+          <h2>Ubicación</h2>
+          <div className="location-card">
+            <div className="location-entry">
+              <FontAwesomeIcon icon={faLocationDot} className="location-icon" />
+              <div>
+                <p className="location-label">Ingreso</p>
+                <p className="location-address">Marcos Sastre 1855</p>
+              </div>
+            </div>
+            <a
+              href="https://maps.google.com/?q=-34.468155,-58.672512"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-map"
+            >
+              <FontAwesomeIcon icon={faLocationDot} />
+              Ver en Google Maps
+            </a>
+          </div>
         </div>
       </section>
 
