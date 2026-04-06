@@ -72,6 +72,15 @@
   line-height: 1.6;
 }
 
+.info-item a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.info-item a:visited {
+  color: inherit;
+}
+
 /* Contact Form */
 .contact-form {
   background-color: var(--white);

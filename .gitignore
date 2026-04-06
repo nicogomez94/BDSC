@@ -33,3 +33,6 @@ server/uploads/
 *.db
 *.sqlite
 *.sqlite3
+
+#
+PROMPT PARA DEPLY EN VPS.md

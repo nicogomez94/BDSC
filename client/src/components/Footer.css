@@ -80,6 +80,19 @@
   gap: 10px;
 }
 
+.footer-contact a {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+.footer-contact a:visited {
+  color: var(--white);
+}
+
+.footer-contact a:hover {
+  color: var(--cream);
+}
+
 .footer-bottom {
   text-align: center;
   padding-top: 40px;

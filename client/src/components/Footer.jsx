@@ -2,9 +2,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEnvelope,
-  faPhone,
   faLocationDot,
-  faClock,
   faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import './Footer.css';
@@ -35,10 +33,18 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Contacto</h4>
           <ul className="footer-contact">
-            <li><FontAwesomeIcon icon={faEnvelope} />hockey@bdsc.com</li>
-            <li><FontAwesomeIcon icon={faPhone} />(011) 4567-8900</li>
-            <li><FontAwesomeIcon icon={faLocationDot} />Av. Belgrano 1234, Buenos Aires</li>
-            <li><FontAwesomeIcon icon={faClock} />Lun-Vie: 9:00-18:00</li>
+            <li><FontAwesomeIcon icon={faEnvelope} />lucasalesheadcoach@gmail.com</li>
+            <li><FontAwesomeIcon icon={faLocationDot} />Marcos Sastre 1855</li>
+            <li>
+              <FontAwesomeIcon icon={faLocationDot} />
+              <a
+                href="https://maps.google.com/?q=-34.468155,-58.672512"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                https://maps.google.com/?q=-34.468155,-58.672512
+              </a>
+            </li>
           </ul>
         </div>
       </div>

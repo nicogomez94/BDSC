@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLocationDot,
-  faPhone,
   faEnvelope,
-  faClock,
   faPaperPlane
 } from '@fortawesome/free-solid-svg-icons';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
@@ -119,25 +117,23 @@ const Contact = () => {
             <div className="info-item">
               <div className="info-icon"><FontAwesomeIcon icon={faLocationDot} /></div>
               <h3>Dirección</h3>
-              <p>Av. Belgrano 1234<br/>Buenos Aires, Argentina</p>
+              <p>Marcos Sastre 1855</p>
             </div>
 
             <div className="info-item">
-              <div className="info-icon"><FontAwesomeIcon icon={faPhone} /></div>
-              <h3>Teléfono</h3>
-              <p>(011) 4567-8900</p>
+              <div className="info-icon"><FontAwesomeIcon icon={faLocationDot} /></div>
+              <h3>Ubicación</h3>
+              <p>
+                <a href="https://maps.google.com/?q=-34.468155,-58.672512" target="_blank" rel="noopener noreferrer">
+                  https://maps.google.com/?q=-34.468155,-58.672512
+                </a>
+              </p>
             </div>
 
             <div className="info-item">
               <div className="info-icon"><FontAwesomeIcon icon={faEnvelope} /></div>
-              <h3>Email</h3>
-              <p>hockey@bdsc.com</p>
-            </div>
-
-            <div className="info-item">
-              <div className="info-icon"><FontAwesomeIcon icon={faClock} /></div>
-              <h3>Horarios de atención</h3>
-              <p>Lunes a Viernes: 9:00 - 18:00<br/>Sábados: 9:00 - 13:00</p>
+              <h3>Correo</h3>
+              <p>lucasalesheadcoach@gmail.com</p>
             </div>
           </div>
 
@@ -213,11 +209,7 @@ const Contact = () => {
                   Respondemos consultas en menos de 24 horas hábiles.
                 </p>
                 <p>
-                  Si tu consulta es urgente, comunicate por teléfono al
-                  (011) 4567-8900.
-                </p>
-                <p>
-                  También podés visitarnos de lunes a viernes de 9:00 a 18:00.
+                  También podés escribir a lucasalesheadcoach@gmail.com.
                 </p>
               </div>
             </form>
