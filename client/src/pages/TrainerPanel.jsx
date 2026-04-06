@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './TrainerPanel.css';
 
-const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE'];
+const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE', 'SAF', 'SUSPENDIDO'];
 const MONTHS = [
   { value: 2, label: 'Febrero' },
   { value: 3, label: 'Marzo' },

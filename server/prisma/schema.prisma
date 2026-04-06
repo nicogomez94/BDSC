@@ -23,6 +23,8 @@ enum AttendanceStatus {
   AUSENTE
   JUSTIFICADA
   TARDE
+  SAF
+  SUSPENDIDO
 }
 
 enum SiteSectionKey {

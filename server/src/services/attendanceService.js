@@ -1,6 +1,6 @@
 import prisma from '../utils/prisma.js';
 
-const ATTENDANCE_STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE'];
+const ATTENDANCE_STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE', 'SAF', 'SUSPENDIDO'];
 const MIN_SEASON_MONTH = 2;
 const MAX_SEASON_MONTH = 11;
 
@@ -198,6 +198,8 @@ const buildStatusCounter = () => ({
   AUSENTE: 0,
   JUSTIFICADA: 0,
   TARDE: 0,
+  SAF: 0,
+  SUSPENDIDO: 0,
 });
 
 const calculateAttendancePercentage = (presente, tarde, totalSessions) => {
@@ -980,6 +982,8 @@ export const getAttendanceReport = async (query = {}, user) => {
         AUSENTE: 0,
         JUSTIFICADA: 0,
         TARDE: 0,
+        SAF: 0,
+        SUSPENDIDO: 0,
         totalRecords: 0,
         totalSessions: 0,
         attendancePercentage: 0,
@@ -1119,6 +1123,8 @@ export const buildAttendanceCsvExport = async (query = {}, user) => {
       'Tarde',
       'Justificada',
       'Ausente',
+      'SAF',
+      'Suspendido',
       'Registros',
       'Asistencia(%)',
     ].join(',')
@@ -1137,6 +1143,8 @@ export const buildAttendanceCsvExport = async (query = {}, user) => {
           player.TARDE,
           player.JUSTIFICADA,
           player.AUSENTE,
+          player.SAF,
+          player.SUSPENDIDO,
           player.totalRecords,
           player.attendancePercentage,
         ].join(',')

@@ -1,0 +1,5 @@
+DO $$
+BEGIN
+  ALTER TYPE "AttendanceStatus" ADD VALUE IF NOT EXISTS 'SAF';
+  ALTER TYPE "AttendanceStatus" ADD VALUE IF NOT EXISTS 'SUSPENDIDO';
+END $$;

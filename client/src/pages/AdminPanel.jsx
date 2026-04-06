@@ -18,7 +18,7 @@ import AdminSiteContentTab from '../components/AdminSiteContentTab';
 import RichTextEditor from '../components/RichTextEditor';
 import './AdminPanel.css';
 
-const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE'];
+const STATUSES = ['PRESENTE', 'AUSENTE', 'JUSTIFICADA', 'TARDE', 'SAF', 'SUSPENDIDO'];
 const MONTHS = [
   { value: 2, label: 'Febrero' },
   { value: 3, label: 'Marzo' },
@@ -122,6 +122,9 @@ const normalizeImportStatus = (value) => {
     A: 'AUSENTE',
     J: 'JUSTIFICADA',
     T: 'TARDE',
+    SF: 'SAF',
+    SU: 'SUSPENDIDO',
+    SUSP: 'SUSPENDIDO',
   };
   return map[raw] || raw;
 };
@@ -1420,13 +1423,13 @@ const AdminPanel = () => {
                     <table className="report-table">
                       <thead>
                         <tr>
-                          <th>Jugadora</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>% Asistencia</th>
+                          <th>Jugadora</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>SAF</th><th>Suspendido</th><th>% Asistencia</th>
                         </tr>
                       </thead>
                       <tbody>
                         {report.byPlayer.map((player) => (
                           <tr key={player.playerId}>
-                            <td>{player.fullName}</td><td>{player.divisionName}</td><td>{player.PRESENTE}</td><td>{player.TARDE}</td><td>{player.JUSTIFICADA}</td><td>{player.AUSENTE}</td><td>{player.attendancePercentage}%</td>
+                            <td>{player.fullName}</td><td>{player.divisionName}</td><td>{player.PRESENTE}</td><td>{player.TARDE}</td><td>{player.JUSTIFICADA}</td><td>{player.AUSENTE}</td><td>{player.SAF}</td><td>{player.SUSPENDIDO}</td><td>{player.attendancePercentage}%</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1440,13 +1443,13 @@ const AdminPanel = () => {
                     <table className="report-table">
                       <thead>
                         <tr>
-                          <th>Fecha</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>Total</th>
+                          <th>Fecha</th><th>División</th><th>Presente</th><th>Tarde</th><th>Justificada</th><th>Ausente</th><th>SAF</th><th>Suspendido</th><th>Total</th>
                         </tr>
                       </thead>
                       <tbody>
                         {report.totalsByDate.map((item) => (
                           <tr key={item.trainingSessionId}>
-                            <td>{dateLabel(item.date)}</td><td>{item.divisionName}</td><td>{item.totals.PRESENTE}</td><td>{item.totals.TARDE}</td><td>{item.totals.JUSTIFICADA}</td><td>{item.totals.AUSENTE}</td><td>{item.totalRecords}</td>
+                            <td>{dateLabel(item.date)}</td><td>{item.divisionName}</td><td>{item.totals.PRESENTE}</td><td>{item.totals.TARDE}</td><td>{item.totals.JUSTIFICADA}</td><td>{item.totals.AUSENTE}</td><td>{item.totals.SAF}</td><td>{item.totals.SUSPENDIDO}</td><td>{item.totalRecords}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1489,7 +1492,7 @@ const AdminPanel = () => {
               <div className="modal-body attendance-help-body">
                 <p><strong>Columnas obligatorias:</strong> <code>fullName</code>, <code>birthYear</code>, <code>date</code>, <code>status</code></p>
                 <p><strong>Columnas opcionales:</strong> <code>observation</code>, <code>notes</code>, <code>active</code></p>
-                <p><strong>Estados válidos:</strong> <code>PRESENTE</code>, <code>AUSENTE</code>, <code>JUSTIFICADA</code>, <code>TARDE</code> (también <code>P/A/J/T</code>)</p>
+                <p><strong>Estados válidos:</strong> <code>PRESENTE</code>, <code>AUSENTE</code>, <code>JUSTIFICADA</code>, <code>TARDE</code>, <code>SAF</code>, <code>SUSPENDIDO</code> (también <code>P/A/J/T/SF/SU</code>)</p>
                 <p><strong>Fecha:</strong> <code>yyyy-mm-dd</code> o <code>dd/mm/yyyy</code></p>
                 <p><strong>Ejemplo CSV:</strong></p>
                 <pre className="attendance-help-csv">
