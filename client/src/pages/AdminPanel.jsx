@@ -265,6 +265,7 @@ const AdminPanel = () => {
   const [filters, setFilters] = useState({ divisionId: '', month: '' });
   const [createModalTab, setCreateModalTab] = useState(null);
   const [editingTrainer, setEditingTrainer] = useState(null);
+  const [editingSection, setEditingSection] = useState(null);
   const [editingDivision, setEditingDivision] = useState(null);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
@@ -366,6 +367,7 @@ const AdminPanel = () => {
   useEffect(() => {
     setCreateModalTab(null);
     setEditingTrainer(null);
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
@@ -466,7 +468,7 @@ const AdminPanel = () => {
     });
   };
 
-  const handleCreateSection = async (e) => {
+  const handleSaveSection = async (e) => {
     e.preventDefault();
     const normalizedContent = String(sectionForm.content || '').trim();
     if (!normalizedContent || normalizedContent === '<p></p>' || normalizedContent === '<p><br></p>') {
@@ -474,11 +476,17 @@ const AdminPanel = () => {
       return;
     }
     await withLoad(async () => {
-      await api.admin.createSection({ ...sectionForm, content: normalizedContent });
+      const isEditing = Boolean(editingSection);
+      if (isEditing) {
+        await api.admin.updateSection(editingSection.id, { ...sectionForm, content: normalizedContent });
+      } else {
+        await api.admin.createSection({ ...sectionForm, content: normalizedContent });
+      }
       setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
+      setEditingSection(null);
       setCreateModalTab(null);
       await loadSections();
-      showSuccessMessage('Sección creada correctamente.');
+      showSuccessMessage(isEditing ? 'Sección actualizada correctamente.' : 'Sección creada correctamente.');
     });
   };
 
@@ -689,6 +697,7 @@ const AdminPanel = () => {
     });
   };
   const openCreateModal = () => {
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
@@ -723,11 +732,15 @@ const AdminPanel = () => {
     if (tab === 'sessions') {
       setSessionForm({ divisionId: '', date: '', notes: '' });
     }
+    if (tab === 'sections') {
+      setSectionForm(DEBUG_MODE ? { ...DEBUG_PREFILL.sectionForm } : { title: '', content: '' });
+    }
     setCreateModalTab(tab);
   };
   const closeCreateModal = () => {
     setCreateModalTab(null);
     setEditingTrainer(null);
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
@@ -735,6 +748,7 @@ const AdminPanel = () => {
     setTrainerCvFileName('');
   };
   const openEditTrainerModal = (trainer) => {
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
@@ -753,8 +767,21 @@ const AdminPanel = () => {
     });
     setCreateModalTab('trainers');
   };
+  const openEditSectionModal = (section) => {
+    setEditingTrainer(null);
+    setEditingDivision(null);
+    setEditingPlayer(null);
+    setEditingSession(null);
+    setEditingSection(section);
+    setSectionForm({
+      title: section.title || '',
+      content: section.content || '',
+    });
+    setCreateModalTab('sections');
+  };
   const openEditDivisionModal = (division) => {
     setEditingTrainer(null);
+    setEditingSection(null);
     setEditingPlayer(null);
     setEditingSession(null);
     setEditingDivision(division);
@@ -766,6 +793,7 @@ const AdminPanel = () => {
   };
   const openEditPlayerModal = (player) => {
     setEditingTrainer(null);
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingSession(null);
     setEditingPlayer(player);
@@ -784,6 +812,7 @@ const AdminPanel = () => {
   };
   const openEditSessionModal = (session) => {
     setEditingTrainer(null);
+    setEditingSection(null);
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(session);
@@ -795,11 +824,12 @@ const AdminPanel = () => {
     setCreateModalTab('sessions');
   };
   const canCreateInTab = CREATE_TABS.includes(tab);
-  const isEditingStandardEntity = Boolean(editingDivision || editingPlayer || editingSession);
+  const isEditingStandardEntity = Boolean(editingSection || editingDivision || editingPlayer || editingSession);
   const modalTitle = (() => {
     if ((createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer) {
       return 'Editar perfil técnico';
     }
+    if (createModalTab === 'sections' && editingSection) return 'Editar sección';
     if (createModalTab === 'divisions' && editingDivision) return 'Editar división';
     if (createModalTab === 'players' && editingPlayer) return 'Editar jugadora';
     if (createModalTab === 'sessions' && editingSession) return 'Editar fecha';
@@ -878,7 +908,7 @@ const AdminPanel = () => {
 
     if (createModalTab === 'sections') {
       return (
-        <form onSubmit={handleCreateSection} className="admin-form">
+        <form onSubmit={handleSaveSection} className="admin-form">
           <div className="form-group">
             <label>Título</label>
             <input value={sectionForm.title} onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })} required />
@@ -892,7 +922,7 @@ const AdminPanel = () => {
               onUploadPdf={handleUploadSectionPdf}
             />
           </div>
-          <button type="submit" className="btn-primary">Crear sección</button>
+          <button type="submit" className="btn-primary">{editingSection ? 'Guardar cambios' : 'Crear sección'}</button>
         </form>
       );
     }
@@ -1118,7 +1148,10 @@ const AdminPanel = () => {
                 <div className="section-card" key={section.id}>
                   <div className="section-header">
                     <h3>{section.title}</h3>
-                    <button className="btn-danger" onClick={() => handleDeleteSection(section.id)}>Eliminar</button>
+                    <div className="row-actions">
+                      <button className="btn-secondary" onClick={() => openEditSectionModal(section)}>Editar</button>
+                      <button className="btn-danger" onClick={() => handleDeleteSection(section.id)}>Eliminar</button>
+                    </div>
                   </div>
                   <div className="section-rich-content" dangerouslySetInnerHTML={{ __html: section.content || '' }} />
                   <div className="section-access">

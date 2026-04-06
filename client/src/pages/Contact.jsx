@@ -134,6 +134,7 @@ const Contact = () => {
               <div className="info-icon"><FontAwesomeIcon icon={faEnvelope} /></div>
               <h3>Correo</h3>
               <p>lucasalesheadcoach@gmail.com</p>
+              <p>Bdschockeycd@gmail.com (Administración)</p>
             </div>
           </div>
 
@@ -210,6 +211,9 @@ const Contact = () => {
                 </p>
                 <p>
                   También podés escribir a lucasalesheadcoach@gmail.com.
+                </p>
+                <p>
+                  Para temas administrativos: Bdschockeycd@gmail.com.
                 </p>
               </div>
             </form>

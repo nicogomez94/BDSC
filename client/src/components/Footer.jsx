@@ -34,6 +34,7 @@ const Footer = () => {
           <h4>Contacto</h4>
           <ul className="footer-contact">
             <li><FontAwesomeIcon icon={faEnvelope} />lucasalesheadcoach@gmail.com</li>
+            <li><FontAwesomeIcon icon={faEnvelope} />Bdschockeycd@gmail.com (Administración)</li>
             <li><FontAwesomeIcon icon={faLocationDot} />Marcos Sastre 1855</li>
             <li>
               <FontAwesomeIcon icon={faLocationDot} />
