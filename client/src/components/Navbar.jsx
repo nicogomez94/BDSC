@@ -203,35 +203,37 @@ const Navbar = () => {
           <ul className="navbar-menu">
             <li><Link to="/" onClick={closeMenu}>Inicio</Link></li>
 
-            {renderSiteDropdown(SITE_SECTION_KEYS.COORDINACION, 'coordinacion', coordinacionMenu)}
-            {renderSiteDropdown(SITE_SECTION_KEYS.RECURSOS, 'recursos', recursosMenu)}
+            {isAuthenticated && renderSiteDropdown(SITE_SECTION_KEYS.COORDINACION, 'coordinacion', coordinacionMenu)}
+            {isAuthenticated && renderSiteDropdown(SITE_SECTION_KEYS.RECURSOS, 'recursos', recursosMenu)}
 
-            <li className={`dropdown ${openDropdown === 'biblioteca-virtual' ? 'active' : ''}`}>
-              <Link to={defaultLibraryPath} onClick={(e) => handleDropdownClick(e, 'biblioteca-virtual')}>
-                Biblioteca virtual
-              </Link>
-              <ul className="dropdown-menu">
-                {libraryMenu.length === 0 && <li><span className="dropdown-empty">Sin contenido aún</span></li>}
-                {libraryMenu.map((section, sectionIndex) => (
-                  <li key={section.id}>
-                    <span className="dropdown-group-title">{section.name}</span>
-                    {section.categories?.map((category) => (
-                      <Link
-                        key={category.id}
-                        to={`/biblioteca-virtual/${section.slug}/${category.slug}`}
-                        onClick={closeMenu}
-                      >
-                        {category.name}
-                      </Link>
-                    ))}
-                    {sectionIndex < libraryMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
-                  </li>
-                ))}
-              </ul>
-            </li>
+            {isAuthenticated && (
+              <li className={`dropdown ${openDropdown === 'biblioteca-virtual' ? 'active' : ''}`}>
+                <Link to={defaultLibraryPath} onClick={(e) => handleDropdownClick(e, 'biblioteca-virtual')}>
+                  Biblioteca virtual
+                </Link>
+                <ul className="dropdown-menu">
+                  {libraryMenu.length === 0 && <li><span className="dropdown-empty">Sin contenido aún</span></li>}
+                  {libraryMenu.map((section, sectionIndex) => (
+                    <li key={section.id}>
+                      <span className="dropdown-group-title">{section.name}</span>
+                      {section.categories?.map((category) => (
+                        <Link
+                          key={category.id}
+                          to={`/biblioteca-virtual/${section.slug}/${category.slug}`}
+                          onClick={closeMenu}
+                        >
+                          {category.name}
+                        </Link>
+                      ))}
+                      {sectionIndex < libraryMenu.length - 1 && <span className="dropdown-divider dropdown-divider-inline"></span>}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )}
             
             <li><Link to="/contacto" onClick={closeMenu}>Contacto</Link></li>
-            <li><Link to={panelPath} onClick={closeMenu}>Panel</Link></li>
+            {isAuthenticated && <li><Link to={panelPath} onClick={closeMenu}>Panel</Link></li>}
           </ul>
 
           <div className="navbar-actions-mobile">

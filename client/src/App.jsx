@@ -37,21 +37,74 @@ function App() {
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/coordinacion" element={<Coordinacion />} />
+              <Route
+                path="/coordinacion"
+                element={
+                  <ProtectedRoute>
+                    <Coordinacion />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/coordinacion/operacion/asistencia"
-                element={<AttendanceSystemPage />}
+                element={
+                  <ProtectedRoute>
+                    <AttendanceSystemPage />
+                  </ProtectedRoute>
+                }
               />
-              <Route path="/coordinacion/gestion-interna/coordinadores" element={<Trainers />} />
-              <Route path="/coordinacion/gestion-interna/preparadores-fisicos" element={<PhysicalTrainers />} />
-              <Route path="/recursos" element={<Recursos />} />
+              <Route
+                path="/coordinacion/gestion-interna/coordinadores"
+                element={
+                  <ProtectedRoute>
+                    <Trainers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/coordinacion/gestion-interna/preparadores-fisicos"
+                element={
+                  <ProtectedRoute>
+                    <PhysicalTrainers />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/recursos"
+                element={
+                  <ProtectedRoute>
+                    <Recursos />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="/contenido/coordinacion/operacion/asistencia"
                 element={<Navigate to="/coordinacion/operacion/asistencia" replace />}
               />
-              <Route path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug/:subpageSlug" element={<SiteContentPage />} />
-              <Route path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug" element={<SiteContentPage />} />
-              <Route path="/biblioteca-virtual/:sectionSlug/:categorySlug" element={<VirtualLibraryCategory />} />
+              <Route
+                path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug/:subpageSlug"
+                element={
+                  <ProtectedRoute>
+                    <SiteContentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contenido/:sectionKeySlug/:subdivisionSlug/:pageSlug"
+                element={
+                  <ProtectedRoute>
+                    <SiteContentPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/biblioteca-virtual/:sectionSlug/:categorySlug"
+                element={
+                  <ProtectedRoute>
+                    <VirtualLibraryCategory />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/login" element={<Login />} />
               
