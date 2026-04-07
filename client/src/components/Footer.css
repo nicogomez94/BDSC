@@ -74,10 +74,17 @@
 .footer-contact li {
   color: var(--cream);
   font-size: 14px;
-  line-height: 1.8;
+  line-height: 1.6;
   display: flex;
   align-items: flex-start;
   gap: 10px;
+}
+
+.footer-contact li svg {
+  width: 14px;
+  min-width: 14px;
+  margin-top: 0.28em;
+  flex-shrink: 0;
 }
 
 .footer-contact a {
