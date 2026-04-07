@@ -39,7 +39,7 @@ const CREATE_TABS = ['trainers', 'physicalTrainers', 'sections', 'divisions', 'p
 const CREATE_MODAL_COPY = {
   trainers: { title: 'Crear entrenador', button: 'Nuevo entrenador' },
   physicalTrainers: { title: 'Crear preparador físico', button: 'Nuevo preparador físico' },
-  sections: { title: 'Crear sección', button: 'Nueva sección' },
+  sections: { title: 'Crear documento', button: 'Nuevo documento' },
   divisions: { title: 'Crear división', button: 'Nueva división' },
   players: { title: 'Crear jugadora', button: 'Nueva jugadora' },
   sessions: { title: 'Crear fecha', button: 'Nueva fecha' },
@@ -47,7 +47,7 @@ const CREATE_MODAL_COPY = {
 const PANEL_TABS = [
   { key: 'trainers', label: 'Entrenadores', icon: faUserTie },
   { key: 'physicalTrainers', label: 'Preparadores físicos', icon: faUserTie },
-  { key: 'sections', label: 'Secciones', icon: faFolderTree },
+  { key: 'sections', label: 'Documentos', icon: faFolderTree },
   { key: 'siteContent', label: 'Menú principal', icon: faFolderTree },
   { key: 'virtualLibrary', label: 'Biblioteca virtual', icon: faBookOpen },
   { key: 'divisions', label: 'Divisiones', icon: faLayerGroup },
@@ -486,7 +486,7 @@ const AdminPanel = () => {
       setEditingSection(null);
       setCreateModalTab(null);
       await loadSections();
-      showSuccessMessage(isEditing ? 'Sección actualizada correctamente.' : 'Sección creada correctamente.');
+      showSuccessMessage(isEditing ? 'Documento actualizado correctamente.' : 'Documento creado correctamente.');
     });
   };
 
@@ -501,7 +501,7 @@ const AdminPanel = () => {
   };
 
   const handleDeleteSection = async (id) => {
-    if (!confirm('¿Eliminar sección?')) return;
+    if (!confirm('¿Eliminar documento?')) return;
     await withLoad(async () => {
       await api.admin.deleteSection(id);
       await loadSections();
@@ -829,7 +829,7 @@ const AdminPanel = () => {
     if ((createModalTab === 'trainers' || createModalTab === 'physicalTrainers') && editingTrainer) {
       return 'Editar perfil técnico';
     }
-    if (createModalTab === 'sections' && editingSection) return 'Editar sección';
+    if (createModalTab === 'sections' && editingSection) return 'Editar documento';
     if (createModalTab === 'divisions' && editingDivision) return 'Editar división';
     if (createModalTab === 'players' && editingPlayer) return 'Editar jugadora';
     if (createModalTab === 'sessions' && editingSession) return 'Editar fecha';
@@ -922,7 +922,7 @@ const AdminPanel = () => {
               onUploadPdf={handleUploadSectionPdf}
             />
           </div>
-          <button type="submit" className="btn-primary">{editingSection ? 'Guardar cambios' : 'Crear sección'}</button>
+          <button type="submit" className="btn-primary">{editingSection ? 'Guardar cambios' : 'Crear documento'}</button>
         </form>
       );
     }
@@ -1142,7 +1142,7 @@ const AdminPanel = () => {
 
         {tab === 'sections' && (
           <div className="tab-content">
-            <h2>Secciones</h2>
+            <h2>Documentos</h2>
             <div className="sections-list">
               {sections.map((section) => (
                 <div className="section-card" key={section.id}>
