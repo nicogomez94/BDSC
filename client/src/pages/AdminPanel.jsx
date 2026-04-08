@@ -270,7 +270,6 @@ const AdminPanel = () => {
   const [editingDivision, setEditingDivision] = useState(null);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [editingSession, setEditingSession] = useState(null);
-  const [trainerModalError, setTrainerModalError] = useState('');
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
   const [isAttendanceGuideOpen, setIsAttendanceGuideOpen] = useState(false);
   const attendanceImportInputRef = useRef(null);
@@ -384,14 +383,12 @@ const AdminPanel = () => {
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
-    setTrainerModalError('');
     setTrainerCvFileName('');
   }, [tab]);
 
   const handleSaveTrainer = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setTrainerModalError('');
     const isEditing = Boolean(editingTrainer);
     try {
       if (isEditing) {
@@ -419,7 +416,7 @@ const AdminPanel = () => {
       await loadTrainers();
       showSuccessMessage(isEditing ? 'Entrenador actualizado correctamente.' : 'Entrenador creado correctamente.');
     } catch (err) {
-      setTrainerModalError(err.message || 'Error al guardar entrenador');
+      showErrorMessage(err.message || 'Error al guardar entrenador');
     } finally {
       setLoading(false);
     }
@@ -428,12 +425,11 @@ const AdminPanel = () => {
   const handleTrainerFormImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setTrainerModalError('');
     try {
       const imageDataUrl = await fileToDataUrl(file);
       setTrainerForm((current) => ({ ...current, photoUrl: imageDataUrl }));
     } catch (err) {
-      setTrainerModalError(err.message || 'No se pudo cargar la imagen.');
+      showErrorMessage(err.message || 'No se pudo cargar la imagen.');
     }
     e.target.value = '';
   };
@@ -441,13 +437,12 @@ const AdminPanel = () => {
   const handleTrainerFormCvUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setTrainerModalError('');
     try {
       const cvDataUrl = await fileToDataUrl(file);
       setTrainerForm((current) => ({ ...current, cvUrl: cvDataUrl }));
       setTrainerCvFileName(file.name);
     } catch (err) {
-      setTrainerModalError(err.message || 'No se pudo cargar el CV.');
+      showErrorMessage(err.message || 'No se pudo cargar el CV.');
     }
   };
 
@@ -712,7 +707,6 @@ const AdminPanel = () => {
           ? { ...createEmptyTrainerForm(defaultType), ...DEBUG_PREFILL.trainerForm, type: defaultType }
           : createEmptyTrainerForm(defaultType)
       );
-      setTrainerModalError('');
       setTrainerCvFileName('');
     }
     if (tab === 'divisions') {
@@ -746,7 +740,6 @@ const AdminPanel = () => {
     setEditingDivision(null);
     setEditingPlayer(null);
     setEditingSession(null);
-    setTrainerModalError('');
     setTrainerCvFileName('');
   };
   const openEditTrainerModal = (trainer) => {
@@ -755,7 +748,6 @@ const AdminPanel = () => {
     setEditingPlayer(null);
     setEditingSession(null);
     setEditingTrainer(trainer);
-    setTrainerModalError('');
     setTrainerCvFileName('');
     setTrainerForm({
       name: trainer.name || '',
@@ -850,7 +842,6 @@ const AdminPanel = () => {
       const roleLabel = trainerForm.type === TRAINER_TYPE.PREPARADOR_FISICO ? 'preparador físico' : 'entrenador';
       return (
         <form onSubmit={handleSaveTrainer} className="admin-form">
-          {trainerModalError && <div className="error-message">{trainerModalError}</div>}
           <div className="form-row">
             <div className="form-group">
               <label>Nombre</label>
