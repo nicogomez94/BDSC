@@ -7,6 +7,7 @@ import {
   getTrainerDivisionAttendanceHandler,
   upsertTrainerAttendanceBulkHandler,
   updateTrainerAttendanceHandler,
+  exportTrainerAttendanceHandler,
 } from '../controllers/trainerAttendanceController.js';
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.put('/profile', updateTrainerProfile);
 router.get('/divisions', getTrainerDivisionsHandler);
 router.get('/divisions/:divisionId/training-sessions', getTrainerDivisionTrainingSessionsHandler);
 router.get('/divisions/:divisionId/attendance', getTrainerDivisionAttendanceHandler);
+router.get('/attendance/export', exportTrainerAttendanceHandler);
 router.post('/attendance/bulk', upsertTrainerAttendanceBulkHandler);
 router.put('/attendance/:id', updateTrainerAttendanceHandler);
 

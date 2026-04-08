@@ -4,6 +4,7 @@ import {
   getDivisionAttendanceMatrix,
   upsertAttendanceBulk,
   updateAttendanceById,
+  buildAttendanceCsvExport,
 } from '../services/attendanceService.js';
 
 export const getTrainerDivisionsHandler = async (req, res, next) => {
@@ -49,6 +50,18 @@ export const updateTrainerAttendanceHandler = async (req, res, next) => {
   try {
     const attendance = await updateAttendanceById(req.params.id, req.body, req.user);
     res.json(attendance);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const exportTrainerAttendanceHandler = async (req, res, next) => {
+  try {
+    const { filename, csv } = await buildAttendanceCsvExport(req.query, req.user);
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(csv);
   } catch (error) {
     next(error);
   }

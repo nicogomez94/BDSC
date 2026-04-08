@@ -919,5 +919,22 @@ export const api = {
         'Error al actualizar asistencia'
       );
     },
+
+    exportAttendance: async (filters = {}) => {
+      const response = await fetch(`${API_URL}/trainer/attendance/export${buildQueryString(filters)}`, {
+        headers: getAuthHeader(),
+      });
+
+      if (!response.ok) {
+        await parseErrorResponse(response, 'Error al exportar asistencia');
+      }
+
+      const contentDisposition = response.headers.get('content-disposition') || '';
+      const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+      const filename = filenameMatch ? filenameMatch[1] : 'asistencia.csv';
+      const blob = await response.blob();
+
+      return { filename, blob };
+    },
   },
 };

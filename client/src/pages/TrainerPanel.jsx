@@ -35,6 +35,15 @@ const dateLabel = (value) => {
   return `${parts.day}/${parts.month}/${parts.year}`;
 };
 
+const sanitizeFilename = (value, fallback = 'archivo') =>
+  String(value || fallback)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || fallback;
+
 const TrainerPanel = () => {
   const { user } = useAuth();
   const panelTitle = user?.role === 'PREPARADOR_FISICO' ? 'Panel de Preparador Físico' : 'Panel de Entrenador';
@@ -52,6 +61,10 @@ const TrainerPanel = () => {
       ? { ...DEBUG_PREFILL.profileForm }
       : { bio: '', specialty: '', photoUrl: '', password: '' }
   );
+  const divisionMap = divisions.reduce((acc, division) => {
+    acc[division.id] = division;
+    return acc;
+  }, {});
 
   const withLoad = async (fn) => {
     setLoading(true);
@@ -130,6 +143,60 @@ const TrainerPanel = () => {
     });
   };
 
+  const exportCsv = async () => {
+    await withLoad(async () => {
+      const { filename, blob } = await api.trainer.exportAttendance({
+        divisionId: filters.divisionId || undefined,
+        month: filters.month || undefined,
+      });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    });
+  };
+
+  const exportAttendanceExcel = async () => {
+    if (!filters.divisionId) {
+      setError('Seleccioná una división antes de exportar la planilla.');
+      return;
+    }
+
+    if (!matrix || !Array.isArray(matrix.players) || !Array.isArray(matrix.sessions) || matrix.sessions.length === 0) {
+      setError('Cargá una planilla con fechas antes de exportar.');
+      return;
+    }
+
+    const headers = ['Jugadora', ...matrix.sessions.map((session) => dateLabel(session.date))];
+    const rows = matrix.players.map((player) => [
+      player.active ? player.fullName : `${player.fullName} (Inactiva)`,
+      ...matrix.sessions.map((session) => cellValue(player.id, session.id) || '-'),
+    ]);
+
+    const xlsxModule = await import('xlsx');
+    const XLSX = xlsxModule.default || xlsxModule;
+    const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    worksheet['!cols'] = [{ wch: 36 }, ...matrix.sessions.map(() => ({ wch: 14 }))];
+
+    const workbook = XLSX.utils.book_new();
+    const division = divisionMap[Number(filters.divisionId)];
+    const sheetTitle = `${division?.name || 'Asistencia'} ${division?.seasonYear || ''}`
+      .trim()
+      .replace(/[:\\/?*\[\]]/g, '')
+      .slice(0, 31) || 'Asistencia';
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetTitle);
+
+    const monthLabel = filters.month
+      ? MONTHS.find((month) => String(month.value) === String(filters.month))?.label || `Mes ${filters.month}`
+      : 'Todos';
+    const filename = `planilla_asistencia_${sanitizeFilename(division?.name || `division-${filters.divisionId}`, 'division')}_${sanitizeFilename(monthLabel, 'todos')}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     await withLoad(async () => {
@@ -183,6 +250,12 @@ const TrainerPanel = () => {
             <div className="filters-actions">
               <button type="button" className="btn-primary" onClick={handleSaveAttendance}>
                 Guardar cambios
+              </button>
+              <button type="button" className="btn-secondary" onClick={() => withLoad(exportAttendanceExcel)}>
+                Exportar Excel
+              </button>
+              <button type="button" className="btn-secondary" onClick={exportCsv}>
+                Exportar CSV
               </button>
             </div>
 
