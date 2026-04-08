@@ -3,6 +3,26 @@ import prisma from '../utils/prisma.js';
 import { validateEmail, validatePassword, validateRequired, generateSlug } from '../utils/validation.js';
 
 // CRUD Entrenadores
+export const getAllAdminTrainers = async (req, res, next) => {
+  try {
+    const trainers = await prisma.trainer.findMany({
+      include: {
+        user: {
+          select: {
+            role: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    res.json(trainers);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createTrainer = async (req, res, next) => {
   try {
     const { name, type, bio, specialty, photoUrl, cvUrl, email, password } = req.body;

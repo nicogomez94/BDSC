@@ -148,6 +148,16 @@ export const api = {
   },
 
   admin: {
+    getTrainers: async () => {
+      return requestJson(
+        `${API_URL}/admin/trainers`,
+        {
+          headers: getAuthHeader(),
+        },
+        'Error al obtener entrenadores'
+      );
+    },
+
     createTrainer: async (data) => {
       return requestJson(
         `${API_URL}/admin/trainers`,

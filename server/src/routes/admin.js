@@ -1,6 +1,7 @@
 import express from 'express';
 import { authenticate, requireRole } from '../middleware/auth.js';
 import {
+  getAllAdminTrainers,
   createTrainer,
   updateTrainer,
   deleteTrainer,
@@ -68,6 +69,7 @@ router.use(authenticate);
 router.use(requireRole('COORDINADOR'));
 
 // Entrenadores
+router.get('/trainers', getAllAdminTrainers);
 router.post('/trainers', createTrainer);
 router.put('/trainers/:id', updateTrainer);
 router.delete('/trainers/:id', deleteTrainer);

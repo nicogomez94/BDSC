@@ -44,6 +44,7 @@ const CREATE_MODAL_COPY = {
   players: { title: 'Crear jugadora', button: 'Nueva jugadora' },
   sessions: { title: 'Crear fecha', button: 'Nueva fecha' },
 };
+const TOAST_TIMEOUT_MS = 3500;
 const PANEL_TABS = [
   { key: 'trainers', label: 'Entrenadores', icon: faUserTie },
   { key: 'physicalTrainers', label: 'Preparadores físicos', icon: faUserTie },
@@ -251,7 +252,7 @@ const parseAttendanceImportRows = (csvText) => {
 const AdminPanel = () => {
   const [tab, setTab] = useState('trainers');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [toasts, setToasts] = useState([]);
   const [trainers, setTrainers] = useState([]);
   const [sections, setSections] = useState([]);
   const [siteContent, setSiteContent] = useState([]);
@@ -271,9 +272,9 @@ const AdminPanel = () => {
   const [editingSession, setEditingSession] = useState(null);
   const [trainerModalError, setTrainerModalError] = useState('');
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [isAttendanceGuideOpen, setIsAttendanceGuideOpen] = useState(false);
   const attendanceImportInputRef = useRef(null);
+  const toastIdRef = useRef(0);
 
   const [trainerForm, setTrainerForm] = useState(
     DEBUG_MODE
@@ -311,19 +312,31 @@ const AdminPanel = () => {
     [trainers]
   );
 
+  const showToast = (message, tone = 'success') => {
+    const content = String(message || '').trim();
+    if (!content) return;
+    const id = toastIdRef.current + 1;
+    toastIdRef.current = id;
+    setToasts((current) => [...current, { id, message: content, tone }]);
+    window.setTimeout(() => {
+      setToasts((current) => current.filter((toast) => toast.id !== id));
+    }, TOAST_TIMEOUT_MS);
+  };
+  const showSuccessMessage = (message) => showToast(message, 'success');
+  const showErrorMessage = (message) => showToast(message, 'error');
+
   const withLoad = async (fn) => {
     setLoading(true);
-    setError('');
     try {
       await fn();
     } catch (err) {
-      setError(err.message);
+      showErrorMessage(err.message || 'Ocurrió un error inesperado.');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadTrainers = async () => setTrainers(await api.getTrainers());
+  const loadTrainers = async () => setTrainers(await api.admin.getTrainers());
   const loadSections = async () => setSections(await api.admin.getSections());
   const loadSiteContent = async () => setSiteContent(await api.admin.getSiteContent());
   const loadVirtualLibrary = async () => setVirtualLibrary(await api.admin.getVirtualLibrary());
@@ -378,7 +391,6 @@ const AdminPanel = () => {
   const handleSaveTrainer = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     setTrainerModalError('');
     const isEditing = Boolean(editingTrainer);
     try {
@@ -411,16 +423,6 @@ const AdminPanel = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (!successMessage) return undefined;
-    const timeoutId = setTimeout(() => setSuccessMessage(''), 3000);
-    return () => clearTimeout(timeoutId);
-  }, [successMessage]);
-
-  const showSuccessMessage = (message) => {
-    setSuccessMessage(message);
   };
 
   const handleTrainerFormImageUpload = async (e) => {
@@ -472,7 +474,7 @@ const AdminPanel = () => {
     e.preventDefault();
     const normalizedContent = String(sectionForm.content || '').trim();
     if (!normalizedContent || normalizedContent === '<p></p>' || normalizedContent === '<p><br></p>') {
-      setError('El contenido es obligatorio.');
+      showErrorMessage('El contenido es obligatorio.');
       return;
     }
     await withLoad(async () => {
@@ -634,12 +636,12 @@ const AdminPanel = () => {
   };
   const exportAttendanceExcel = async () => {
     if (!filters.divisionId) {
-      setError('Seleccioná una división antes de exportar la planilla.');
+      showErrorMessage('Seleccioná una división antes de exportar la planilla.');
       return;
     }
 
     if (!matrix || !Array.isArray(matrix.players) || !Array.isArray(matrix.sessions) || matrix.sessions.length === 0) {
-      setError('Cargá una planilla con fechas antes de exportar.');
+      showErrorMessage('Cargá una planilla con fechas antes de exportar.');
       return;
     }
 
@@ -681,7 +683,7 @@ const AdminPanel = () => {
     if (!file) return;
 
     if (!filters.divisionId) {
-      setError('Seleccioná una división antes de importar planilla.');
+      showErrorMessage('Seleccioná una división antes de importar planilla.');
       return;
     }
 
@@ -762,7 +764,7 @@ const AdminPanel = () => {
       specialty: trainer.specialty || '',
       photoUrl: trainer.photoUrl || '',
       cvUrl: trainer.cvUrl || '',
-      email: '',
+      email: trainer.user?.email || '',
       password: '',
     });
     setCreateModalTab('trainers');
@@ -894,11 +896,21 @@ const AdminPanel = () => {
           <div className="form-row">
             <div className="form-group">
               <label>{editingTrainer ? 'Email (opcional para cambiar)' : 'Email'}</label>
-              <input type="email" value={trainerForm.email} onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })} />
+              <input
+                type="email"
+                value={trainerForm.email}
+                onChange={(e) => setTrainerForm({ ...trainerForm, email: e.target.value })}
+                placeholder={editingTrainer && !trainerForm.email ? 'Sin email asociado' : ''}
+              />
             </div>
             <div className="form-group">
               <label>{editingTrainer ? 'Contraseña nueva (opcional)' : 'Contraseña'}</label>
-              <input type="password" value={trainerForm.password} onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })} />
+              <input
+                type="password"
+                value={trainerForm.password}
+                onChange={(e) => setTrainerForm({ ...trainerForm, password: e.target.value })}
+                placeholder={editingTrainer ? 'Dejá en blanco para mantener la actual' : ''}
+              />
             </div>
           </div>
           <button type="submit" className="btn-primary">{editingTrainer ? 'Guardar cambios' : `Crear ${roleLabel}`}</button>
@@ -1068,6 +1080,15 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel">
+      {toasts.length > 0 && (
+        <div className="toast-stack" aria-live="polite" aria-atomic="true">
+          {toasts.map((toast) => (
+            <div key={toast.id} className={`toast-item toast-item-${toast.tone}`}>
+              {toast.message}
+            </div>
+          ))}
+        </div>
+      )}
       <div className="container">
         <h1 className="panel-title">
           <FontAwesomeIcon icon={faUserGear} />
@@ -1084,8 +1105,6 @@ const AdminPanel = () => {
         </div>
 
         {loading && <div className="loading">Cargando...</div>}
-        {error && <div className="error-message">{error}</div>}
-        {successMessage && <div className="success-message">{successMessage}</div>}
         {canCreateInTab && (
           <div className="tab-actions">
             <button type="button" className="btn-primary" onClick={openCreateModal}>
