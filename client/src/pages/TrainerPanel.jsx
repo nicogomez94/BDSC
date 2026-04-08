@@ -18,7 +18,22 @@ const MONTHS = [
   { value: 11, label: 'Noviembre' },
 ];
 
-const dateLabel = (value) => new Date(value).toLocaleDateString('es-AR');
+const getUtcDateParts = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return {
+    day: String(date.getUTCDate()).padStart(2, '0'),
+    month: String(date.getUTCMonth() + 1).padStart(2, '0'),
+    year: date.getUTCFullYear(),
+  };
+};
+
+const dateLabel = (value) => {
+  const parts = getUtcDateParts(value);
+  if (!parts) return '';
+  return `${parts.day}/${parts.month}/${parts.year}`;
+};
 
 const TrainerPanel = () => {
   const { user } = useAuth();
