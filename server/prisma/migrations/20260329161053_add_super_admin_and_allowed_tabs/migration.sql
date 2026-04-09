@@ -1,0 +1,2 @@
+-- Migration file restored (original file was missing)
+-- This migration was already applied to the database
