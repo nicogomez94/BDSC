@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
@@ -50,28 +50,35 @@ const sanitizeFilename = (value, fallback = 'archivo') =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 80) || fallback;
 
+const createSessionForm = (divisionId = '') => ({ divisionId, date: '', notes: '' });
+
 const TrainerPanel = () => {
   const { user } = useAuth();
-  const panelTitle = user?.role === 'PREPARADOR_FISICO' ? 'Panel de Preparador Físico' : 'Panel de Entrenador';
+  const panelTitle = user?.role === 'PREPARADOR_FISICO' ? 'Panel de Preparador Fisico' : 'Panel de Entrenador';
   const [tab, setTab] = useState('attendance');
   const [sections, setSections] = useState([]);
   const [divisions, setDivisions] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [matrix, setMatrix] = useState(null);
   const [changes, setChanges] = useState({});
-  const [sessionDateChanges, setSessionDateChanges] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingProfile, setEditingProfile] = useState(false);
+  const [editingSession, setEditingSession] = useState(null);
+  const [sessionModalOpen, setSessionModalOpen] = useState(false);
   const [filters, setFilters] = useState({ divisionId: '', month: '' });
+  const [sessionForm, setSessionForm] = useState(createSessionForm());
   const [profileForm, setProfileForm] = useState(
     DEBUG_MODE
       ? { ...DEBUG_PREFILL.profileForm }
       : { bio: '', specialty: '', photoUrl: '', password: '' }
   );
-  const divisionMap = divisions.reduce((acc, division) => {
-    acc[division.id] = division;
-    return acc;
-  }, {});
+
+  const divisionMap = useMemo(() => {
+    const map = {};
+    for (const division of divisions) map[division.id] = division;
+    return map;
+  }, [divisions]);
 
   const withLoad = async (fn) => {
     setLoading(true);
@@ -86,15 +93,31 @@ const TrainerPanel = () => {
   };
 
   const loadSections = async () => setSections(await api.trainer.getSections());
-  const loadDivisions = async () => setDivisions(await api.trainer.getDivisions());
-  const loadMatrix = async () => {
-    if (!filters.divisionId) return;
-    const data = await api.trainer.getDivisionAttendance(filters.divisionId, {
-      month: filters.month || undefined,
+
+  const loadMatrix = async (divisionId = filters.divisionId, month = filters.month) => {
+    if (!divisionId) {
+      setMatrix(null);
+      setChanges({});
+      return;
+    }
+
+    const data = await api.trainer.getDivisionAttendance(divisionId, {
+      month: month || undefined,
     });
     setMatrix(data);
     setChanges({});
-    setSessionDateChanges({});
+  };
+
+  const loadSessions = async (divisionId = filters.divisionId, month = filters.month) => {
+    if (!divisionId) {
+      setSessions([]);
+      return;
+    }
+
+    const data = await api.trainer.getDivisionTrainingSessions(divisionId, {
+      month: month || undefined,
+    });
+    setSessions(data);
   };
 
   useEffect(() => {
@@ -102,11 +125,17 @@ const TrainerPanel = () => {
       await loadSections();
       const divisionData = await api.trainer.getDivisions();
       setDivisions(divisionData);
-      if (!filters.divisionId && divisionData.length > 0) {
-        setFilters((current) => ({ ...current, divisionId: String(divisionData[0].id) }));
-      } else if (filters.divisionId) {
-        await loadMatrix();
+
+      const initialDivisionId = filters.divisionId || (divisionData[0] ? String(divisionData[0].id) : '');
+      if (initialDivisionId && initialDivisionId !== filters.divisionId) {
+        setFilters((current) => ({ ...current, divisionId: initialDivisionId }));
       }
+
+      if (initialDivisionId) {
+        await loadMatrix(initialDivisionId, filters.month);
+        setSessionForm(createSessionForm(initialDivisionId));
+      }
+
       if (user?.trainer) {
         setProfileForm({
           bio: user.trainer.bio || (DEBUG_MODE ? DEBUG_PREFILL.profileForm.bio : ''),
@@ -119,19 +148,33 @@ const TrainerPanel = () => {
   }, []);
 
   useEffect(() => {
-    if (!filters.divisionId) return;
-    withLoad(loadMatrix);
-  }, [filters.divisionId, filters.month]);
+    if (!filters.divisionId) {
+      setMatrix(null);
+      setSessions([]);
+      setChanges({});
+      return;
+    }
+
+    withLoad(async () => {
+      if (tab === 'sessions') {
+        await loadSessions();
+      } else if (tab === 'attendance') {
+        await loadMatrix();
+      }
+    });
+  }, [filters.divisionId, filters.month, tab]);
+
+  useEffect(() => {
+    if (editingSession) return;
+    setSessionForm((current) => {
+      const nextDivisionId = filters.divisionId || current.divisionId;
+      if (current.divisionId === nextDivisionId) return current;
+      return { ...current, divisionId: nextDivisionId };
+    });
+  }, [filters.divisionId, editingSession]);
 
   const cellValue = (playerId, sessionId) =>
     changes[sessionId]?.[playerId]?.status || matrix?.matrix?.[playerId]?.[sessionId]?.status || '';
-
-  const sessionDateValue = (session) => sessionDateChanges[session.id] ?? dateInput(session.date);
-  const hasSessionDateChanges =
-    matrix?.sessions?.some((session) => {
-      const nextDate = sessionDateChanges[session.id];
-      return nextDate && nextDate !== dateInput(session.date);
-    }) ?? false;
 
   const handleCell = (playerId, sessionId, status) => {
     setChanges((current) => ({
@@ -158,30 +201,78 @@ const TrainerPanel = () => {
     });
   };
 
-  const handleSessionDateChange = (sessionId, date) => {
-    setSessionDateChanges((current) => ({
-      ...current,
-      [sessionId]: date,
-    }));
+  const openCreateSession = () => {
+    if (!filters.divisionId) {
+      setError('Selecciona una division primero.');
+      return;
+    }
+    setEditingSession(null);
+    setSessionForm(createSessionForm(filters.divisionId));
+    setSessionModalOpen(true);
   };
 
-  const handleSaveSessionDates = async () => {
-    if (!matrix?.sessions?.length) return;
+  const openEditSession = (session) => {
+    setEditingSession(session);
+    setSessionForm({
+      divisionId: String(session.divisionId || ''),
+      date: dateInput(session.date),
+      notes: session.notes || '',
+    });
+    setSessionModalOpen(true);
+  };
 
-    const updates = matrix.sessions
-      .map((session) => ({
-        sessionId: session.id,
-        date: sessionDateChanges[session.id],
-        currentDate: dateInput(session.date),
-      }))
-      .filter((item) => item.date && item.date !== item.currentDate);
+  const cancelSessionEdition = () => {
+    setEditingSession(null);
+    setSessionForm(createSessionForm(filters.divisionId));
+    setSessionModalOpen(false);
+  };
 
-    if (!updates.length) return;
+  const handleSaveSession = async (e) => {
+    e.preventDefault();
+
+    if (!sessionForm.date) {
+      setError('La fecha es obligatoria.');
+      return;
+    }
+
+    const normalizedDivisionId = Number(sessionForm.divisionId || filters.divisionId);
+    if (!editingSession && !normalizedDivisionId) {
+      setError('Selecciona una division.');
+      return;
+    }
 
     await withLoad(async () => {
-      for (const update of updates) {
-        await api.trainer.updateTrainingSession(update.sessionId, { date: update.date });
+      if (editingSession) {
+        await api.trainer.updateTrainingSession(editingSession.id, {
+          date: sessionForm.date,
+          notes: sessionForm.notes,
+        });
+      } else {
+        await api.trainer.createTrainingSession({
+          divisionId: normalizedDivisionId,
+          date: sessionForm.date,
+          notes: sessionForm.notes,
+        });
       }
+
+      setEditingSession(null);
+      setSessionForm(createSessionForm(filters.divisionId || String(normalizedDivisionId)));
+      setSessionModalOpen(false);
+      await loadSessions();
+      await loadMatrix();
+    });
+  };
+
+  const handleDeleteSession = async (sessionId) => {
+    if (!confirm('Eliminar fecha de entrenamiento?')) return;
+
+    await withLoad(async () => {
+      await api.trainer.deleteTrainingSession(sessionId);
+      if (editingSession?.id === sessionId) {
+        setEditingSession(null);
+        setSessionForm(createSessionForm(filters.divisionId));
+      }
+      await loadSessions();
       await loadMatrix();
     });
   };
@@ -205,12 +296,12 @@ const TrainerPanel = () => {
 
   const exportAttendanceExcel = async () => {
     if (!filters.divisionId) {
-      setError('Seleccioná una división antes de exportar la planilla.');
+      setError('Selecciona una division antes de exportar la planilla.');
       return;
     }
 
     if (!matrix || !Array.isArray(matrix.players) || !Array.isArray(matrix.sessions) || matrix.sessions.length === 0) {
-      setError('Cargá una planilla con fechas antes de exportar.');
+      setError('Carga una planilla con fechas antes de exportar.');
       return;
     }
 
@@ -249,6 +340,36 @@ const TrainerPanel = () => {
     });
   };
 
+  const filterRow = (
+    <div className="filters-row">
+      <div className="form-group">
+        <label>Division</label>
+        <select
+          value={filters.divisionId}
+          onChange={(e) => setFilters((current) => ({ ...current, divisionId: e.target.value }))}
+        >
+          <option value="">Seleccionar</option>
+          {divisions.map((division) => (
+            <option key={division.id} value={division.id}>
+              {division.name} - {division.seasonYear}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="form-group">
+        <label>Mes</label>
+        <select value={filters.month} onChange={(e) => setFilters((current) => ({ ...current, month: e.target.value }))}>
+          <option value="">Todos</option>
+          {MONTHS.map((month) => (
+            <option key={month.value} value={month.value}>
+              {month.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+
   return (
     <div className="trainer-panel">
       <div className="container">
@@ -256,51 +377,28 @@ const TrainerPanel = () => {
 
         <div className="tabs tabs-wrap">
           <button className={tab === 'attendance' ? 'active' : ''} onClick={() => setTab('attendance')}>Asistencia</button>
+          <button className={tab === 'sessions' ? 'active' : ''} onClick={() => setTab('sessions')}>Fechas</button>
           <button className={tab === 'sections' ? 'active' : ''} onClick={() => setTab('sections')}>Secciones</button>
           <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}>Perfil</button>
         </div>
 
         {loading && <div className="loading">Cargando...</div>}
         {error && <div className="error-message">{error}</div>}
+        {tab === 'sessions' && (
+          <div className="tab-actions">
+            <button type="button" className="btn-primary" onClick={openCreateSession}>
+              Nueva fecha
+            </button>
+          </div>
+        )}
 
         {tab === 'attendance' && (
           <div className="tab-content">
-            <h2>Asistencia por división</h2>
-            <div className="filters-row">
-              <div className="form-group">
-                <label>División</label>
-                <select value={filters.divisionId} onChange={(e) => setFilters((current) => ({ ...current, divisionId: e.target.value }))}>
-                  <option value="">Seleccionar</option>
-                  {divisions.map((division) => (
-                    <option key={division.id} value={division.id}>
-                      {division.name} - {division.seasonYear}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label>Mes</label>
-                <select value={filters.month} onChange={(e) => setFilters((current) => ({ ...current, month: e.target.value }))}>
-                  <option value="">Todos</option>
-                  {MONTHS.map((month) => (
-                    <option key={month.value} value={month.value}>
-                      {month.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+            <h2>Asistencia por division</h2>
+            {filterRow}
             <div className="filters-actions">
               <button type="button" className="btn-primary" onClick={handleSaveAttendance}>
                 Guardar cambios
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={handleSaveSessionDates}
-                disabled={!hasSessionDateChanges}
-              >
-                Guardar fechas
               </button>
               <button type="button" className="btn-secondary" onClick={() => withLoad(exportAttendanceExcel)}>
                 Exportar Excel
@@ -317,16 +415,7 @@ const TrainerPanel = () => {
                     <tr>
                       <th>Jugadora</th>
                       {matrix.sessions.map((session) => (
-                        <th key={session.id}>
-                          <div className="session-header-cell">
-                            <span>{dateLabel(session.date)}</span>
-                            <input
-                              type="date"
-                              value={sessionDateValue(session)}
-                              onChange={(e) => handleSessionDateChange(session.id, e.target.value)}
-                            />
-                          </div>
-                        </th>
+                        <th key={session.id}>{dateLabel(session.date)}</th>
                       ))}
                     </tr>
                   </thead>
@@ -350,8 +439,46 @@ const TrainerPanel = () => {
                 </table>
               </div>
             ) : (
-              <p>No hay fechas de entrenamiento para la división/mes seleccionado.</p>
+              <p>No hay fechas de entrenamiento para la division/mes seleccionado.</p>
             )}
+          </div>
+        )}
+
+        {tab === 'sessions' && (
+          <div className="tab-content">
+            <h2>Fechas de entrenamiento</h2>
+            {filterRow}
+            <div className="filters-actions">
+              <button type="button" className="btn-secondary" onClick={() => withLoad(loadSessions)}>
+                Aplicar filtros
+              </button>
+            </div>
+
+            <div className="sessions-list">
+              {sessions.length === 0 ? (
+                <p>No hay fechas de entrenamiento para la division/mes seleccionado.</p>
+              ) : (
+                sessions.map((session) => (
+                  <div className="session-row" key={session.id}>
+                    <div className="session-row-info">
+                      <h3>{dateLabel(session.date)}</h3>
+                      <p>
+                        {divisionMap[session.divisionId]?.name || 'Division'} | Mes {session.month} | Registros {session._count?.attendance || 0}
+                      </p>
+                      {session.notes && <p>{session.notes}</p>}
+                    </div>
+                    <div className="row-actions">
+                      <button type="button" className="btn-secondary" onClick={() => openEditSession(session)}>
+                        Editar
+                      </button>
+                      <button type="button" className="btn-danger" onClick={() => handleDeleteSession(session.id)}>
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )}
 
@@ -376,19 +503,81 @@ const TrainerPanel = () => {
             <div className="profile-info">
               <p><strong>Nombre:</strong> {user?.trainer?.name}</p>
               <p><strong>Especialidad:</strong> {user?.trainer?.specialty || 'No especificada'}</p>
-              <p><strong>Biografía:</strong> {user?.trainer?.bio || 'Sin biografía'}</p>
+              <p><strong>Biografia:</strong> {user?.trainer?.bio || 'Sin biografia'}</p>
               <button className="btn-secondary" onClick={() => setEditingProfile(!editingProfile)}>
                 {editingProfile ? 'Cancelar' : 'Editar perfil'}
               </button>
               {editingProfile && (
                 <form onSubmit={handleUpdateProfile} className="profile-form">
                   <div className="form-group"><label>Especialidad</label><input value={profileForm.specialty} onChange={(e) => setProfileForm({ ...profileForm, specialty: e.target.value })} /></div>
-                  <div className="form-group"><label>Biografía</label><textarea value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} rows="4" /></div>
+                  <div className="form-group"><label>Biografia</label><textarea value={profileForm.bio} onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })} rows="4" /></div>
                   <div className="form-group"><label>URL foto</label><input value={profileForm.photoUrl} onChange={(e) => setProfileForm({ ...profileForm, photoUrl: e.target.value })} /></div>
-                  <div className="form-group"><label>Nueva contraseña</label><input type="password" value={profileForm.password} onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })} /></div>
+                  <div className="form-group"><label>Nueva contrasena</label><input type="password" value={profileForm.password} onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })} /></div>
                   <button type="submit" className="btn-primary">Guardar cambios</button>
                 </form>
               )}
+            </div>
+          </div>
+        )}
+
+        {sessionModalOpen && (
+          <div className="modal-overlay" onClick={cancelSessionEdition}>
+            <div className="modal-content trainer-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-header-copy">
+                  <h3>{editingSession ? 'Editar fecha' : 'Crear fecha'}</h3>
+                  <p>{editingSession ? 'Actualiza los datos de la fecha.' : 'Completa los datos para crear una fecha.'}</p>
+                </div>
+                <button type="button" className="modal-close" onClick={cancelSessionEdition} aria-label="Cerrar modal">
+                  x
+                </button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleSaveSession} className="session-form">
+                  {!editingSession && (
+                    <div className="form-group">
+                      <label>Division</label>
+                      <select
+                        value={sessionForm.divisionId}
+                        onChange={(e) => setSessionForm((current) => ({ ...current, divisionId: e.target.value }))}
+                        required
+                      >
+                        <option value="">Seleccionar</option>
+                        {divisions.map((division) => (
+                          <option key={division.id} value={division.id}>
+                            {division.name} - {division.seasonYear}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <div className="form-group">
+                    <label>Fecha</label>
+                    <input
+                      type="date"
+                      value={sessionForm.date}
+                      onChange={(e) => setSessionForm((current) => ({ ...current, date: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Notas</label>
+                    <input
+                      value={sessionForm.notes}
+                      onChange={(e) => setSessionForm((current) => ({ ...current, notes: e.target.value }))}
+                      placeholder="Opcional"
+                    />
+                  </div>
+                  <div className="session-form-actions">
+                    <button type="submit" className="btn-primary">
+                      {editingSession ? 'Guardar cambios' : 'Crear fecha'}
+                    </button>
+                    <button type="button" className="btn-secondary" onClick={cancelSessionEdition}>
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}

@@ -4,7 +4,9 @@ import { getTrainerSections, updateTrainerProfile } from '../controllers/trainer
 import {
   getTrainerDivisionsHandler,
   getTrainerDivisionTrainingSessionsHandler,
+  createTrainerTrainingSessionHandler,
   updateTrainerTrainingSessionHandler,
+  deleteTrainerTrainingSessionHandler,
   getTrainerDivisionAttendanceHandler,
   upsertTrainerAttendanceBulkHandler,
   updateTrainerAttendanceHandler,
@@ -21,7 +23,9 @@ router.get('/sections', getTrainerSections);
 router.put('/profile', updateTrainerProfile);
 router.get('/divisions', getTrainerDivisionsHandler);
 router.get('/divisions/:divisionId/training-sessions', getTrainerDivisionTrainingSessionsHandler);
+router.post('/training-sessions', createTrainerTrainingSessionHandler);
 router.put('/training-sessions/:id', updateTrainerTrainingSessionHandler);
+router.delete('/training-sessions/:id', deleteTrainerTrainingSessionHandler);
 router.get('/divisions/:divisionId/attendance', getTrainerDivisionAttendanceHandler);
 router.get('/attendance/export', exportTrainerAttendanceHandler);
 router.post('/attendance/bulk', upsertTrainerAttendanceBulkHandler);

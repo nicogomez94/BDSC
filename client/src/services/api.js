@@ -880,6 +880,21 @@ export const api = {
       );
     },
 
+    createTrainingSession: async (data) => {
+      return requestJson(
+        `${API_URL}/trainer/training-sessions`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al crear fecha de entrenamiento'
+      );
+    },
+
     updateTrainingSession: async (id, data) => {
       return requestJson(
         `${API_URL}/trainer/training-sessions/${id}`,
@@ -892,6 +907,17 @@ export const api = {
           body: JSON.stringify(data),
         },
         'Error al actualizar fecha de entrenamiento'
+      );
+    },
+
+    deleteTrainingSession: async (id) => {
+      return requestJson(
+        `${API_URL}/trainer/training-sessions/${id}`,
+        {
+          method: 'DELETE',
+          headers: getAuthHeader(),
+        },
+        'Error al eliminar fecha de entrenamiento'
       );
     },
 

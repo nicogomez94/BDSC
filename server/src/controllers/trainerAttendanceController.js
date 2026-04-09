@@ -1,7 +1,9 @@
 import {
   getTrainerDivisions,
   listTrainingSessions,
+  createTrainingSession,
   updateTrainingSession,
+  deleteTrainingSession,
   getDivisionAttendanceMatrix,
   upsertAttendanceBulk,
   updateAttendanceById,
@@ -33,6 +35,24 @@ export const updateTrainerTrainingSessionHandler = async (req, res, next) => {
   try {
     const session = await updateTrainingSession(req.params.id, req.body, req.user);
     res.json(session);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createTrainerTrainingSessionHandler = async (req, res, next) => {
+  try {
+    const session = await createTrainingSession(req.body, req.user);
+    res.status(201).json(session);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteTrainerTrainingSessionHandler = async (req, res, next) => {
+  try {
+    await deleteTrainingSession(req.params.id, req.user);
+    res.json({ message: 'Fecha de entrenamiento eliminada correctamente' });
   } catch (error) {
     next(error);
   }
