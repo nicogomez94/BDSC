@@ -880,6 +880,21 @@ export const api = {
       );
     },
 
+    updateTrainingSession: async (id, data) => {
+      return requestJson(
+        `${API_URL}/trainer/training-sessions/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+          body: JSON.stringify(data),
+        },
+        'Error al actualizar fecha de entrenamiento'
+      );
+    },
+
     getDivisionAttendance: async (divisionId, filters = {}) => {
       return requestJson(
         `${API_URL}/trainer/divisions/${divisionId}/attendance${buildQueryString(filters)}`,

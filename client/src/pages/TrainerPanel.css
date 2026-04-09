@@ -117,6 +117,19 @@
   text-align: left;
 }
 
+.session-header-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 130px;
+}
+
+.session-header-cell input {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 12px;
+}
+
 .attendance-grid select {
   min-width: 122px;
   padding: 6px;

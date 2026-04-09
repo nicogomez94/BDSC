@@ -1,6 +1,7 @@
 import {
   getTrainerDivisions,
   listTrainingSessions,
+  updateTrainingSession,
   getDivisionAttendanceMatrix,
   upsertAttendanceBulk,
   updateAttendanceById,
@@ -23,6 +24,15 @@ export const getTrainerDivisionTrainingSessionsHandler = async (req, res, next) 
       req.user
     );
     res.json(sessions);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTrainerTrainingSessionHandler = async (req, res, next) => {
+  try {
+    const session = await updateTrainingSession(req.params.id, req.body, req.user);
+    res.json(session);
   } catch (error) {
     next(error);
   }

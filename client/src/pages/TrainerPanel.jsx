@@ -35,6 +35,12 @@ const dateLabel = (value) => {
   return `${parts.day}/${parts.month}/${parts.year}`;
 };
 
+const dateInput = (value) => {
+  const parts = getUtcDateParts(value);
+  if (!parts) return '';
+  return `${parts.year}-${parts.month}-${parts.day}`;
+};
+
 const sanitizeFilename = (value, fallback = 'archivo') =>
   String(value || fallback)
     .toLowerCase()
@@ -52,6 +58,7 @@ const TrainerPanel = () => {
   const [divisions, setDivisions] = useState([]);
   const [matrix, setMatrix] = useState(null);
   const [changes, setChanges] = useState({});
+  const [sessionDateChanges, setSessionDateChanges] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editingProfile, setEditingProfile] = useState(false);
@@ -87,6 +94,7 @@ const TrainerPanel = () => {
     });
     setMatrix(data);
     setChanges({});
+    setSessionDateChanges({});
   };
 
   useEffect(() => {
@@ -118,6 +126,13 @@ const TrainerPanel = () => {
   const cellValue = (playerId, sessionId) =>
     changes[sessionId]?.[playerId]?.status || matrix?.matrix?.[playerId]?.[sessionId]?.status || '';
 
+  const sessionDateValue = (session) => sessionDateChanges[session.id] ?? dateInput(session.date);
+  const hasSessionDateChanges =
+    matrix?.sessions?.some((session) => {
+      const nextDate = sessionDateChanges[session.id];
+      return nextDate && nextDate !== dateInput(session.date);
+    }) ?? false;
+
   const handleCell = (playerId, sessionId, status) => {
     setChanges((current) => ({
       ...current,
@@ -138,6 +153,34 @@ const TrainerPanel = () => {
             entries,
           });
         }
+      }
+      await loadMatrix();
+    });
+  };
+
+  const handleSessionDateChange = (sessionId, date) => {
+    setSessionDateChanges((current) => ({
+      ...current,
+      [sessionId]: date,
+    }));
+  };
+
+  const handleSaveSessionDates = async () => {
+    if (!matrix?.sessions?.length) return;
+
+    const updates = matrix.sessions
+      .map((session) => ({
+        sessionId: session.id,
+        date: sessionDateChanges[session.id],
+        currentDate: dateInput(session.date),
+      }))
+      .filter((item) => item.date && item.date !== item.currentDate);
+
+    if (!updates.length) return;
+
+    await withLoad(async () => {
+      for (const update of updates) {
+        await api.trainer.updateTrainingSession(update.sessionId, { date: update.date });
       }
       await loadMatrix();
     });
@@ -251,6 +294,14 @@ const TrainerPanel = () => {
               <button type="button" className="btn-primary" onClick={handleSaveAttendance}>
                 Guardar cambios
               </button>
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleSaveSessionDates}
+                disabled={!hasSessionDateChanges}
+              >
+                Guardar fechas
+              </button>
               <button type="button" className="btn-secondary" onClick={() => withLoad(exportAttendanceExcel)}>
                 Exportar Excel
               </button>
@@ -266,7 +317,16 @@ const TrainerPanel = () => {
                     <tr>
                       <th>Jugadora</th>
                       {matrix.sessions.map((session) => (
-                        <th key={session.id}>{dateLabel(session.date)}</th>
+                        <th key={session.id}>
+                          <div className="session-header-cell">
+                            <span>{dateLabel(session.date)}</span>
+                            <input
+                              type="date"
+                              value={sessionDateValue(session)}
+                              onChange={(e) => handleSessionDateChange(session.id, e.target.value)}
+                            />
+                          </div>
+                        </th>
                       ))}
                     </tr>
                   </thead>
