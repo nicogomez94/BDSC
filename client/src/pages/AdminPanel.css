@@ -363,6 +363,18 @@
   min-width: 220px;
 }
 
+.attendance-grid th:nth-child(2),
+.attendance-grid td:nth-child(2) {
+  min-width: 120px;
+  white-space: nowrap;
+}
+
+.attendance-grid th:nth-child(3),
+.attendance-grid td:nth-child(3) {
+  min-width: 150px;
+  white-space: nowrap;
+}
+
 .attendance-grid select {
   min-width: 122px;
   padding: 6px;

@@ -151,6 +151,8 @@ const AttendanceSystemPage = () => {
                 <thead>
                   <tr>
                     <th>Jugadora</th>
+                    <th>Grado</th>
+                    <th>Año de nacimiento</th>
                     {matrix.sessions.map((session) => (
                       <th key={session.id}>{dateLabel(session.date)}</th>
                     ))}
@@ -163,6 +165,8 @@ const AttendanceSystemPage = () => {
                         {player.fullName}
                         {!player.active && <span className="inactive-badge">Inactiva</span>}
                       </td>
+                      <td>{player.grade || '-'}</td>
+                      <td>{player.birthYear || '-'}</td>
                       {matrix.sessions.map((session) => (
                         <td key={`${player.id}-${session.id}`}>
                           <span className="attendance-readonly-status">{resolveCellStatus(player.id, session.id)}</span>

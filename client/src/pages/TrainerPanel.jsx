@@ -305,16 +305,18 @@ const TrainerPanel = () => {
       return;
     }
 
-    const headers = ['Jugadora', ...matrix.sessions.map((session) => dateLabel(session.date))];
+    const headers = ['Jugadora', 'Grado', 'Año de nacimiento', ...matrix.sessions.map((session) => dateLabel(session.date))];
     const rows = matrix.players.map((player) => [
       player.active ? player.fullName : `${player.fullName} (Inactiva)`,
+      player.grade || '-',
+      player.birthYear || '-',
       ...matrix.sessions.map((session) => cellValue(player.id, session.id) || '-'),
     ]);
 
     const xlsxModule = await import('xlsx');
     const XLSX = xlsxModule.default || xlsxModule;
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    worksheet['!cols'] = [{ wch: 36 }, ...matrix.sessions.map(() => ({ wch: 14 }))];
+    worksheet['!cols'] = [{ wch: 36 }, { wch: 14 }, { wch: 18 }, ...matrix.sessions.map(() => ({ wch: 14 }))];
 
     const workbook = XLSX.utils.book_new();
     const division = divisionMap[Number(filters.divisionId)];
@@ -414,6 +416,8 @@ const TrainerPanel = () => {
                   <thead>
                     <tr>
                       <th>Jugadora</th>
+                      <th>Grado</th>
+                      <th>Año de nacimiento</th>
                       {matrix.sessions.map((session) => (
                         <th key={session.id}>{dateLabel(session.date)}</th>
                       ))}
@@ -423,6 +427,8 @@ const TrainerPanel = () => {
                     {matrix.players.map((player) => (
                       <tr key={player.id}>
                         <td>{player.fullName}</td>
+                        <td>{player.grade || '-'}</td>
+                        <td>{player.birthYear || '-'}</td>
                         {matrix.sessions.map((session) => (
                           <td key={`${player.id}-${session.id}`}>
                             <select value={cellValue(player.id, session.id)} onChange={(e) => handleCell(player.id, session.id, e.target.value)}>
