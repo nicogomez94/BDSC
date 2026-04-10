@@ -313,6 +313,7 @@ export const listPlayers = async (query = {}) => {
 export const createPlayer = async (payload) => {
   const fullName = parseStringField(payload.fullName, 'fullName', { maxLength: 120 });
   const birthYear = parseIntField(payload.birthYear, 'birthYear', { min: 1900, max: 2100 });
+  const grade = payload.grade != null ? parseStringField(payload.grade, 'grade', { required: false, maxLength: 50 }) : undefined;
   const divisionId = parseIntField(payload.divisionId, 'divisionId', { min: 1 });
   const active = parseBooleanField(payload.active, 'active', { required: false });
   const phone = payload.phone != null ? parseStringField(payload.phone, 'phone', { required: false, maxLength: 30 }) : undefined;
@@ -327,6 +328,7 @@ export const createPlayer = async (payload) => {
     data: {
       fullName,
       birthYear,
+      grade: grade ?? null,
       divisionId,
       active: active ?? true,
       phone: phone ?? null,
@@ -350,6 +352,9 @@ export const updatePlayer = async (playerIdValue, payload) => {
   }
   if (payload.birthYear !== undefined) {
     data.birthYear = parseIntField(payload.birthYear, 'birthYear', { min: 1900, max: 2100 });
+  }
+  if (payload.grade !== undefined) {
+    data.grade = payload.grade ? parseStringField(payload.grade, 'grade', { maxLength: 50 }) : null;
   }
   if (payload.active !== undefined) {
     data.active = parseBooleanField(payload.active, 'active', { required: true });
@@ -974,6 +979,7 @@ export const getAttendanceReport = async (query = {}, user) => {
         playerId: player.id,
         fullName: player.fullName,
         birthYear: player.birthYear,
+        grade: player.grade,
         active: player.active,
         divisionId: division.id,
         divisionName: division.name,

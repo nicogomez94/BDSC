@@ -105,6 +105,7 @@ model Player {
   id         Int          @id @default(autoincrement())
   fullName   String
   birthYear  Int
+  grade      String?
   phone      String?
   email      String?
   parentName String?

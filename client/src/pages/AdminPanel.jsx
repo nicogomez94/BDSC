@@ -287,6 +287,7 @@ const AdminPanel = () => {
   const [playerForm, setPlayerForm] = useState({
     fullName: '',
     birthYear: '',
+    grade: '',
     divisionId: '',
     active: true,
     phone: '',
@@ -532,6 +533,7 @@ const AdminPanel = () => {
       const payload = {
         fullName: playerForm.fullName,
         birthYear: Number(playerForm.birthYear),
+        grade: playerForm.grade || null,
         divisionId: Number(playerForm.divisionId),
         active: playerForm.active,
         phone: playerForm.phone || null,
@@ -548,6 +550,7 @@ const AdminPanel = () => {
       setPlayerForm({
         fullName: '',
         birthYear: '',
+        grade: '',
         divisionId: '',
         active: true,
         phone: '',
@@ -716,6 +719,7 @@ const AdminPanel = () => {
       setPlayerForm({
         fullName: '',
         birthYear: '',
+        grade: '',
         divisionId: '',
         active: true,
         phone: '',
@@ -794,6 +798,7 @@ const AdminPanel = () => {
     setPlayerForm({
       fullName: player.fullName || '',
       birthYear: player.birthYear || '',
+      grade: player.grade || '',
       divisionId: String(player.divisionId || ''),
       active: Boolean(player.active),
       phone: player.phone || '',
@@ -950,7 +955,7 @@ const AdminPanel = () => {
 
     if (createModalTab === 'players') {
       return (
-        <form onSubmit={handleSavePlayer} className="admin-form">
+        <form onSubmit={handleSavePlayer} className="admin-form admin-form-player">
           <div className="form-row">
             <div className="form-group">
               <label>Nombre completo</label>
@@ -959,6 +964,12 @@ const AdminPanel = () => {
             <div className="form-group">
               <label>Año nacimiento</label>
               <input type="number" value={playerForm.birthYear} onChange={(e) => setPlayerForm({ ...playerForm, birthYear: e.target.value })} required />
+            </div>
+          </div>
+          <div className="form-row form-row-single">
+            <div className="form-group">
+              <label>Grado</label>
+              <input value={playerForm.grade} onChange={(e) => setPlayerForm({ ...playerForm, grade: e.target.value })} />
             </div>
           </div>
           <div className="form-row">
@@ -987,7 +998,7 @@ const AdminPanel = () => {
               <input type="tel" value={playerForm.parentPhone} onChange={(e) => setPlayerForm({ ...playerForm, parentPhone: e.target.value })} />
             </div>
           </div>
-          <div className="form-row">
+          <div className="form-row player-division-row">
             <div className="form-group">
               <label>División</label>
               <select value={playerForm.divisionId} onChange={(e) => setPlayerForm({ ...playerForm, divisionId: e.target.value })} required>
@@ -997,11 +1008,11 @@ const AdminPanel = () => {
                 ))}
               </select>
             </div>
-            <div className="form-group checkbox-group">
+            <div className="form-group checkbox-group player-active-group">
               <label className="active-toggle">
                 <input type="checkbox" checked={playerForm.active} onChange={(e) => setPlayerForm({ ...playerForm, active: e.target.checked })} />
+                <span>Activa</span>&nbsp;&nbsp;
                 <span className="active-toggle-track" aria-hidden="true" />
-                <span>Activa</span>
               </label>
             </div>
           </div>
@@ -1321,7 +1332,12 @@ const AdminPanel = () => {
                 <div className="data-row" key={player.id}>
                   <div className="data-info">
                     <h3>{player.fullName}</h3>
-                    <p>{divisionMap[player.divisionId]?.name || 'División'} | {player.birthYear} | {player.active ? 'Activa' : 'Inactiva'}</p>
+                    <p>
+                      {divisionMap[player.divisionId]?.name || 'División'} | {player.birthYear}
+                      {player.grade ? ` | Grado ${player.grade}` : ''}
+                      {' | '}
+                      {player.active ? 'Activa' : 'Inactiva'}
+                    </p>
                   </div>
                   <div className="row-actions">
                     <button

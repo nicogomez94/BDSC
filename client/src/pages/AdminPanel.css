@@ -615,6 +615,37 @@
   margin-top: 0;
 }
 
+.modal-content .admin-form-player .form-row {
+  gap: 18px;
+}
+
+.modal-content .admin-form-player .form-group {
+  margin-bottom: 14px;
+}
+
+.modal-content .admin-form-player .form-row-single {
+  grid-template-columns: 1fr;
+}
+
+.modal-content .admin-form-player .player-division-row {
+  align-items: end;
+}
+
+.modal-content .admin-form-player .player-active-group {
+  display: flex;
+  justify-content: flex-end;
+  align-items: end;
+}
+
+.modal-content .admin-form-player .player-active-group .active-toggle {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #d7d0c3;
+  background: #fffdfa;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
 .attendance-help-modal {
   width: min(760px, 100%);
 }
@@ -813,6 +844,11 @@
 
   .modal-content .admin-form {
     padding: 16px;
+  }
+
+  .modal-content .admin-form-player .player-active-group {
+    justify-content: flex-start;
+    align-items: center;
   }
 
   .site-content-admin .section-card > h3 {
