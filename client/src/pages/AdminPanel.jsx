@@ -1412,7 +1412,7 @@ const AdminPanel = () => {
         )}
 
         {tab === 'attendance' && (
-          <div className="tab-content">
+          <div className="tab-content attendance-tab">
             <h2>Carga de asistencia</h2>
             {filterRow}
             <div className="filters-actions">
@@ -1422,16 +1422,24 @@ const AdminPanel = () => {
             </div>
 
             {matrix && matrix.sessions.length > 0 ? (
-              <div className="attendance-grid-wrapper">
-                <table className="attendance-grid">
+              <>
+                <p className="attendance-grid-hint" aria-hidden="true">Desliza la tabla hacia los costados para ver todas las fechas.</p>
+                <div className="attendance-grid-wrapper">
+                  <table className="attendance-grid">
                   <thead>
                     <tr>
                       <th>Jugadora</th>
                       <th>Grado</th>
                       <th>Año de nacimiento</th>
-                      {matrix.sessions.map((session) => (
-                        <th key={session.id}>{dateLabel(session.date)}</th>
-                      ))}
+                      {matrix.sessions.map((session) => {
+                        const parts = getUtcDateParts(session.date);
+                        return (
+                          <th key={session.id} className="attendance-date-column">
+                            <span className="attendance-date-main">{parts ? `${parts.day}/${parts.month}` : dateLabel(session.date)}</span>
+                            {parts && <span className="attendance-date-year">{parts.year}</span>}
+                          </th>
+                        );
+                      })}
                     </tr>
                   </thead>
                   <tbody>
@@ -1456,8 +1464,9 @@ const AdminPanel = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+                  </table>
+                </div>
+              </>
             ) : (
               <p>Seleccioná una división y cargá la planilla.</p>
             )}
