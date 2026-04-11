@@ -57,6 +57,20 @@ const PANEL_TABS = [
   { key: 'attendance', label: 'Asistencia', icon: faClipboardCheck },
   { key: 'reports', label: 'Reportes', icon: faChartColumn },
 ];
+const GRADE_OPTIONS = [
+  '1° grado',
+  '2° grado',
+  '3° grado',
+  '4° grado',
+  '5° grado',
+  '6° grado',
+  '7° grado',
+  '1° año',
+  '2° año',
+  '3° año',
+  '4° año',
+  '5° año',
+];
 
 const getUtcDateParts = (value) => {
   if (!value) return null;
@@ -971,7 +985,14 @@ const AdminPanel = () => {
           <div className="form-row form-row-single">
             <div className="form-group">
               <label>Grado</label>
-              <input value={playerForm.grade} onChange={(e) => setPlayerForm({ ...playerForm, grade: e.target.value })} />
+              <select value={playerForm.grade} onChange={(e) => setPlayerForm({ ...playerForm, grade: e.target.value })}>
+                <option value="">Seleccionar</option>
+                {GRADE_OPTIONS.map((gradeOption) => (
+                  <option key={gradeOption} value={gradeOption}>
+                    {gradeOption}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="form-row">
