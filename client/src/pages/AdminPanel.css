@@ -846,6 +846,14 @@
 }
 
 @media (max-width: 768px) {
+  .admin-panel {
+    padding: 20px 6px;
+  }
+
+  .admin-panel .container {
+    padding: 0 6px;
+  }
+
   .data-row {
     flex-direction: column;
     align-items: flex-start;
