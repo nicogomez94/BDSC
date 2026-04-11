@@ -10,7 +10,7 @@ import './Contact.css';
 
 const CONTACT_SERVICE_ENDPOINT = 'https://contact-form-service-e8aa.onrender.com/api/contact';
 const CONTACT_SITE_ID = 'coordinacionhockey.com.ar';
-const CONTACT_TO_EMAIL = 'nicolasgomez94@gmail.com';
+const CONTACT_TO_EMAIL = 'lucasalesheadcoach@gmail.com';
 const CONTACT_RECIPIENTS = ['Deportivo', 'Administración'];
 
 const Contact = () => {
