@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faLocationDot,
@@ -8,7 +8,8 @@ import {
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
 import './Contact.css';
 
-const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT;
+const CONTACT_SERVICE_ENDPOINT = 'https://contact-form-service.onrender.com/api/contact';
+const CONTACT_SITE_ID = 'coordinacionhockey.com.ar';
 const CONTACT_RECIPIENTS = ['Deportivo', 'Administración'];
 
 const Contact = () => {
@@ -55,31 +56,47 @@ const Contact = () => {
     setSubmitError('');
     setSubmitSuccess('');
 
-    if (!FORMSPREE_ENDPOINT) {
-      setSubmitError('Falta configurar VITE_FORMSPREE_ENDPOINT en el frontend.');
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name || !email || !message) {
+      setSubmitError('Completá nombre, email y mensaje para continuar.');
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setSubmitError('Ingresá un email válido.');
       return;
     }
 
     try {
       setSubmitting(true);
 
-      const response = await fetch(FORMSPREE_ENDPOINT, {
+      const response = await fetch(CONTACT_SERVICE_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
         },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          recipient: formData.recipient,
-          message: formData.message,
-          _subject: `Nuevo contacto (${formData.recipient}) de ${formData.name}`,
+          name,
+          email,
+          message,
+          site: CONTACT_SITE_ID,
+          company: '',
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('No se pudo enviar el mensaje.');
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (!response.ok || data?.success !== true) {
+        throw new Error('No pudimos enviar tu mensaje en este momento. Intentá nuevamente.');
       }
 
       setSubmitSuccess('Gracias por tu mensaje. Te contactaremos pronto.');
@@ -87,7 +104,7 @@ const Contact = () => {
         DEBUG_MODE ? { ...DEBUG_PREFILL.contact } : { name: '', email: '', recipient: '', message: '' }
       );
     } catch (error) {
-      setSubmitError(error.message || 'Ocurrió un error al enviar.');
+      setSubmitError(error.message || 'Error de red. Verificá tu conexión e intentá nuevamente.');
     } finally {
       setSubmitting(false);
     }
@@ -113,7 +130,7 @@ const Contact = () => {
         <div className="contact-content">
           <div className="contact-info scroll-reveal">
             <h2>Información de Contacto</h2>
-            
+
             <div className="info-item">
               <div className="info-icon"><FontAwesomeIcon icon={faLocationDot} /></div>
               <h3>Dirección</h3>
@@ -143,24 +160,24 @@ const Contact = () => {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="name">Nombre completo</label>
-                <input 
-                  type="text" 
-                  id="name" 
+                <input
+                  type="text"
+                  id="name"
                   value={formData.name}
                   onChange={handleChange}
-                  required 
+                  required
                   placeholder="Tu nombre"
                 />
               </div>
 
               <div className="form-group">
                 <label htmlFor="email">Email</label>
-                <input 
-                  type="email" 
-                  id="email" 
+                <input
+                  type="email"
+                  id="email"
                   value={formData.email}
                   onChange={handleChange}
-                  required 
+                  required
                   placeholder="tu@email.com"
                 />
               </div>
@@ -171,7 +188,6 @@ const Contact = () => {
                   id="recipient"
                   value={formData.recipient}
                   onChange={handleChange}
-                  required
                 >
                   <option value="">Seleccionar destinatario</option>
                   {CONTACT_RECIPIENTS.map((recipient) => (
@@ -184,9 +200,9 @@ const Contact = () => {
 
               <div className="form-group">
                 <label htmlFor="message">Mensaje</label>
-                <textarea 
-                  id="message" 
-                  rows="6" 
+                <textarea
+                  id="message"
+                  rows="6"
                   value={formData.message}
                   onChange={handleChange}
                   required
