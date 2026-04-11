@@ -277,7 +277,7 @@ const AdminPanel = () => {
   const [matrix, setMatrix] = useState(null);
   const [changes, setChanges] = useState({});
   const [report, setReport] = useState(null);
-  const [filters, setFilters] = useState({ divisionId: '', month: '' });
+  const [filters, setFilters] = useState({ divisionId: '', month: '', year: '', grade: '' });
   const [createModalTab, setCreateModalTab] = useState(null);
   const [editingTrainer, setEditingTrainer] = useState(null);
   const [editingSection, setEditingSection] = useState(null);
@@ -317,6 +317,40 @@ const AdminPanel = () => {
     for (const division of divisions) map[division.id] = division;
     return map;
   }, [divisions]);
+  const attendanceYearOptions = useMemo(() => {
+    if (!Array.isArray(matrix?.sessions)) return [];
+    const years = new Set();
+    matrix.sessions.forEach((session) => {
+      const year = getUtcDateParts(session.date)?.year;
+      if (year) years.add(String(year));
+    });
+    return Array.from(years).sort((a, b) => Number(b) - Number(a));
+  }, [matrix]);
+  const attendanceGradeOptions = useMemo(() => {
+    if (!Array.isArray(matrix?.players)) return [];
+    const grades = new Set();
+    matrix.players.forEach((player) => {
+      const grade = String(player.grade || '').trim();
+      if (grade) grades.add(grade);
+    });
+    const preferredOrder = new Map(GRADE_OPTIONS.map((grade, index) => [grade, index]));
+    return Array.from(grades).sort((a, b) => {
+      const aOrder = preferredOrder.has(a) ? preferredOrder.get(a) : Number.MAX_SAFE_INTEGER;
+      const bOrder = preferredOrder.has(b) ? preferredOrder.get(b) : Number.MAX_SAFE_INTEGER;
+      if (aOrder !== bOrder) return aOrder - bOrder;
+      return a.localeCompare(b, 'es');
+    });
+  }, [matrix]);
+  const filteredAttendanceSessions = useMemo(() => {
+    if (!Array.isArray(matrix?.sessions)) return [];
+    if (!filters.year) return matrix.sessions;
+    return matrix.sessions.filter((session) => String(getUtcDateParts(session.date)?.year || '') === String(filters.year));
+  }, [filters.year, matrix]);
+  const filteredAttendancePlayers = useMemo(() => {
+    if (!Array.isArray(matrix?.players)) return [];
+    if (!filters.grade) return matrix.players;
+    return matrix.players.filter((player) => String(player.grade || '').trim() === String(filters.grade));
+  }, [filters.grade, matrix]);
   const headCoaches = useMemo(
     () => trainers.filter((trainer) => (trainer.type || TRAINER_TYPE.ENTRENADOR) === TRAINER_TYPE.ENTRENADOR),
     [trainers]
@@ -657,18 +691,23 @@ const AdminPanel = () => {
       return;
     }
 
-    const headers = ['Jugadora', 'Grado', 'Año de nacimiento', ...matrix.sessions.map((session) => dateLabel(session.date))];
-    const rows = matrix.players.map((player) => [
+    if (filteredAttendanceSessions.length === 0 || filteredAttendancePlayers.length === 0) {
+      showErrorMessage('No hay datos para exportar con los filtros seleccionados.');
+      return;
+    }
+
+    const headers = ['Jugadora', 'Grado', 'Año de nacimiento', ...filteredAttendanceSessions.map((session) => dateLabel(session.date))];
+    const rows = filteredAttendancePlayers.map((player) => [
       player.active ? player.fullName : `${player.fullName} (Inactiva)`,
       player.grade || '-',
       player.birthYear || '-',
-      ...matrix.sessions.map((session) => cellValue(player.id, session.id) || '-'),
+      ...filteredAttendanceSessions.map((session) => cellValue(player.id, session.id) || '-'),
     ]);
 
     const xlsxModule = await import('xlsx');
     const XLSX = xlsxModule.default || xlsxModule;
     const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-    worksheet['!cols'] = [{ wch: 36 }, { wch: 14 }, { wch: 18 }, ...matrix.sessions.map(() => ({ wch: 14 }))];
+    worksheet['!cols'] = [{ wch: 36 }, { wch: 14 }, { wch: 18 }, ...filteredAttendanceSessions.map(() => ({ wch: 14 }))];
 
     const workbook = XLSX.utils.book_new();
     const division = divisionMap[Number(filters.divisionId)];
@@ -1436,6 +1475,30 @@ const AdminPanel = () => {
           <div className="tab-content attendance-tab">
             <h2>Carga de asistencia</h2>
             {filterRow}
+            <div className="filters-row attendance-extra-filters">
+              <div className="form-group">
+                <label>Año</label>
+                <select value={filters.year} onChange={(e) => setFilters((current) => ({ ...current, year: e.target.value }))}>
+                  <option value="">Todos</option>
+                  {attendanceYearOptions.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Grado</label>
+                <select value={filters.grade} onChange={(e) => setFilters((current) => ({ ...current, grade: e.target.value }))}>
+                  <option value="">Todos</option>
+                  {attendanceGradeOptions.map((gradeOption) => (
+                    <option key={gradeOption} value={gradeOption}>
+                      {gradeOption}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <div className="filters-actions">
               <button className="btn-secondary" type="button" onClick={() => withLoad(loadMatrix)}>Cargar planilla</button>
               <button className="btn-primary" type="button" onClick={saveAttendance}>Guardar cambios</button>
@@ -1452,7 +1515,7 @@ const AdminPanel = () => {
                       <th>Jugadora</th>
                       <th>Grado</th>
                       <th>Año de nacimiento</th>
-                      {matrix.sessions.map((session) => {
+                      {filteredAttendanceSessions.map((session) => {
                         const parts = getUtcDateParts(session.date);
                         return (
                           <th key={session.id} className="attendance-date-column">
@@ -1464,7 +1527,7 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {matrix.players.map((player) => (
+                    {filteredAttendancePlayers.map((player) => (
                       <tr key={player.id}>
                         <td>
                           {player.fullName}
@@ -1472,7 +1535,7 @@ const AdminPanel = () => {
                         </td>
                         <td>{player.grade || '-'}</td>
                         <td>{player.birthYear || '-'}</td>
-                        {matrix.sessions.map((session) => (
+                        {filteredAttendanceSessions.map((session) => (
                           <td key={`${player.id}-${session.id}`}>
                             <select value={cellValue(player.id, session.id)} onChange={(e) => handleCell(player.id, session.id, e.target.value)}>
                               <option value="">-</option>
@@ -1487,6 +1550,9 @@ const AdminPanel = () => {
                   </tbody>
                   </table>
                 </div>
+                {(filteredAttendancePlayers.length === 0 || filteredAttendanceSessions.length === 0) && (
+                  <p>No hay resultados para los filtros de año y grado seleccionados.</p>
+                )}
               </>
             ) : (
               <p>Seleccioná una división y cargá la planilla.</p>
