@@ -58,18 +58,21 @@ const PANEL_TABS = [
   { key: 'reports', label: 'Reportes', icon: faChartColumn },
 ];
 const GRADE_OPTIONS = [
-  '1° grado',
-  '2° grado',
-  '3° grado',
-  '4° grado',
-  '5° grado',
-  '6° grado',
-  '7° grado',
-  '1° año',
-  '2° año',
-  '3° año',
-  '4° año',
-  '5° año',
+  'K4',
+  'K5',
+  'P1',
+  'P2',
+  'P3',
+  'P4',
+  'P5',
+  'P6',
+  'M1',
+  'M2',
+  'M3',
+  'S4',
+  'S5',
+  'S6',
+  'U',
 ];
 
 const getUtcDateParts = (value) => {
@@ -1689,3 +1692,4 @@ Luz Gomez,2008,2026-03-08,AUSENTE,Sin aviso,,true
 };
 
 export default AdminPanel;
+

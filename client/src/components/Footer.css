@@ -113,10 +113,17 @@
   opacity: 0.8;
 }
 
-.footer-bottom p {
+.footer-bottom a {
+  color: var(--white);
+  text-decoration: underline;
+}
+
+.footer-bottom a:visited {
+  color: var(--white);
+}
+
+.footer-bottom a:hover {
   color: var(--cream);
-  font-size: 14px;
-  opacity: 0.8;
 }
 
 /* Responsive Design */

@@ -52,6 +52,16 @@ const Footer = () => {
       
       <div className="footer-bottom">
         <p>&copy; 2026 BDSC Hockey. Todos los derechos reservados.</p>
+        <p>
+          hecho por{' '}
+          <a
+            href="https://zigodev.com.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            zigodev.com.ar
+          </a>
+        </p>
       </div>
     </footer>
   );
