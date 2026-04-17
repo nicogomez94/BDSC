@@ -290,6 +290,10 @@ const AdminPanel = () => {
   const [trainerCvFileName, setTrainerCvFileName] = useState('');
   const [isAttendanceGuideOpen, setIsAttendanceGuideOpen] = useState(false);
   const attendanceImportInputRef = useRef(null);
+  const attendanceTopScrollRef = useRef(null);
+  const attendanceTopScrollContentRef = useRef(null);
+  const attendanceGridWrapperRef = useRef(null);
+  const attendanceGridRef = useRef(null);
   const toastIdRef = useRef(0);
 
   const [trainerForm, setTrainerForm] = useState(
@@ -354,6 +358,54 @@ const AdminPanel = () => {
     if (!filters.grade) return matrix.players;
     return matrix.players.filter((player) => String(player.grade || '').trim() === String(filters.grade));
   }, [filters.grade, matrix]);
+
+  useEffect(() => {
+    const topScroll = attendanceTopScrollRef.current;
+    const topScrollContent = attendanceTopScrollContentRef.current;
+    const gridWrapper = attendanceGridWrapperRef.current;
+    const grid = attendanceGridRef.current;
+
+    if (!topScroll || !topScrollContent || !gridWrapper || !grid) return undefined;
+
+    let syncingFromTop = false;
+    let syncingFromBottom = false;
+
+    const syncWidths = () => {
+      topScrollContent.style.width = `${grid.scrollWidth}px`;
+      topScroll.scrollLeft = gridWrapper.scrollLeft;
+    };
+
+    const handleTopScroll = () => {
+      if (syncingFromBottom) return;
+      syncingFromTop = true;
+      gridWrapper.scrollLeft = topScroll.scrollLeft;
+      syncingFromTop = false;
+    };
+
+    const handleBottomScroll = () => {
+      if (syncingFromTop) return;
+      syncingFromBottom = true;
+      topScroll.scrollLeft = gridWrapper.scrollLeft;
+      syncingFromBottom = false;
+    };
+
+    syncWidths();
+    topScroll.addEventListener('scroll', handleTopScroll);
+    gridWrapper.addEventListener('scroll', handleBottomScroll);
+
+    const resizeObserver = new ResizeObserver(syncWidths);
+    resizeObserver.observe(gridWrapper);
+    resizeObserver.observe(grid);
+    window.addEventListener('resize', syncWidths);
+
+    return () => {
+      topScroll.removeEventListener('scroll', handleTopScroll);
+      gridWrapper.removeEventListener('scroll', handleBottomScroll);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', syncWidths);
+    };
+  }, [tab, matrix, filteredAttendanceSessions.length, filteredAttendancePlayers.length]);
+
   const headCoaches = useMemo(
     () => trainers.filter((trainer) => (trainer.type || TRAINER_TYPE.ENTRENADOR) === TRAINER_TYPE.ENTRENADOR),
     [trainers]
@@ -1511,8 +1563,11 @@ const AdminPanel = () => {
             {matrix && matrix.sessions.length > 0 ? (
               <>
                 <p className="attendance-grid-hint" aria-hidden="true">Desliza la tabla hacia los costados para ver todas las fechas.</p>
-                <div className="attendance-grid-wrapper">
-                  <table className="attendance-grid">
+                <div className="attendance-grid-top-scroll" ref={attendanceTopScrollRef} aria-hidden="true">
+                  <div className="attendance-grid-top-scroll-content" ref={attendanceTopScrollContentRef} />
+                </div>
+                <div className="attendance-grid-wrapper" ref={attendanceGridWrapperRef}>
+                  <table className="attendance-grid" ref={attendanceGridRef}>
                   <thead>
                     <tr>
                       <th>Jugadora</th>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { DEBUG_MODE, DEBUG_PREFILL } from '../config/debug';
@@ -55,6 +55,10 @@ const createSessionForm = (divisionId = '') => ({ divisionId, date: '', notes: '
 const TrainerPanel = () => {
   const { user } = useAuth();
   const panelTitle = user?.role === 'PREPARADOR_FISICO' ? 'Panel de Preparador Fisico' : 'Panel de Entrenador';
+  const attendanceTopScrollRef = useRef(null);
+  const attendanceTopScrollContentRef = useRef(null);
+  const attendanceGridWrapperRef = useRef(null);
+  const attendanceGridRef = useRef(null);
   const [tab, setTab] = useState('attendance');
   const [sections, setSections] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -79,6 +83,53 @@ const TrainerPanel = () => {
     for (const division of divisions) map[division.id] = division;
     return map;
   }, [divisions]);
+
+  useEffect(() => {
+    const topScroll = attendanceTopScrollRef.current;
+    const topScrollContent = attendanceTopScrollContentRef.current;
+    const gridWrapper = attendanceGridWrapperRef.current;
+    const grid = attendanceGridRef.current;
+
+    if (!topScroll || !topScrollContent || !gridWrapper || !grid) return undefined;
+
+    let syncingFromTop = false;
+    let syncingFromBottom = false;
+
+    const syncWidths = () => {
+      topScrollContent.style.width = `${grid.scrollWidth}px`;
+      topScroll.scrollLeft = gridWrapper.scrollLeft;
+    };
+
+    const handleTopScroll = () => {
+      if (syncingFromBottom) return;
+      syncingFromTop = true;
+      gridWrapper.scrollLeft = topScroll.scrollLeft;
+      syncingFromTop = false;
+    };
+
+    const handleBottomScroll = () => {
+      if (syncingFromTop) return;
+      syncingFromBottom = true;
+      topScroll.scrollLeft = gridWrapper.scrollLeft;
+      syncingFromBottom = false;
+    };
+
+    syncWidths();
+    topScroll.addEventListener('scroll', handleTopScroll);
+    gridWrapper.addEventListener('scroll', handleBottomScroll);
+
+    const resizeObserver = new ResizeObserver(syncWidths);
+    resizeObserver.observe(gridWrapper);
+    resizeObserver.observe(grid);
+    window.addEventListener('resize', syncWidths);
+
+    return () => {
+      topScroll.removeEventListener('scroll', handleTopScroll);
+      gridWrapper.removeEventListener('scroll', handleBottomScroll);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', syncWidths);
+    };
+  }, [tab, matrix]);
 
   const withLoad = async (fn) => {
     setLoading(true);
@@ -411,8 +462,12 @@ const TrainerPanel = () => {
             </div>
 
             {matrix && matrix.sessions.length > 0 ? (
-              <div className="attendance-grid-wrapper">
-                <table className="attendance-grid">
+              <>
+                <div className="attendance-grid-top-scroll" ref={attendanceTopScrollRef} aria-hidden="true">
+                  <div className="attendance-grid-top-scroll-content" ref={attendanceTopScrollContentRef} />
+                </div>
+                <div className="attendance-grid-wrapper" ref={attendanceGridWrapperRef}>
+                  <table className="attendance-grid" ref={attendanceGridRef}>
                   <thead>
                     <tr>
                       <th>Jugadora</th>
@@ -442,8 +497,9 @@ const TrainerPanel = () => {
                       </tr>
                     ))}
                   </tbody>
-                </table>
-              </div>
+                  </table>
+                </div>
+              </>
             ) : (
               <p>No hay fechas de entrenamiento para la division/mes seleccionado.</p>
             )}

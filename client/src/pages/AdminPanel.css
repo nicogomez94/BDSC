@@ -337,6 +337,20 @@
   outline-offset: 2px;
 }
 
+.attendance-grid-top-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 0 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: #f6f2ea;
+  scrollbar-gutter: stable;
+}
+
+.attendance-grid-top-scroll-content {
+  height: 16px;
+}
+
 .attendance-grid-wrapper {
   position: relative;
   overflow: auto;
@@ -888,6 +902,10 @@
 
   .attendance-grid-hint {
     display: block;
+  }
+
+  .attendance-grid-top-scroll {
+    margin-bottom: 6px;
   }
 
   .attendance-grid {

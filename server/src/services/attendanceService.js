@@ -202,9 +202,9 @@ const buildStatusCounter = () => ({
   SUSPENDIDO: 0,
 });
 
-const calculateAttendancePercentage = (presente, tarde, totalRecords) => {
-  if (!totalRecords) return 0;
-  return Number((((presente + tarde) / totalRecords) * 100).toFixed(2));
+const calculateAttendancePercentage = (presente, totalSessions) => {
+  if (!totalSessions) return 0;
+  return Number(((presente / totalSessions) * 100).toFixed(2));
 };
 
 const escapeCsv = (value) => {
@@ -1063,7 +1063,7 @@ export const getAttendanceReport = async (query = {}, user) => {
 
   const byPlayer = Array.from(playerStatsMap.values()).map((player) => ({
     ...player,
-    attendancePercentage: calculateAttendancePercentage(player.PRESENTE, player.TARDE, player.totalRecords),
+    attendancePercentage: calculateAttendancePercentage(player.PRESENTE, player.totalSessions),
   }));
 
   const ranking = Array.from(divisionStatsMap.values()).map((division) => {
